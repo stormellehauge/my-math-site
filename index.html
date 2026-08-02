@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathVerse | Explore the Beauty of Numbers</title>
+    <!-- Google Fonts for Modern Typography -->
+    <link href="https://googleapis.com" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cloudflare.com">
+    
+    <style>
+        /* Base Cosmic Neon Theme */
+        :root {
+            --bg-dark: #0b0c10;
+            --card-bg: #1f2833;
+            --neon-blue: #45f3ff;
+            --neon-pink: #ff2a74;
+            --text-light: #c5c6c7;
+            --text-white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            overflow-x: hidden;
+        }
+
+        /* Catchy Hero Section */
+        header {
+            position: relative;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: radial-gradient(circle, #1a1a2e 0%, #0f0c1b 100%);
+            padding: 20px;
+            border-bottom: 2px solid var(--neon-blue);
+        }
+
+        .hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            color: var(--text-white);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue);
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin-bottom: 30px;
+            color: #86c232;
+            font-weight: 600;
+        }
+
+        /* Floating Mathematical Symbols Background Elements */
+        .math-bg {
+            position: absolute;
+            font-family: 'Orbitron', serif;
+            font-size: 5rem;
+            color: rgba(69, 243, 255, 0.05);
+            user-select: none;
+            z-index: 0;
+            pointer-events: none;
+        }
+        #sym1 { top: 15%; left: 10%; transform: rotate(-15deg); }
+        #sym2 { bottom: 20%; right: 12%; transform: rotate(25deg); }
+        #sym3 { top: 40%; right: 25%; transform: rotate(10deg); }
+
+        /* Navigation Buttons */
+        .cta-btn {
+            background: transparent;
+            color: var(--neon-blue);
+            border: 2px solid var(--neon-blue);
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(69, 243, 255, 0.2);
+            z-index: 2;
+        }
+
+        .cta-btn:hover {
+            background: var(--neon-blue);
+            color: var(--bg-dark);
+            box-shadow: 0 0 25px var(--neon-blue);
+        }
+
+        /* Main Content Container */
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            font-size: 2.2rem;
+            color: var(--text-white);
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: var(--neon-pink);
+            box-shadow: 0 0 10px var(--neon-pink);
+        }
+
+        /* Core Pillars / Concept Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 70px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--neon-blue);
+            box-shadow: 0 5px 20px rgba(69, 243, 255, 0.15);
+        }
+
+        .card i {
+            font-size: 2.5rem;
+            color: var(--neon-blue);
+            margin-bottom: 20px;
+        }
+
+        .card h3 {
+            color: var(--text-white);
+            margin-bottom: 12px;
+            font-size: 1.4rem;
+        }
+
+        .card p {
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Interactive Math Lab Engine */
+        .interactive-lab {
+            background: #11141c;
+            border-radius: 15px;
+            padding: 40px;
+            border: 1px solid var(--neon-pink);
+            box-shadow: 0 0 20px rgba(255, 42, 116, 0.1);
+        }
+
+        .lab-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .lab-layout { grid-template-columns: 1fr; }
+            .hero-title { font-size: 2.3rem; }
+        }
+
+        .lab-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-white);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background: var(--card-bg);
+            border: 1px solid #444;
+            color: var(--text-white);
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--neon-pink);
+        }
+
+        .calc-btn {
+            background: var(--neon-pink);
+            color: var(--text-white);
+            border: none;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .calc-btn:hover {
+            background: #e01b5d;
+            box-shadow: 0 0 15px var(--neon-pink);
+        }
+
+        .output-box {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(255, 42, 116, 0.05);
+            border-left: 4px solid var(--neon-pink);
+            border-radius: 4px;
+        }
+
+        .output-box h4 {
+            color: var(--text-white);
+            margin-bottom: 5px;
+        }
+
+        /* Canvas Visualizer Panel */
+        .canvas-panel {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+            border-radius: 8px;
+            border: 1px solid #333;
+            min-height: 300px;
+            position: relative;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            max-width: 350px;
+            max-height: 350px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            border-top: 1px solid #222;
+            font-size: 0.9rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Catchy Background Math Symbols -->
+    <div class="math-bg" id="sym1">f(x)=∫y²</div>
+    <div class="math-bg" id="sym2">π≈3.14</div>
+    <div class="math-bg" id="sym3">E=mc²</div>
+
+    <!-- Header / Hero Space -->
+    <header>
+        <h1 class="hero-title">MathVerse</h1>
+        <p class="hero-subtitle">Decoding the Hidden Blueprint of the Universe through Interactive Geometry & Calculus</p>
+        <button class="cta-btn" onclick="document.getElementById('lab').scrollIntoView({behavior: 'smooth'});">Enter Interactive Lab</button>
+    </header>
+
+    <!-- Content Sections -->
+    <main>
+        
+        <h2 class="section-title">The Three Pillars of Math</h2>
+        
+        <div class="grid">
+            <!-- Card 1 -->
+            <div class="card">
+                <i class="fa-solid fa-calculator"></i>
+                <h3>Calculus & Functions</h3>
+                <p>Calculus models the physics of change. By calculating slopes of tangents (derivatives) and summation of areas beneath curves (integrals), we unlock fluid dynamics and planetary motion paths.</p>
+            </div>
+            <!-- Card 2 -->
+            <div class="card">
+                <i class="fa-solid fa-shapes"></i>
+                <h3>Sacred Geometry</h3>
+                <p>Geometry studies structural boundaries, volume laws, and mathematical symmetries. From Euclidean coordinate graphs to non-Euclidean spacetime contours, layout defines reality.</p>
+            </div>
+            <!-- Card 3 -->
+            <div class="card">
+                <i class="fa-solid fa-infinity"></i>
+                <h3>Number Theory</h3>
+                <p>The pure search for structural patterns within integer sequences. Number theory serves as the structural foundation driving cryptography algorithms, system firewalls, and computational security systems.</p>
+            </div>
+        </div>
+
+        <!-- Interactive Visual Lab Section -->
+        <h2 class="section-title" id="lab">Interactive Geometry Lab</h2>
+        
+        <div class="interactive-lab">
+            <div class="lab-layout">
+                <!-- Inputs and Calculations Panel -->
