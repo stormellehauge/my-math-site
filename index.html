@@ -13,12 +13,13 @@
             font-family: 'Arial Black', 'Arial', sans-serif;
         }
         body {
-            background-color: #f0f2f5;
+            background-color: #0b0c10; /* Darker mathematical void background */
             color: #111;
             overflow-x: hidden;
             min-height: 100vh;
         }
-        /* Number Matrix Layer Background */
+        
+        /* Dense Background Wall of Numbers */
         .number-bg {
             position: fixed;
             top: 0;
@@ -26,14 +27,16 @@
             width: 100vw;
             height: 100vh;
             z-index: -1;
-            opacity: 0.08;
-            font-family: monospace;
-            font-size: 14px;
-            line-height: 1.2;
+            opacity: 0.15; /* Perfectly balanced visibility */
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 16px;
+            line-height: 1.1;
+            letter-spacing: 2px;
+            color: #45f3ff; /* Electric mathematical cyan */
             word-break: break-all;
             user-select: none;
             overflow: hidden;
-            padding: 10px;
+            padding: 5px;
         }
         
         /* Navigation Screen Controller Matrix */
@@ -49,7 +52,7 @@
             display: block;
         }
 
-        /* SCREEN 1: Home Page Elements */
+        /* SCREEN 1: Home Page Elements (Kept Exactly the Same Layout) */
         #home-screen {
             text-align: center;
             display: none;
@@ -64,32 +67,40 @@
         .main-title {
             font-size: 5rem;
             font-weight: 900;
-            color: #000000;
+            color: #000000; /* Maintained the thick black font */
             text-transform: uppercase;
             letter-spacing: -2px;
             line-height: 0.9;
             margin-bottom: 30px;
+            /* White text outline to make it burst out cleanly over the dark numbers background */
+            text-shadow: -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff, 0 10px 20px rgba(0,0,0,0.5);
         }
         @media (max-width: 768px) {
             .main-title { font-size: 3rem; }
         }
+        
+        /* Advanced Arcade-Style Button Styling */
         .blast-btn {
             background-color: #000000;
             color: #ffffff;
-            border: none;
+            border: 4px solid #ffffff;
             padding: 20px 45px;
             font-size: 1.8rem;
             cursor: pointer;
             text-transform: uppercase;
-            transition: transform 0.1s, background-color 0.2s;
-            box-shadow: 0 8px 0 #444;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 8px 0 #222;
         }
         .blast-btn:hover {
-            background-color: #222;
+            background-color: #45f3ff;
+            color: #000000;
+            border-color: #000000;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 0 #00b4cc;
         }
         .blast-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 4px 0 #444;
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #222;
         }
 
         /* SCREEN 2: Main Choice Dashboard */
@@ -108,26 +119,36 @@
             padding: 40px;
             text-align: center;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 0 #000;
         }
         .dash-card:hover {
-            transform: scale(1.03);
-            background: #fbfbfb;
+            transform: translateY(-4px);
+            background: #45f3ff;
+            box-shadow: 0 10px 0 #000;
         }
         .dash-card h2 {
             font-size: 2.5rem;
             margin-bottom: 15px;
             text-transform: uppercase;
         }
+        
+        /* Clean Back and Control Buttons */
         .back-btn {
             background: #000;
             color: #fff;
-            padding: 10px 20px;
-            border: none;
+            padding: 12px 24px;
+            border: 2px solid #fff;
             cursor: pointer;
             margin-bottom: 20px;
             text-transform: uppercase;
             display: inline-block;
+            transition: all 0.2s ease;
+        }
+        .back-btn:hover {
+            background: #ff2a74;
+            color: #fff;
+            transform: scale(1.05);
         }
 
         /* SCREEN 3: Trivia Level Matrix */
@@ -144,18 +165,27 @@
             font-size: 1.5rem;
             cursor: pointer;
             text-align: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 0 #000;
+        }
+        .level-btn:hover:not(.locked) {
+            background: #45f3ff;
+            transform: translateY(-3px);
+            box-shadow: 0 7px 0 #000;
         }
         .level-btn.locked {
-            background: #ddd;
-            color: #888;
+            background: #333;
+            color: #666;
             cursor: not-allowed;
-            border-color: #888;
+            border-color: #222;
+            box-shadow: none;
         }
         .quiz-container {
             background: white;
             border: 5px solid #000;
             padding: 30px;
             margin-top: 20px;
+            box-shadow: 0 10px 0 rgba(0,0,0,0.3);
         }
         .options-grid {
             display: grid;
@@ -166,12 +196,17 @@
         .option-btn {
             background: #fff;
             border: 3px solid #000;
-            padding: 15px;
-            font-size: 1.1rem;
+            padding: 18px;
+            font-size: 1.2rem;
             text-align: left;
             cursor: pointer;
+            transition: all 0.15s ease;
         }
-        .option-btn:hover { background: #eee; }
+        .option-btn:hover { 
+            background: #ff2a74; 
+            color: white;
+            padding-left: 25px;
+        }
 
         /* SCREEN 4: Games Selector & Viewports */
         .game-viewport {
@@ -192,14 +227,25 @@
         .game-ui-overlay {
             color: white;
             text-align: center;
-            padding: 10px;
+            padding: 15px;
             background: #111;
+            border: 3px solid #333;
+            font-size: 1.1rem;
+        }
+        
+        /* Text Color Adaptations for Headings over dark canvas area */
+        .section-header {
+            font-size: 3rem; 
+            text-align:center;
+            color: #ffffff;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.8);
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
 
-    <!-- Mathematical Matrix Screen Background -->
+    <!-- Mathematical Matrix Screen Background (Dense Walls of Numbers) -->
     <div class="number-bg" id="matrix-bg"></div>
 
     <!-- 1. HOME SCREEN -->
@@ -211,7 +257,7 @@
     <!-- 2. GAME OR TRIVIA DASHBOARD -->
     <section class="screen" id="dash-screen">
         <button class="back-btn" onclick="navigateTo('home-screen')">⏮ Back</button>
-        <h1 style="font-size: 3rem; text-align:center;">CHOOSE YOUR PATH</h1>
+        <h1 class="section-header">CHOOSE YOUR PATH</h1>
         <div class="dashboard-grid">
             <div class="dash-card" onclick="navigateTo('trivia-lobby-screen')">
                 <h2>TRIVIA</h2>
@@ -227,7 +273,7 @@
     <!-- 3. TRIVIA LOBBY -->
     <section class="screen" id="trivia-lobby-screen">
         <button class="back-btn" onclick="navigateTo('dash-screen')">⏮ Back</button>
-        <h1 style="font-size: 3rem;">TRIVIA LEVELS</h1>
+        <h1 class="section-header">TRIVIA LEVELS</h1>
         <div class="level-grid" id="level-matrix-container"></div>
     </section>
 
@@ -247,7 +293,7 @@
     <!-- 4. GAMES LOBBY -->
     <section class="screen" id="games-lobby-screen">
         <button class="back-btn" onclick="navigateTo('dash-screen')">⏮ Back</button>
-        <h1 style="font-size: 3rem; text-align:center; margin-bottom:30px;">ARCADE ROOM</h1>
+        <h1 class="section-header">ARCADE ROOM</h1>
         <div class="dashboard-grid">
             <div class="dash-card" onclick="startPacman()">
                 <h2>MATH PACMAN</h2>
@@ -256,45 +302,4 @@
             <div class="dash-card" onclick="startSonar()">
                 <h2>SONAR HUNTER</h2>
                 <p>Use coordinates feedback logic to find hidden math keys.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- GAME WINDOW: PACMAN -->
-    <section class="screen" id="game-pacman-screen">
-        <button class="back-btn" onclick="stopArcadeGames(); navigateTo('games-lobby-screen');">Exit Game</button>
-        <div class="game-ui-overlay">
-            <span id="pacman-score">Objective: Eat EVEN Numbers | Score: 0</span>
-        </div>
-        <div class="game-viewport">
-            <canvas id="pacmanCanvas" width="500" height="400"></canvas>
-        </div>
-        <p style="text-align:center; font-size:0.9rem; margin-top:10px;">Use ARROW keys to navigate your explorer token.</p>
-    </section>
-
-    <!-- GAME WINDOW: SONAR -->
-    <section class="screen" id="game-sonar-screen">
-        <button class="back-btn" onclick="stopArcadeGames(); navigateTo('games-lobby-screen');">Exit Game</button>
-        <div class="game-ui-overlay">
-            <span id="sonar-feedback">Click anywhere on the grid map to send radar signals!</span>
-        </div>
-        <div class="game-viewport">
-            <canvas id="sonarCanvas" width="500" height="400"></canvas>
-        </div>
-    </section>
-
-    <!-- APPLICATION ENGINES -->
-    <script>
-        // 1. GENERATE BACKGROUND MATRIX NUMBERS
-        const matrixContainer = document.getElementById('matrix-bg');
-        let matrixString = "";
-        for(let i=0; i<3000; i++) {
-            matrixString += Math.floor(Math.random() * 10) + (Math.random() > 0.8 ? " " : "");
-        }
-        matrixContainer.innerText = matrixString;
-
-        // 2. STATE ROUTING ENGINE
-        function navigateTo(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
 
