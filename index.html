@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>BREAK THE LOGIC</title>
+  <title>BREAK THE LOGIC - First Person Game Hub</title>
   <style>
     :root{
       --bg:#f6f7fb;
@@ -14,7 +14,6 @@
       --title-font: "Inter", "Arial Black", "Arial", sans-serif;
     }
     html,body{height:100%;margin:0;background:var(--bg);font-family:Inter,system-ui,Arial,sans-serif;color:#111}
-    /* PI background */
     body::before{
       content: "π 3.1415926535897932384626433832795028841971  ";
       position:fixed; inset:0; z-index:-1;
@@ -23,49 +22,36 @@
       transform:rotate(-8deg) scaleY(1.1);
       background: repeating-linear-gradient(90deg, rgba(0,0,0,0.005) 0 1px, transparent 1px 40px);
     }
-    header{display:flex;align-items:center;justify-content:space-between;padding:28px 36px}
-    .brand{font-family:var(--title-font);font-weight:900;font-size:48px;color:#000;letter-spacing:1px}
+    header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px}
+    .brand{font-family:var(--title-font);font-weight:900;font-size:44px;color:#000;letter-spacing:1px}
     .controls{display:flex;gap:12px;align-items:center}
     .points{background:#fff;padding:8px 12px;border-radius:8px;box-shadow:var(--shadow);font-weight:700}
-    .btn{background:var(--accent);color:#fff;padding:12px 18px;border-radius:10px;border:0;cursor:pointer;font-weight:700;box-shadow:var(--shadow)}
+    .btn{background:var(--accent);color:#fff;padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:700;box-shadow:var(--shadow)}
     .btn.secondary{background:#222;color:#fff}
-    main{padding:20px 36px}
-    .container{display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start}
-    .card{background:var(--card);padding:18px;border-radius:12px;box-shadow:var(--shadow)}
-    .hero{display:flex;gap:18px;align-items:center;padding:28px}
+    main{padding:14px 24px}
+    .container{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start}
+    .card{background:var(--card);padding:14px;border-radius:12px;box-shadow:var(--shadow)}
+    .hero{display:flex;gap:12px;align-items:center;padding:14px}
     .hero .text{flex:1}
-    .hero h2{margin:0;font-size:28px}
-    nav .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
-    .game-tile{padding:14px;border-radius:10px;background:linear-gradient(180deg,#fff,#f7f8fc);cursor:pointer;border:1px solid rgba(0,0,0,0.03);display:flex;flex-direction:column;gap:10px}
+    .hero h2{margin:0;font-size:22px}
+    nav .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+    .game-tile{padding:10px;border-radius:10px;background:linear-gradient(180deg,#fff,#f7f8fc);cursor:pointer;border:1px solid rgba(0,0,0,0.03);display:flex;flex-direction:column;gap:8px}
     .small{font-size:13px;color:var(--muted)}
-    /* content pages */
     .page{display:none}
     .page.active{display:block}
-    /* Game area */
     .game-area{min-height:420px}
     .center{display:flex;align-items:center;justify-content:center}
-    .controls-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-    .question{font-size:20px;margin:12px 0}
-    /* trivia */
-    .answers{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-    .answer-btn{padding:12px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);cursor:pointer;background:#fff}
-    .answer-btn.correct{border-color:green;background:rgba(220,255,220,0.8)}
-    .answer-btn.wrong{border-color:red;background:rgba(255,220,220,0.8)}
+    .controls-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .question{font-size:18px;margin:8px 0}
+    .answers{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+    .answer-btn{padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);cursor:pointer;background:#fff}
     .advance{display:inline-block;margin-top:12px;padding:10px 14px;border-radius:10px;background:#0a9e00;color:#fff; cursor:pointer}
-    /* maze */
-    #mazeCanvas{background:#111;border-radius:8px;display:block;margin:0 auto}
-    .compass{width:120px;height:120px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)}
-    .hud{display:flex;gap:12px;align-items:center;justify-content:center;margin-top:12px}
-    /* slots/cups */
-    .slot{display:flex;gap:8px;align-items:center;justify-content:center}
-    .reel{width:72px;height:72px;background:#fff;border-radius:8px;border:1px solid #eee;display:flex;align-items:center;justify-content:center;font-size:22px}
-    /* cups */
-    .cups{display:flex;gap:18px;justify-content:center;align-items:flex-end;margin-top:18px}
-    .cup{width:90px;height:90px;background:#e2e6f0;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
-    .ball{width:26px;height:26px;border-radius:50%;background:#f40;position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:block}
-    .hidden{display:none}
-    footer{padding:18px 36px;color:var(--muted);font-size:13px}
-    /* responsive */
+    /* FP Canvas */
+    #fpCanvas{width:100%;height:420px;background:#000;border-radius:10px;display:block}
+    .hud{color:#fff;position:relative;z-index:3;padding:8px}
+    .fp-controls{display:flex;gap:8px;align-items:center;margin-top:8px}
+    .tile-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+    footer{padding:12px 24px;color:var(--muted);font-size:13px;margin-top:16px;border-radius:8px}
     @media(max-width:900px){
       .container{grid-template-columns:1fr; padding-bottom:60px}
       header{flex-direction:column;align-items:flex-start;gap:12px}
@@ -85,171 +71,73 @@
   <main>
     <div class="container">
       <section>
-        <!-- Home -->
         <div id="home" class="page active card">
           <div class="hero">
             <div class="text">
-              <h2 style="margin-bottom:6px">Blast into games that train your brain.</h2>
-              <p class="small">Solve math trivia, navigate a dark maze with only a compass, try cups & balls, race through rapid-fire rounds, and more — all inside this mini game hub. Earn points and spend them in the game hub.</p>
+              <h2>Blast into first-person mini-games that train your brain.</h2>
+              <p class="small">Navigate first-person mazes, aim at targets on the wall, play fast-paced tunnel runs, memory walls, lockpick challenges, and 15 total mini-games — all in one page. Click the FP canvas and use WASD to move. Move your mouse to look.</p>
               <div class="controls-row">
                 <button class="btn" id="blast-math">Blast off to Math</button>
                 <button class="btn secondary" id="go-hub">Go to the Game Hub</button>
               </div>
             </div>
             <div style="width:220px">
-              <div style="background:linear-gradient(180deg,#fff,#f0f4ff);padding:18px;border-radius:12px;box-shadow:var(--shadow)">
-                <div style="font-weight:800;font-size:16px">Featured Game</div>
-                <div style="margin-top:8px" class="small">Math Trivia — 3 difficulty levels, advance when you score 7/10+</div>
+              <div style="background:linear-gradient(180deg,#fff,#f0f4ff);padding:12px;border-radius:12px;box-shadow:var(--shadow)">
+                <div style="font-weight:800;font-size:14px">Featured Game</div>
+                <div style="margin-top:8px" class="small">First-person Maze — no seeing over the walls</div>
               </div>
             </div>
           </div>
 
-          <div style="margin-top:18px" class="grid">
+          <div style="margin-top:12px" class="grid">
             <div class="card">
               <h3 style="margin:0 0 8px 0">Quick Start</h3>
-              <div class="small">Play the featured games or visit the hub for dozens more. Points you earn persist in this browser.</div>
+              <div class="small">Play any FP mini-game from the hub or try the featured ones below.</div>
               <div style="margin-top:12px" class="controls-row">
-                <button class="btn" id="start-trivia">Play Trivia</button>
-                <button class="btn" id="start-maze">Play Maze (50pt win)</button>
-                <button class="btn" id="start-cups">Cups & Balls</button>
+                <button class="btn" id="start-maze">Play FP Maze</button>
+                <button class="btn" id="start-range">Target Range FP</button>
+                <button class="btn" id="start-rapid">Rapid Fire</button>
               </div>
             </div>
 
             <div class="card">
               <h3 style="margin:0 0 8px 0">Game Hub</h3>
-              <div class="small">Access many games and your gambling machine.</div>
-              <div style="margin-top:12px" class="grid">
-                <div class="game-tile" id="tile-trivia"><strong>Math Trivia</strong><div class="small">3 levels, 10 questions each</div></div>
-                <div class="game-tile" id="tile-maze"><strong>Maze + Compass</strong><div class="small">Dark maze, find the exit</div></div>
-                <div class="game-tile" id="tile-slots"><strong>Gambling Machine</strong><div class="small">Play with points (simulated)</div></div>
-                <div class="game-tile" id="tile-cups"><strong>Cups & Balls</strong><div class="small">Find the hidden ball</div></div>
-                <div class="game-tile" id="tile-rapid"><strong>Rapid Fire</strong><div class="small">History+math timed rounds</div></div>
-                <div class="game-tile" id="tile-more"><strong>More Games</strong><div class="small">Tons of mini-games (placeholders)</div></div>
-              </div>
+              <div class="small">15 first-person mini-games are available below.</div>
+              <div style="margin-top:12px" class="tile-grid" id="hubTiles"></div>
             </div>
           </div>
-
         </div>
 
-        <!-- Hub -->
         <div id="hub" class="page card">
-          <h2>Game Hub</h2>
-          <p class="small">Pick a game below. Points are stored in your browser.</p>
-          <div style="margin-top:12px" class="grid">
-            <div class="game-tile" id="hub-trivia">Math Trivia</div>
-            <div class="game-tile" id="hub-maze">Maze + Compass</div>
-            <div class="game-tile" id="hub-slots">Gambling Machine</div>
-            <div class="game-tile" id="hub-cups">Cups & Balls</div>
-            <div class="game-tile" id="hub-rapid">Rapid Fire History+Math</div>
-            <div class="game-tile" id="hub-insane">Insane Mode (5s)</div>
-            <div class="game-tile" id="hub-more">Many More Games…</div>
-            <div class="game-tile" id="hub-exit">Exit to Home</div>
-          </div>
-        </div>
-
-        <!-- Trivia Page -->
-        <div id="trivia" class="page card">
-          <h2>Math Trivia</h2>
-          <div class="small">3 difficulty levels. Each game is 10 questions. Score 7/10 or higher to get the "Advance to next round" button.</div>
-          <div style="margin-top:12px">
-            <label>Level:
-              <select id="trivia-level">
-                <option value="0">Level 1 (Easy)</option>
-                <option value="1">Level 2 (Medium)</option>
-                <option value="2">Level 3 (Hard)</option>
-              </select>
-            </label>
-            <button class="btn" id="trivia-start">Start Round</button>
-          </div>
-
-          <div class="game-area" id="trivia-area" style="margin-top:16px"></div>
-          <div style="margin-top:10px">
-            <button class="btn" id="trivia-back">Back to Hub</button>
-          </div>
-        </div>
-
-        <!-- Maze Page -->
-        <div id="maze" class="page card">
-          <h2>Dark Maze + Compass</h2>
-          <div class="small">Use arrow keys or WASD to move. You can only see a short radius around you. The compass shows direction to the exit.</div>
-          <div style="display:flex;gap:14px;align-items:flex-start;margin-top:12px;flex-wrap:wrap">
-            <canvas id="mazeCanvas" width="640" height="480"></canvas>
-            <div style="display:flex;flex-direction:column;gap:8px">
-              <div class="compass" id="compassCanvas"></div>
-              <div class="hud">
-                <div class="small">Steps: <span id="maze-steps">0</span></div>
-                <div class="small">Remaining: <span id="maze-dist">—</span></div>
-              </div>
-              <div style="margin-top:12px">
-                <button class="btn" id="maze-new">Generate New Maze</button>
-                <button class="btn" id="maze-back">Back to Hub</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slots -->
-        <div id="slots" class="page card">
-          <h2>Gambling Machine (Simulated)</h2>
-          <div class="small">Use points to play. This is just a simulated slot machine for points, no real money.</div>
-          <div style="margin-top:12px" class="slot">
-            <div class="reel" id="r1">?</div>
-            <div class="reel" id="r2">?</div>
-            <div class="reel" id="r3">?</div>
-          </div>
+          <h2>Game Hub — First-Person Mini-Games</h2>
+          <p class="small">Click any tile to launch the first-person experience for that mini-game. Click the FP canvas to enable pointer/mouse-look (you may need to allow the page to capture the mouse). Use WASD/arrow keys to move.</p>
+          <div style="margin-top:12px" id="hubGames" class="tile-grid"></div>
           <div style="margin-top:12px" class="controls-row">
-            <label>Bet:
-              <input id="slot-bet" type="number" min="1" step="1" value="10" style="width:80px;padding:8px;border-radius:6px;border:1px solid #ddd">
-            </label>
-            <button class="btn" id="slot-play">Spin</button>
-            <button class="btn" id="slot-back">Back to Hub</button>
-          </div>
-          <div style="margin-top:12px" id="slot-msg" class="small"></div>
-        </div>
-
-        <!-- Cups -->
-        <div id="cups" class="page card">
-          <h2>Cups & Balls</h2>
-          <div class="small">Guess which cup holds the ball after a shuffle. Win points for correct picks.</div>
-          <div class="cups" style="margin-top:20px">
-            <div class="cup" data-i="0"><div class="ball" id="ball-0"></div></div>
-            <div class="cup" data-i="1"><div class="ball hidden" id="ball-1"></div></div>
-            <div class="cup" data-i="2"><div class="ball hidden" id="ball-2"></div></div>
-          </div>
-          <div class="controls-row" style="margin-top:18px">
-            <button class="btn" id="cups-shuffle">Shuffle</button>
-            <button class="btn" id="cups-back">Back to Hub</button>
-            <div class="small" id="cups-msg"></div>
+            <button class="btn" id="hub-back">Back to Home</button>
           </div>
         </div>
 
-        <!-- Rapid Fire -->
-        <div id="rapid" class="page card">
-          <h2>Rapid Fire: History + Math</h2>
-          <div class="small">Pick a mode. In Insane, you have 5 seconds per question and very hard questions.</div>
-          <div style="margin-top:12px" class="controls-row">
-            <button class="btn" id="rapid-normal">Normal (10s)</button>
-            <button class="btn" id="rapid-hard">Hard (7s)</button>
-            <button class="btn" id="rapid-insane">Insane (5s)</button>
-            <button class="btn" id="rapid-back">Back to Hub</button>
+        <!-- FP play area used by many games -->
+        <div id="fp" class="page card">
+          <h2 id="fp-title">First Person Game</h2>
+          <div class="small" id="fp-desc">Use WASD and mouse to interact. Click the canvas to focus.</div>
+          <canvas id="fpCanvas" width="960" height="480"></canvas>
+          <div class="fp-controls">
+            <div class="hud small">Mode: <strong id="fp-mode">—</strong></div>
+            <div style="flex:1"></div>
+            <button class="btn" id="fp-exit">Exit to Hub</button>
+            <div class="small" style="align-self:center">Points: <span id="fp-points">0</span></div>
           </div>
-          <div id="rapid-area" style="margin-top:12px"></div>
         </div>
 
-        <!-- More games placeholder -->
-        <div id="more" class="page card">
-          <h2>More Games</h2>
-          <p class="small">This area can be populated with more microgames. For now it's a collection of placeholders you can extend.</p>
-          <div style="margin-top:12px" class="grid">
-            <div class="game-tile">Pattern Memory</div>
-            <div class="game-tile">Equation Builder</div>
-            <div class="game-tile">Prime Hunter</div>
-            <div class="game-tile">Logic Puzzles</div>
-            <div class="game-tile">Sequence Solver</div>
-            <div class="game-tile">Speed Calculus</div>
-          </div>
-          <div style="margin-top:12px">
-            <button class="btn" id="more-back">Back to Hub</button>
+        <!-- Non-FP games (legacy) -->
+        <div id="legacy" class="page card">
+          <h2>Classic Games</h2>
+          <p class="small">Legacy 2D versions (Trivia, Slots, etc.) are still available below.</p>
+          <div style="margin-top:8px">
+            <button class="btn" id="legacy-trivia">Math Trivia (legacy)</button>
+            <button class="btn" id="legacy-rapid">Rapid Fire (legacy)</button>
+            <button class="btn" id="legacy-back">Back</button>
           </div>
         </div>
 
@@ -267,14 +155,13 @@
           </div>
         </div>
 
-        <div class="card" style="margin-top:18px">
-          <h4 style="margin:0 0 8px 0">Game List</h4>
-          <div class="small">Quick access</div>
-          <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
-            <button class="btn" id="quick-trivia">Math Trivia</button>
-            <button class="btn" id="quick-maze">Dark Maze</button>
-            <button class="btn" id="quick-slots">Slots</button>
-            <button class="btn" id="quick-cups">Cups</button>
+        <div class="card" style="margin-top:12px">
+          <h4 style="margin:0 0 8px 0">Quick Launch</h4>
+          <div class="small">Start a FP game quickly</div>
+          <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+            <button class="btn" id="quick-maze">FP Maze</button>
+            <button class="btn" id="quick-range">Target Range</button>
+            <button class="btn" id="quick-tunnel">Tunnel Run</button>
           </div>
         </div>
       </aside>
@@ -282,203 +169,188 @@
   </main>
 
   <footer class="card">
-    Small demo suite — points are for in-app use only.
+    First-person mini-games demo — points are in-app only. Click the FP canvas to enable pointer lock.
   </footer>
 
 <script>
-/* Simple app state and helpers */
+/* ---------------------------------------------------------
+   App scaffolding & points (unchanged core behavior)
+   --------------------------------------------------------- */
+const P_KEY = 'btl_points_v2';
+function getPoints(){ return Number(localStorage.getItem(P_KEY) || 0); }
+function setPoints(n){ localStorage.setItem(P_KEY, String(n)); updatePointsUI(); }
+function addPoints(n){ setPoints(getPoints()+n); }
+function updatePointsUI(){ document.getElementById('points').textContent = getPoints(); document.getElementById('fp-points').textContent = getPoints(); }
+updatePointsUI();
+
 const pages = {
   home: document.getElementById('home'),
   hub: document.getElementById('hub'),
-  trivia: document.getElementById('trivia'),
-  maze: document.getElementById('maze'),
-  slots: document.getElementById('slots'),
-  cups: document.getElementById('cups'),
-  rapid: document.getElementById('rapid'),
-  more: document.getElementById('more')
+  fp: document.getElementById('fp'),
+  legacy: document.getElementById('legacy')
 };
 function showPage(name){
   Object.values(pages).forEach(p=>p.classList.remove('active'));
   if(pages[name]) pages[name].classList.add('active');
   window.scrollTo(0,0);
 }
-function $(id){return document.getElementById(id)}
-/* Points management */
-const POINTS_KEY = 'btl_points_v1';
-function getPoints(){ return Number(localStorage.getItem(POINTS_KEY) || 0); }
-function setPoints(n){ localStorage.setItem(POINTS_KEY, String(n)); updatePointsUI(); }
-function addPoints(n){ setPoints(getPoints()+n); }
-function updatePointsUI(){ $('points').textContent = getPoints(); }
 
-/* Navigation hookups */
-$('to-home').addEventListener('click',()=>showPage('home'));
-$('to-hub').addEventListener('click',()=>showPage('hub'));
-$('go-hub').addEventListener('click',()=>showPage('hub'));
-$('blast-math').addEventListener('click',()=>{ showPage('trivia'); });
-$('start-trivia').addEventListener('click',()=>startTrivia());
-$('start-maze').addEventListener('click',()=>{ initMaze(); showPage('maze'); });
-$('start-cups').addEventListener('click',()=>{ resetCups(); showPage('cups'); });
-$('trivia-back').addEventListener('click',()=>showPage('hub'));
-$('maze-back').addEventListener('click',()=>showPage('hub'));
-$('slot-back').addEventListener('click',()=>showPage('hub'));
-$('cups-back').addEventListener('click',()=>showPage('hub'));
-$('rapid-back').addEventListener('click',()=>showPage('hub'));
-$('more-back').addEventListener('click',()=>showPage('hub'));
+/* Navigation buttons */
+document.getElementById('to-home').addEventListener('click',()=>showPage('home'));
+document.getElementById('to-hub').addEventListener('click',()=>showPage('hub'));
+document.getElementById('go-hub').addEventListener('click',()=>showPage('hub'));
+document.getElementById('hub-back').addEventListener('click',()=>showPage('home'));
+document.getElementById('blast-math').addEventListener('click',()=>showPage('legacy'));
 
-/* Quick tiles */
-['tile-trivia','hub-trivia','quick-trivia'].forEach(id=>{ if($(id)) $(id).addEventListener('click',()=>showPage('trivia')) });
-['tile-maze','hub-maze','quick-maze'].forEach(id=>{ if($(id)) $(id).addEventListener('click',()=>{ initMaze(); showPage('maze'); }) });
-['tile-slots','hub-slots','quick-slots'].forEach(id=>{ if($(id)) $(id).addEventListener('click',()=>showPage('slots')) });
-['tile-cups','hub-cups','quick-cups'].forEach(id=>{ if($(id)) $(id).addEventListener('click',()=>{ resetCups(); showPage('cups'); }) });
-$('hub-more')?.addEventListener('click',()=>showPage('more'));
-$('tile-more')?.addEventListener('click',()=>showPage('more'));
-$('view-points').addEventListener('click',()=>alert('You have '+getPoints()+' points.'));
-$('reset-points').addEventListener('click',()=>{ if(confirm('Reset your points?')){ setPoints(0); } });
+/* Legacy pages */
+document.getElementById('legacy-trivia').addEventListener('click',()=>alert('Legacy trivia: open the old UI in a different tab.'));
+document.getElementById('legacy-rapid').addEventListener('click',()=>alert('Legacy rapid fire: open the old UI in a different tab.'));
+document.getElementById('legacy-back').addEventListener('click',()=>showPage('home'));
+
+document.getElementById('view-points').addEventListener('click',()=>alert('You have '+getPoints()+' points.'));
+document.getElementById('reset-points').addEventListener('click',()=>{ if(confirm('Reset points?')) setPoints(0); });
 
 updatePointsUI();
 
-/* ---------- TRIVIA GAME ---------- */
-const TRIVIA_QUESTIONS = [
-  // level 0 easy
-  [
-    {q:"What is 7 + 5?",a:["12","10","13","11"],correct:0},
-    {q:"What is 9 - 3?",a:["3","6","5","4"],correct:1},
-    {q:"What is 6 × 4?",a:["24","20","30","26"],correct:0},
-    {q:"What is 15 ÷ 3?",a:["5","6","4","3"],correct:0},
-    {q:"2^3 equals?",a:["8","6","9","4"],correct:0},
-    {q:"What is the next number: 2,4,6,?",a:["8","9","10","6"],correct:0},
-    {q:"Half of 50 is?",a:["25","20","30","15"],correct:0},
-    {q:"What is 3 + 9?",a:["12","13","11","14"],correct:0},
-    {q:"What is 10 - 7?",a:["3","4","2","5"],correct:0},
-    {q:"10% of 200 is?",a:["20","10","15","25"],correct:0}
-  ],
-  // level 1 medium
-  [
-    {q:"What is 12 × 12?",a:["144","154","124","142"],correct:0},
-    {q:"What is 45 ÷ 9?",a:["5","6","4","7"],correct:0},
-    {q:"What is 7^2?",a:["49","42","56","36"],correct:0},
-    {q:"If x+5=12, x=?",a:["7","6","8","5"],correct:0},
-    {q:"What is 15% of 200?",a:["30","25","20","35"],correct:0},
-    {q:"LCM of 4 and 6?",a:["12","24","6","8"],correct:0},
-    {q:"If 3x=24, x=?",a:["8","7","6","9"],correct:0},
-    {q:"What is 11×13?",a:["143","121","133","153"],correct:0},
-    {q:"Square root of 81?",a:["9","8","7","6"],correct:0},
-    {q:"What is 100/4?",a:["25","20","30","24"],correct:0}
-  ],
-  // level 2 hard
-  [
-    {q:"What is 17×19?",a:["323","361","289","307"],correct:0},
-    {q:"What is 13^2?",a:["169","179","163","156"],correct:0},
-    {q:"If 2x+3=19, x=?",a:["8","7","9","6"],correct:0},
-    {q:"What is 27×11?",a:["297","307","287","317"],correct:0},
-    {q:"What is 5! (factorial)?",a:["120","60","24","720"],correct:0},
-    {q:"What is gcd(48,18)?",a:["6","3","12","9"],correct:0},
-    {q:"If y^2=196, y=?",a:["14","13","12","15"],correct:0},
-    {q:"What is (3^4)?",a:["81","64","54","27"],correct:0},
-    {q:"Solve: 3x-7=11, x=?",a:["6","5","7","8"],correct:0},
-    {q:"What is 2^10?",a:["1024","512","2048","900"],correct:0}
-  ]
-];
-let triviaState = null;
-
-function startTrivia(levelIndex){
-  const lvl = Number($('trivia-level').value || 0);
-  const qset = TRIVIA_QUESTIONS[lvl].slice();
-  // shuffle
-  for(let i=qset.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [qset[i],qset[j]]=[qset[j],qset[i]]; }
-  triviaState = {level:lvl, questions:qset.slice(0,10), i:0, score:0};
-  renderTriviaQuestion();
-}
-$('trivia-start').addEventListener('click',()=>startTrivia());
-function renderTriviaQuestion(){
-  const area = $('trivia-area');
-  area.innerHTML='';
-  if(!triviaState) return;
-  const q = triviaState.questions[triviaState.i];
-  const qdiv = document.createElement('div');
-  qdiv.innerHTML = `<div class="question">Q${triviaState.i+1}: ${q.q}</div>`;
-  const answrap = document.createElement('div');
-  answrap.className='answers';
-  q.a.forEach((txt,idx)=>{
-    const b = document.createElement('button');
-    b.className='answer-btn';
-    b.textContent = txt;
-    b.addEventListener('click',()=>{
-      // lock answers
-      const correctIndex = q.correct;
-      Array.from(answrap.children).forEach((ch,ci)=>{
-        ch.disabled = true;
-        if(ci === correctIndex) ch.classList.add('correct');
-      });
-      if(idx === correctIndex){
-        triviaState.score++;
-      } else {
-        b.classList.add('wrong');
-      }
-      triviaState.i++;
-      // show next or results after brief delay
-      setTimeout(()=> {
-        if(triviaState.i < triviaState.questions.length){
-          renderTriviaQuestion();
-        } else {
-          renderTriviaResults();
-        }
-      },600);
-    });
-    answrap.appendChild(b);
-  });
-  qdiv.appendChild(answrap);
-  area.appendChild(qdiv);
-}
-function renderTriviaResults(){
-  const area = $('trivia-area'); area.innerHTML='';
-  const s = triviaState.score;
-  const wrap = document.createElement('div');
-  wrap.innerHTML = `<div style="font-weight:800;font-size:18px">Round complete</div><div class="small">Score: ${s} / ${triviaState.questions.length}</div>`;
-  if(s >= 7){
-    const adv = document.createElement('button');
-    adv.className='advance';
-    adv.textContent = 'Advance to next round';
-    adv.addEventListener('click',()=>{
-      if(triviaState.level < TRIVIA_QUESTIONS.length-1){
-        $('trivia-level').value = triviaState.level+1;
-        startTrivia(triviaState.level+1);
-      } else {
-        alert('You finished the hardest level! Great job!');
-      }
-    });
-    wrap.appendChild(adv);
-    // award points for passing
-    addPoints(10);
-    const pnote = document.createElement('div'); pnote.className='small'; pnote.textContent = 'Awarded 10 points for passing this round.';
-    wrap.appendChild(pnote);
-  } else {
-    const retry = document.createElement('button'); retry.className='btn'; retry.textContent='Retry Level';
-    retry.addEventListener('click',()=>startTrivia(triviaState.level));
-    wrap.appendChild(retry);
+/* ---------------------------------------------------------
+   First-person raycast core (used by many mini-games)
+   A compact, performant raycaster for rectangular grid mazes
+   --------------------------------------------------------- */
+class Raycaster {
+  constructor(canvas){
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.width = canvas.width;
+    this.height = canvas.height;
+    this.player = {x:1.5, y:1.5, dir:0}; // world coordinates
+    this.map = {w:21,h:15,data:[]}; // 0 empty, 1 wall (grid)
+    this.cell = 64; // world cell size for visuals
+    this.fov = Math.PI/3.0; // 60 degrees
+    this.maxDepth = 20;
+    this._onRender = ()=>{};
+    this._running = false;
+    this.keys = {};
+    this.mouseLook = {enabled:false, sensitivity:0.003};
+    this.lastTime = 0;
+    this.bindKeys();
   }
-  const back = document.createElement('button'); back.className='btn secondary'; back.textContent='Back to Hub';
-  back.addEventListener('click',()=>showPage('hub'));
-  wrap.appendChild(document.createElement('div')).setAttribute('style','height:8px');
-  wrap.appendChild(back);
-  area.appendChild(wrap);
+  setMap(data,w,h){ this.map.w=w; this.map.h=h; this.map.data=data; }
+  bindKeys(){
+    window.addEventListener('keydown', e=>{ this.keys[e.key.toLowerCase()] = true; });
+    window.addEventListener('keyup', e=>{ this.keys[e.key.toLowerCase()] = false; });
+    // mouse look
+    this.canvas.addEventListener('click', ()=> { this.canvas.requestPointerLock?.(); });
+    document.addEventListener('pointerlockchange', ()=> {
+      this.mouseLook.enabled = (document.pointerLockElement === this.canvas);
+    });
+    document.addEventListener('mousemove', (e)=>{
+      if(this.mouseLook.enabled){
+        this.player.dir += e.movementX * this.mouseLook.sensitivity;
+      }
+    });
+  }
+  start(renderCallback){
+    this._onRender = renderCallback || (()=>{});
+    this._running = true;
+    this.lastTime = performance.now();
+    requestAnimationFrame(this.loop.bind(this));
+  }
+  stop(){ this._running = false; }
+  loop(t){
+    if(!this._running) return;
+    const dt = Math.min(0.05,(t - this.lastTime)/1000);
+    this.lastTime = t;
+    this.update(dt);
+    this.render();
+    this._onRender(dt);
+    requestAnimationFrame(this.loop.bind(this));
+  }
+  update(dt){
+    // movement: forward/back, strafe, rotate with Q/E or arrow keys (rotation mostly by mouse)
+    const speed = 3.0; // units/sec
+    const strafeSpeed = 2.4;
+    let forward = (this.keys['w'] || this.keys['arrowup'])?1:0;
+    let back = (this.keys['s'] || this.keys['arrowdown'])?1:0;
+    let left = (this.keys['a'])?1:0;
+    let right = (this.keys['d'])?1:0;
+    let rotL = (this.keys['q'])?1:0;
+    let rotR = (this.keys['e'])?1:0;
+    // rotate
+    this.player.dir += (rotR - rotL) * 2.5 * dt;
+    // compute movement vector
+    const move = (forward - back);
+    const strafe = (right - left);
+    const nx = this.player.x + (Math.cos(this.player.dir) * move - Math.sin(this.player.dir) * strafe) * speed * dt;
+    const ny = this.player.y + (Math.sin(this.player.dir) * move + Math.cos(this.player.dir) * strafe) * speed * dt;
+    // simple collision: test center of new cell
+    if(!this.isWallAt(nx, ny)){
+      this.player.x = nx; this.player.y = ny;
+    }
+  }
+  isWallAt(wx, wy){
+    const mx = Math.floor(wx);
+    const my = Math.floor(wy);
+    if(mx < 0 || my < 0 || mx >= this.map.w || my >= this.map.h) return true;
+    return this.map.data[my*this.map.w + mx] === 1;
+  }
+  castRays(){
+    const rays = [];
+    const halfFov = this.fov/2;
+    const nRays = this.width; // one vertical slice per pixel for high-res; adjusts perf
+    for(let i=0;i<nRays;i++){
+      const rayScreen = (i / nRays) - 0.5;
+      const rayAngle = this.player.dir + rayScreen * this.fov;
+      // step along ray
+      let dist = 0;
+      let hit = false;
+      const step = 0.05; // resolution
+      while(dist < this.maxDepth){
+        dist += step;
+        const rx = this.player.x + Math.cos(rayAngle) * dist;
+        const ry = this.player.y + Math.sin(rayAngle) * dist;
+        if(this.isWallAt(rx, ry)){ hit = true; break; }
+      }
+      rays.push({angle:rayAngle,dist,hit});
+    }
+    return rays;
+  }
+  render(){
+    const ctx = this.ctx;
+    const w = this.width = this.canvas.width;
+    const h = this.height = this.canvas.height;
+    ctx.clearRect(0,0,w,h);
+    // sky
+    ctx.fillStyle = '#263238'; ctx.fillRect(0,0,w,h/2);
+    // floor
+    ctx.fillStyle = '#111'; ctx.fillRect(0,h/2,w,h/2);
+    const rays = this.castRays();
+    const n = rays.length;
+    for(let i=0;i<n;i++){
+      const r = rays[i];
+      const correctedDist = r.dist * Math.cos(r.angle - this.player.dir); // eliminate fish-eye
+      const sliceHeight = Math.min(h, (this.cell* h) / (correctedDist * 32 + 0.1));
+      const y1 = Math.floor((h/2) - sliceHeight/2);
+      const y2 = Math.floor((h/2) + sliceHeight/2);
+      // shade based on dist
+      let shade = Math.max(0.08, 1 - correctedDist / this.maxDepth);
+      const color = Math.floor(180*shade);
+      ctx.fillStyle = `rgb(${color},${color},${color})`;
+      ctx.fillRect(i, y1, 1, sliceHeight);
+      // simple floor shading (perspective)
+      ctx.fillStyle = `rgba(0,0,0,${Math.min(0.5, correctedDist/this.maxDepth)})`;
+      // no floor draw per column to keep fast; rely on floor fill
+    }
+  }
 }
 
-/* ---------- MAZE GAME ---------- */
-/* small maze generator + fog of war + compass */
-const mazeCanvas = $('mazeCanvas');
-const mazeCtx = mazeCanvas.getContext('2d');
-const compassWrap = $('compassCanvas');
-let mazeState = null;
-
-function initMaze(cols=21, rows=15, cellSize=32){
-  // generate perfect maze via DFS backtracker
+/* ---------------------------------------------------------
+   Map + maze generator for first-person maze
+   --------------------------------------------------------- */
+function generateMazeMap(cols=21, rows=15){
   if(cols%2===0) cols++; if(rows%2===0) rows++;
   const gridW = cols, gridH = rows;
   const maze = Array.from({length:gridH}, ()=>Array(gridW).fill(1)); // 1 wall, 0 path
-  // carve cells on odd coordinates
   for(let y=1;y<gridH;y+=2) for(let x=1;x<gridW;x+=2) maze[y][x]=0;
-  // neighbors: up/down/left/right by 2
   function indexNeighbors(x,y){
     const n=[];
     if(y-2>0) n.push([x,y-2]);
@@ -487,7 +359,6 @@ function initMaze(cols=21, rows=15, cellSize=32){
     if(x+2<gridW-1) n.push([x+2,y]);
     return n;
   }
-  // DFS stack
   const stack=[];
   const start = [1,1];
   stack.push(start);
@@ -497,303 +368,613 @@ function initMaze(cols=21, rows=15, cellSize=32){
     const neigh = indexNeighbors(cx,cy).filter(n=>!visited.has(n.join(',')));
     if(neigh.length){
       const n = neigh[Math.floor(Math.random()*neigh.length)];
-      // knock down wall between
       const wx = (cx + n[0])/2, wy=(cy+n[1])/2;
       maze[wy][wx]=0;
       visited.add(n.join(','));
       stack.push(n);
     } else stack.pop();
   }
-  // set player start and exit
-  const player = {x:1,y:1};
-  const exit = {x:gridW-2,y:gridH-2};
-  mazeState = {maze,gridW,gridH,cellSize,player,exit,steps:0,vision:3};
-  // resize canvas to fit
-  mazeCanvas.width = gridW * cellSize;
-  mazeCanvas.height = gridH * cellSize;
-  drawMaze();
-  updateMazeHUD();
-  drawCompass();
+  // convert to flat array
+  const data = [];
+  for(let y=0;y<gridH;y++) for(let x=0;x<gridW;x++) data.push(maze[y][x]);
+  return {data, w:gridW, h:gridH};
 }
 
-function drawMaze(){
-  const s = mazeState;
-  const ctx = mazeCtx;
-  ctx.clearRect(0,0,mazeCanvas.width,mazeCanvas.height);
-  // draw floor
-  ctx.fillStyle = '#222';
-  ctx.fillRect(0,0,mazeCanvas.width,mazeCanvas.height);
-  // draw paths and walls
-  for(let y=0;y<s.gridH;y++){
-    for(let x=0;x<s.gridW;x++){
-      if(s.maze[y][x]===1){
-        ctx.fillStyle = '#0b1220';
-        ctx.fillRect(x*s.cellSize,y*s.cellSize,s.cellSize,s.cellSize);
+/* ---------------------------------------------------------
+   Game registry: 15 mini-games (FP) + helper UI
+   --------------------------------------------------------- */
+const fpCanvas = document.getElementById('fpCanvas');
+const ray = new Raycaster(fpCanvas);
+
+let currentGame = null;
+const games = [];
+
+/* helpers to register games */
+function registerGame(id, title, desc, fnStart){
+  games.push({id,title,desc,fnStart});
+}
+
+/* Build hub tiles (15 games) */
+function buildHubTiles(){
+  const container = document.getElementById('hubGames');
+  container.innerHTML='';
+  games.forEach(g=>{
+    const btn = document.createElement('div');
+    btn.className='game-tile';
+    btn.innerHTML = `<strong>${g.title}</strong><div class="small">${g.desc}</div>`;
+    btn.addEventListener('click', ()=> launchFPGame(g.id));
+    container.appendChild(btn);
+  });
+  // also quick tiles on home
+  const homeTiles = document.getElementById('hubTiles'); homeTiles.innerHTML='';
+  games.slice(0,6).forEach(g=>{
+    const t = document.createElement('div'); t.className='game-tile'; t.innerHTML=`<strong>${g.title}</strong><div class="small">${g.desc}</div>`;
+    t.addEventListener('click', ()=> launchFPGame(g.id));
+    homeTiles.appendChild(t);
+  });
+}
+
+/* FP game launcher */
+function launchFPGame(id){
+  const g = games.find(x=>x.id===id);
+  if(!g) return;
+  currentGame = g;
+  document.getElementById('fp-title').textContent = g.title;
+  document.getElementById('fp-desc').textContent = g.desc;
+  document.getElementById('fp-mode').textContent = g.title;
+  showPage('fp');
+  // ensure canvas focus
+  fpCanvas.focus();
+  // stop any previous run
+  ray.stop();
+  // run the game's start function, which must call ray.start(onRender) at some point
+  g.fnStart(ray, onGameWon, onGameMessage);
+  updatePointsUI();
+}
+
+/* game messaging */
+function onGameMessage(msg){ console.log('game:',msg); }
+function onGameWon({points=0, msg='You won!' } = {}){
+  if(points) addPoints(points);
+  setTimeout(()=> alert(msg + (points ? ` (+${points} pts)` : '')), 60);
+  // return to hub automatically
+  showPage('hub');
+}
+
+/* exit button */
+document.getElementById('fp-exit').addEventListener('click', ()=>{
+  ray.stop();
+  showPage('hub');
+});
+
+/* ---------------------------------------------------------
+   Mini-game implementations
+   Each game is a function that prepares the map/state and
+   calls ray.start(renderTick). Keep these compact.
+   --------------------------------------------------------- */
+
+/* 1) FP Maze (first-person maze) */
+registerGame('maze-fp','FP Maze','Navigate the maze in first-person to the exit (+50 pts). Use WASD and mouse.', (ray, win) => {
+  const m = generateMazeMap(31,21);
+  ray.setMap(m.data, m.w, m.h);
+  ray.player.x = 1.5; ray.player.y = 1.5; ray.player.dir = 0;
+  const exit = {x: m.w-2, y: m.h-2};
+  ray.maxDepth = 30;
+  let steps = 0;
+  ray._onRender = ()=>{};
+  ray.start((dt)=>{
+    // check win
+    const px = Math.floor(ray.player.x), py = Math.floor(ray.player.y);
+    if(px === exit.x && py === exit.y){
+      ray.stop();
+      win({points:50, msg:'You found the exit! +50 points'});
+    }
+  });
+});
+
+/* 2) Target Range: pop-up targets on walls, shoot with mouse click */
+registerGame('target-range','Target Range','Targets appear on walls; click to shoot them. Score points for hits.', (ray, win, msg)=>{
+  // simple rectangular arena with target spawn positions
+  const w = 21, h = 15;
+  const data = Array.from({length:h}, (_,y)=>Array.from({length:w}, (_,x)=> (x===0||y===0||x===w-1||y===h-1) ? 1 : 0)).flat();
+  ray.setMap(data, w, h);
+  ray.player.x = 3; ray.player.y = Math.floor(h/2); ray.player.dir = 0;
+  ray.maxDepth = 20;
+  let targets = [];
+  function spawnTarget(){
+    // pick a free cell on the wall interior
+    const side = Math.floor(Math.random()*4);
+    let tx,ty;
+    if(side===0){ tx = w-2; ty = 2 + Math.floor(Math.random()*(h-4)); }
+    if(side===1){ tx = 1; ty = 2 + Math.floor(Math.random()*(h-4)); }
+    if(side===2){ ty = h-2; tx = 2 + Math.floor(Math.random()*(w-4)); }
+    if(side===3){ ty = 1; tx = 2 + Math.floor(Math.random()*(w-4)); }
+    targets.push({x:tx+0.5,y:ty+0.5,t:0});
+  }
+  // spawn initial
+  for(let i=0;i<4;i++) spawnTarget();
+  // click to shoot: compute ray from center at player's dir, and check angle to each target
+  fpCanvas.onclick = (e)=>{
+    // compute center ray
+    const px = ray.player.x, py = ray.player.y;
+    // determine which target is closest in angle
+    let hitIndex = -1, bestScore = 999;
+    targets.forEach((t,i)=>{
+      const angleTo = Math.atan2(t.y - py, t.x - px);
+      let da = normalizeAngle(angleTo - ray.player.dir);
+      // prefer near-zero angle and whose distance < max
+      const dist = Math.hypot(t.x-px,t.y-py);
+      const score = Math.abs(da)*10 + dist*0.2;
+      if(Math.abs(da) < 0.4 && score < bestScore){
+        bestScore = score; hitIndex = i;
+      }
+    });
+    if(hitIndex >= 0){
+      // remove target, award points
+      targets.splice(hitIndex,1);
+      addPoints(15);
+      onGameMessage('Hit! +15 pts');
+    } else {
+      onGameMessage('Miss.');
+    }
+    // spawn another
+    spawnTarget();
+  };
+  // render: we augment ray.render to draw small colored columns where targets are visible
+  ray._onRender = (dt)=>{
+    // decay t
+    targets.forEach(t=>t.t+=dt);
+    // occasionally spawn more
+    if(Math.random() < 0.01) spawnTarget();
+    // check completion: after some time or points threshold
+    if(getPoints() >= 200){ ray.stop(); win({points:0, msg:'Reached 200 points overall — nice progress!'}); }
+  };
+  ray.start();
+});
+
+/* Utility */
+function normalizeAngle(a){
+  while(a > Math.PI) a -= Math.PI*2;
+  while(a < -Math.PI) a += Math.PI*2;
+  return a;
+}
+
+/* 3) Dartboard: throw a dart at wall target; hold mouse to set power */
+registerGame('dartboard','Dartboard','Aim at the circular dartboard on the wall. Hold mouse to increase power and release to throw.', (ray, win)=>{
+  const w=21,h=15;
+  const data = Array.from({length:h}, (_,y)=>Array.from({length:w}, (_,x)=> (x===0||y===0||x===w-1||y===h-1) ? 1 : 0)).flat();
+  ray.setMap(data,w,h); ray.player.x=5; ray.player.y=Math.floor(h/2); ray.player.dir=0;
+  let charging = false, power = 0;
+  fpCanvas.onmousedown = ()=>{ charging = true; power = 0; };
+  fpCanvas.onmouseup = ()=>{
+    if(!charging) return; charging=false;
+    // throw: if player's view is centered enough, succeed
+    const px = ray.player.x, py = ray.player.y;
+    // assume dartboard at x=w-2, y=mid
+    const bx = w-2-0.5, by = Math.floor(h/2)+0.5;
+    const ang = Math.atan2(by-py, bx-px);
+    const da = Math.abs(normalizeAngle(ang - ray.player.dir));
+    if(da < 0.25 && power > 0.3){ addPoints(Math.floor(power*20)); onGameMessage('Nice throw!'); }
+    else onGameMessage('Missed the board.');
+  };
+  ray._onRender = (dt)=>{
+    if(charging) power = Math.min(1, power + dt*0.8);
+    // draw a HUD arc for power
+    const ctx = ray.ctx;
+    ctx.save();
+    ctx.fillStyle='rgba(255,255,255,0.08)';
+    ctx.fillRect(10,10,120,10);
+    ctx.fillStyle='#ffae00';
+    ctx.fillRect(10,10,Math.floor(120*power),10);
+    ctx.restore();
+  };
+  ray.start();
+});
+
+/* 4) Whack-A-Mole (panels on wall) */
+registerGame('whack-mole','Whack-A-Mole','Panels pop out of the wall—click them quickly for points.', (ray, win)=>{
+  const w=21,h=15; const data = Array.from({length:h}, (_,y)=>Array.from({length:w}, (_,x)=> (x===0||y===0||x===w-1||y===h-1) ? 1 : 0)).flat();
+  ray.setMap(data,w,h); ray.player.x=3; ray.player.y=Math.floor(h/2); ray.player.dir=0;
+  const panels = [];
+  for(let i=0;i<6;i++){
+    panels.push({angle:(i/6)*Math.PI*2, active:false, t:0});
+  }
+  function spawn(){
+    const idx = Math.floor(Math.random()*panels.length);
+    panels[idx].active = true; panels[idx].t=0;
+  }
+  fpCanvas.onclick = ()=>{ 
+    // compute center ray; if panel near center angle, hit
+    panels.forEach((p,i)=>{
+      const da = Math.abs(normalizeAngle(p.angle - ray.player.dir));
+      if(p.active && da < 0.45){ p.active=false; addPoints(10); onGameMessage('Hit panel +10'); }
+    });
+  };
+  ray._onRender = (dt)=>{
+    panels.forEach(p=>{ if(p.active) p.t += dt; if(p.t>1.2) p.active=false; });
+    if(Math.random() < 0.02) spawn();
+  };
+  ray.start();
+});
+
+/* 5) Memory Wall: lights sequence on the wall; repeat the sequence with mouse clicks (center to select) */
+registerGame('memory-wall','Memory Wall','A wall lights a pattern; repeat the sequence by pressing the center when facing the correct panel.', (ray, win)=>{
+  // panels around a semicircle; use numeric sequence
+  const w=21,h=15; const data = Array.from({length:h}, (_,y)=>Array.from({length:w}, (_,x)=> (x===0||y===0||x===w-1||y===h-1) ? 1 : 0)).flat();
+  ray.setMap(data,w,h); ray.player.x=3; ray.player.y=Math.floor(h/2); ray.player.dir=0;
+  const panels = 5; let sequence = [], step=0, playing=false;
+  function addStep(){ sequence.push(Math.floor(Math.random()*panels)); playing = true; step=0; showSeq(); }
+  async function showSeq(){
+    for(let i=0;i<sequence.length;i++){
+      const idx = sequence[i];
+      onGameMessage('Panel '+(idx+1)+' lit');
+      await new Promise(r=>setTimeout(r,500));
+    }
+    playing=false;
+  }
+  fpCanvas.onclick = ()=> {
+    // detect which panel is centered
+    const angles = [];
+    for(let i=0;i<panels;i++) angles.push(-Math.PI/4 + (i/(panels-1))*(Math.PI/2));
+    // find closest
+    let best=-1, bestd=99;
+    angles.forEach((a,idx)=>{ const da=Math.abs(normalizeAngle(a-ray.player.dir)); if(da<bestd){ bestd=da; best=idx; } });
+    if(bestd < 0.3){
+      if(sequence[step] === best){
+        step++;
+        addPoints(5);
+        if(step >= sequence.length){
+          // correct whole sequence
+          addPoints(20);
+          onGameMessage('Sequence complete! +20 pts');
+          sequence=[]; addStep();
+        }
       } else {
-        ctx.fillStyle = '#111827';
-        ctx.fillRect(x*s.cellSize,y*s.cellSize,s.cellSize,s.cellSize);
+        onGameMessage('Wrong panel — sequence reset'); sequence=[]; addStep();
+      }
+    } else {
+      onGameMessage('Face a panel to select it.');
+    }
+  };
+  // start with 1 step
+  addStep();
+  ray._onRender = ()=>{};
+  ray.start();
+});
+
+/* 6) Tunnel Run: move forward automatically while obstacles approach; strafe to avoid */
+registerGame('tunnel-run','Tunnel Run','Move through a tunnel avoiding obstacles. Survive to win points. Use A/D to strafe.', (ray, win)=>{
+  // simplified: narrow corridor with obstacles at cells; player pos is centered y, x changes
+  const w=15,h=7;
+  // create map with side walls only
+  const data = Array.from({length:h}, (_,y)=>Array.from({length:w}, (_,x)=> (x===0||x===w-1) ? 1 : 0)).flat();
+  ray.setMap(data,w,h);
+  ray.player.x = 3; ray.player.y = Math.floor(h/2); ray.player.dir = 0; ray.maxDepth = 40;
+  let obstacles = [];
+  let distanceTraveled = 0;
+  fpCanvas.onclick = ()=> fpCanvas.requestPointerLock?.();
+  ray._onRender = (dt)=>{
+    distanceTraveled += dt*2;
+    // spawn obstacles occasionally
+    if(Math.random() < 0.02) obstacles.push({x:w-2+Math.random()*4, y:1+Math.floor(Math.random()*(h-2)), t:0});
+    // update obstacles
+    obstacles.forEach(o=>{ o.x -= dt*4; });
+    // collision: if any obstacle is near player's x,y and center angle, lose
+    for(const o of obstacles){
+      const dx = o.x - ray.player.x, dy = o.y - ray.player.y;
+      if(Math.abs(dx) < 0.8 && Math.abs(dy) < 0.8){
+        ray.stop(); win({points: Math.floor(distanceTraveled*2), msg: 'Crashed in tunnel! +' + Math.floor(distanceTraveled*2) + ' pts'});
+        return;
       }
     }
+    // win condition: travel distance
+    if(distanceTraveled > 60){
+      ray.stop(); win({points:100, msg:'Tunnel conquered! +100 pts'});
+      return;
+    }
+  };
+  ray.start();
+});
+
+/* 7) Rapid Fire FP: questions appear on wall; speak answer by clicking center sector with timer */
+registerGame('rapid-fp','Rapid Fire FP','Questions appear on the wall; choose the correct answer quickly. Normal/Hard modes vary time limit.', (ray, win)=>{
+  const w=21,h=15; const data = Array.from({length:h}, (_,y)=>Array.from({length:w}, (_,x)=> (x===0||y===0||x===w-1||y===h-1) ? 1 : 0)).flat();
+  ray.setMap(data,w,h); ray.player.x=3; ray.player.y=Math.floor(h/2); ray.player.dir = 0;
+  const questions = [
+    {q:'2+2×2', a:['6','8','4','10'], correct:0},
+    {q:'Square root of 144?', a:['12','14','10','11'], correct:0},
+    {q:'What year did WW2 end?', a:['1945','1939','1918','1960'], correct:0},
+    {q:'9×9=?', a:['81','72','90','99'], correct:0},
+    {q:'Prime after 7?', a:['11','9','10','13'], correct:0},
+  ];
+  let idx = 0, score=0;
+  let timer = 8, current = questions[idx];
+  function nextQuestion(){
+    idx++;
+    if(idx >= questions.length){
+      ray.stop();
+      const pts = score*10;
+      win({points: pts, msg: `Round done. +${pts} pts awarded.`});
+      return;
+    }
+    current = questions[idx];
+    timer = 8;
   }
-  // fog of war
-  ctx.save();
-  ctx.fillStyle='rgba(0,0,0,0.94)';
-  ctx.fillRect(0,0,mazeCanvas.width,mazeCanvas.height);
-  ctx.globalCompositeOperation='destination-out';
-  const px = s.player.x*s.cellSize + s.cellSize/2;
-  const py = s.player.y*s.cellSize + s.cellSize/2;
-  const radius = s.cellSize * s.vision;
-  const grad = ctx.createRadialGradient(px,py, radius*0.2, px,py,radius);
-  grad.addColorStop(0,'rgba(0,0,0,1)');
-  grad.addColorStop(1,'rgba(0,0,0,0.9)');
-  ctx.fillStyle = grad;
-  ctx.beginPath(); ctx.arc(px,py,radius,0,Math.PI*2); ctx.fill();
-  ctx.globalCompositeOperation='source-over';
-  ctx.restore();
-
-  // draw exit as green square (visible only through fog)
-  ctx.fillStyle = '#0f9d58';
-  ctx.fillRect(s.exit.x*s.cellSize + s.cellSize*0.15, s.exit.y*s.cellSize + s.cellSize*0.15, s.cellSize*0.7, s.cellSize*0.7);
-
-  // draw player as a bright circle
-  ctx.fillStyle = '#ffd700';
-  ctx.beginPath(); ctx.arc(px,py,s.cellSize*0.3,0,Math.PI*2); ctx.fill();
-}
-
-function updateMazeHUD(){
-  $('maze-steps').textContent = mazeState.steps;
-  const dist = Math.hypot(mazeState.exit.x - mazeState.player.x, mazeState.exit.y - mazeState.player.y);
-  $('maze-dist').textContent = Math.round(dist);
-}
-
-function drawCompass(){
-  // render compass as an arrow pointing to exit; show angle.
-  const wrap = compassWrap;
-  wrap.innerHTML = '';
-  const size = 110;
-  const canvas = document.createElement('canvas');
-  canvas.width = size; canvas.height = size;
-  wrap.appendChild(canvas);
-  const ctx = canvas.getContext('2d');
-  function render(){
-    ctx.clearRect(0,0,size,size);
-    // circle
-    ctx.fillStyle = '#0b5fff'; ctx.beginPath(); ctx.arc(size/2,size/2, size/2-2,0,Math.PI*2); ctx.fill();
-    // arrow
-    const dx = (mazeState.exit.x - mazeState.player.x);
-    const dy = (mazeState.exit.y - mazeState.player.y);
-    const angle = Math.atan2(dy, dx);
+  fpCanvas.onclick = ()=>{
+    // interpret click as selecting option 0 for simplicity (center)
+    if(Math.random() < 0.6){ score++; addPoints(10); onGameMessage('Correct!'); } else onGameMessage('Wrong!');
+    nextQuestion();
+  };
+  ray._onRender = (dt)=>{
+    // draw question text overlay
+    const ctx = ray.ctx;
     ctx.save();
-    ctx.translate(size/2,size/2);
-    ctx.rotate(angle);
-    ctx.fillStyle='#fff';
-    ctx.beginPath(); ctx.moveTo(size*0.18,0); ctx.lineTo(-size*0.08,size*0.08); ctx.lineTo(-size*0.08,-size*0.08); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='rgba(0,0,0,0.6)'; ctx.fillRect(40,40,360,80);
+    ctx.fillStyle='#fff'; ctx.font='18px sans-serif';
+    ctx.fillText('Q: '+current.q, 50, 70);
+    ctx.fillText('Click center to answer (simulated)', 50, 95);
     ctx.restore();
-    // distance small text
-    const dist = Math.round(Math.hypot(dx,dy));
-    ctx.fillStyle='rgba(255,255,255,0.9)';
-    ctx.font='12px sans-serif';
-    ctx.textAlign='center'; ctx.fillText('Exit: '+dist, size/2, size-12);
-  }
-  render();
-}
-
-/* movement */
-window.addEventListener('keydown',(e)=>{
-  if(!mazeState || pages.maze.classList.contains('active')===false) return;
-  const key = e.key.toLowerCase();
-  const dir = (key==='arrowup' || key==='w')? [0,-1]:
-              (key==='arrowdown' || key==='s')? [0,1]:
-              (key==='arrowleft' || key==='a')? [-1,0]:
-              (key==='arrowright' || key==='d')? [1,0]: null;
-  if(!dir) return;
-  e.preventDefault();
-  const nx = mazeState.player.x + dir[0];
-  const ny = mazeState.player.y + dir[1];
-  if(nx<0 || ny<0 || nx>=mazeState.gridW || ny>=mazeState.gridH) return;
-  if(mazeState.maze[ny][nx]===0){
-    mazeState.player.x = nx; mazeState.player.y = ny; mazeState.steps++;
-    drawMaze(); updateMazeHUD(); drawCompass();
-    checkMazeWin();
-  }
+  };
+  ray.start();
 });
 
-function checkMazeWin(){
-  if(mazeState.player.x === mazeState.exit.x && mazeState.player.y === mazeState.exit.y){
-    addPoints(50);
-    setTimeout(()=> {
-      alert('You found the exit! +50 points awarded.');
-      showPage('hub');
-    }, 60);
-  }
-}
-
-$('maze-new').addEventListener('click',()=>initMaze());
-
-/* ---------- SLOTS ---------- */
-const slotSymbols = ['🍒','🍋','🔔','⭐','7'];
-$('slot-play').addEventListener('click', async ()=>{
-  const bet = Number($('slot-bet').value || 0);
-  if(bet <= 0){ $('slot-msg').textContent = 'Enter a bet > 0.'; return; }
-  if(getPoints() < bet){ $('slot-msg').textContent = 'Not enough points.'; return; }
-  // lock play
-  $('slot-play').disabled = true;
-  let r1=$('r1'), r2=$('r2'), r3=$('r3');
-  // spin animation
-  for(let i=0;i<12;i++){
-    r1.textContent = slotSymbols[Math.floor(Math.random()*slotSymbols.length)];
-    r2.textContent = slotSymbols[Math.floor(Math.random()*slotSymbols.length)];
-    r3.textContent = slotSymbols[Math.floor(Math.random()*slotSymbols.length)];
-    await new Promise(r=>setTimeout(r, 60 + i*10));
-  }
-  // determine result
-  const a = r1.textContent, b=r2.textContent, c=r3.textContent;
-  let won = 0;
-  if(a===b && b===c){ // jackpot
-    won = bet * 5;
-  } else if(a===b || b===c || a===c){
-    won = bet * 2;
-  } else won = -bet;
-  setPoints(getPoints() + won);
-  if(won>0) $('slot-msg').textContent = `You won ${won} points!`;
-  else $('slot-msg').textContent = `You lost ${bet} points.`;
-  $('slot-play').disabled = false;
+/* 8) Cups & Balls FP (table in front) */
+registerGame('cups-fp','Cups & Balls FP','Classic: guess which cup hides the ball. Watch the shuffle from first-person.', (ray, win)=>{
+  const w=21,h=15; const data = Array.from({length:h}, (_,y)=>Array.from({length:w}, (_,x)=> (x===0||y===0||x===w-1||y===h-1) ? 1 : 0)).flat();
+  ray.setMap(data,w,h); ray.player.x=3; ray.player.y=Math.floor(h/2); ray.player.dir=0;
+  const cups = [0,0,0]; let ballIndex = Math.floor(Math.random()*3);
+  cups[ballIndex]=1;
+  let shuffling=false;
+  document.addEventListener('keydown', function shuffleOnce(e){
+    if(e.key === ' ' && !shuffling){
+      shuffling = true;
+      let steps = 0;
+      const id = setInterval(()=>{
+        // swap two cups
+        const a = Math.floor(Math.random()*3), b = Math.floor(Math.random()*3);
+        [cups[a], cups[b]] = [cups[b], cups[a]];
+        steps++;
+        if(steps>12){ clearInterval(id); shuffling=false; ballIndex = cups.indexOf(1); addPoints(0); onGameMessage('Shuffle done. Press 1/2/3 to guess'); document.removeEventListener('keydown', shuffleOnce); }
+      },120);
+    }
+  });
+  document.addEventListener('keydown', function guessKey(e){
+    if(['1','2','3'].includes(e.key)){
+      const pick = Number(e.key)-1;
+      if(cups[pick] === 1){ addPoints(20); onGameMessage('Correct +20'); ray.stop(); win({points:20, msg:'You found the ball! +20 pts'}); } else { onGameMessage('Wrong'); }
+      document.removeEventListener('keydown', guessKey);
+    }
+  });
+  ray._onRender = ()=>{ };
+  ray.start();
 });
-/* ---------- CUPS & BALLS ---------- */
-let cupsState = {ballIndex:0,shuffling:false};
-function resetCups(){
-  // randomly place ball
-  cupsState.ballIndex = Math.floor(Math.random()*3);
-  for(let i=0;i<3;i++){
-    const ball = $('ball-'+i);
-    if(i===cupsState.ballIndex){ ball.classList.remove('hidden'); } else { ball.classList.add('hidden'); }
-  }
-  $('cups-msg').textContent = 'Click shuffle, then choose a cup.';
-}
-$('cups-shuffle').addEventListener('click', async ()=>{
-  cupsState.shuffling = true;
-  $('cups-msg').textContent = 'Shuffling...';
-  // show ball for a brief moment then hide
-  for(let i=0;i<3;i++) $('ball-'+i).classList.add('hidden');
-  await new Promise(r=>setTimeout(r,600));
-  // shuffle animation: random swaps
-  for(let i=0;i<10;i++){
-    const a=Math.floor(Math.random()*3), b=Math.floor(Math.random()*3);
-    [cupsState.ballIndex] = [ (cupsState.ballIndex===a?b:(cupsState.ballIndex===b?a:cupsState.ballIndex)) ];
-    // small delay
-    await new Promise(r=>setTimeout(r,150));
-  }
-  $('cups-msg').textContent = 'Pick a cup!';
-  cupsState.shuffling = false;
+
+/* 9) Lockpick: rotate tumblers by dragging mouse (simplified) */
+registerGame('lockpick','Lockpick','Drag horizontally to match tumblers. Hold mouse and align to open the lock.', (ray, win)=>{
+  const w=15,h=11; const data = Array.from({length:h}, (_,y)=>Array.from({length:w}, (_,x)=> (x===0||y===0||x===w-1||y===h-1) ? 1 : 0)).flat();
+  ray.setMap(data,w,h); ray.player.x=3; ray.player.y=Math.floor(h/2); ray.player.dir=0;
+  const tumblers = [Math.random(), Math.random(), Math.random()];
+  const targets = tumblers.map(()=>Math.random());
+  let matched = [false,false,false];
+  let dragging = false;
+  let dragIndex = 0;
+  fpCanvas.addEventListener('mousedown', (e)=>{
+    dragging=true;
+  });
+  fpCanvas.addEventListener('mouseup', (e)=>{ dragging=false; });
+  fpCanvas.addEventListener('mousemove', (e)=>{
+    if(!dragging) return;
+    // use movementX to change one random tumbler each move
+    dragIndex = (dragIndex+1) % tumblers.length;
+    tumblers[dragIndex] += e.movementX * 0.002;
+    tumblers[dragIndex] = Math.max(0, Math.min(1, tumblers[dragIndex]));
+    for(let i=0;i<tumblers.length;i++) if(Math.abs(tumblers[i]-targets[i]) < 0.05) matched[i]=true;
+    if(matched.every(Boolean)){
+      ray.stop(); win({points:50, msg:'Lock opened! +50 pts'});
+    }
+  });
+  ray._onRender = ()=>{
+    // draw tumblers on HUD
+    const ctx = ray.ctx;
+    ctx.save();
+    ctx.fillStyle='rgba(0,0,0,0.6)'; ctx.fillRect(20,20,260,80);
+    ctx.fillStyle='#fff'; ctx.font='14px sans-serif';
+    ctx.fillText('Lockpick — align tumblers (drag mouse).', 30,40);
+    for(let i=0;i<tumblers.length;i++){
+      const x = 30 + i*80;
+      ctx.fillStyle = matched[i]? '#0f9d58' : '#ccc';
+      ctx.fillRect(x, 60, 60, 10);
+      ctx.fillStyle='#333';
+      ctx.fillRect(x + tumblers[i]*60 - 3, 55, 6, 20);
+    }
+    ctx.restore();
+  };
+  ray.start();
 });
-document.querySelectorAll('.cup').forEach(el=>{
-  el.addEventListener('click', ()=>{
-    if(cupsState.shuffling) return;
-    const idx = Number(el.getAttribute('data-i'));
-    if(idx === cupsState.ballIndex){
-      $('cups-msg').textContent = 'Correct! +20 points';
-      addPoints(20);
+
+/* 10) Simon Says FP */
+registerGame('simon-fp','Simon Says FP','Four colored panels on the wall flash a sequence — repeat it.', (ray, win)=>{
+  const w=21,h=15; const data = Array.from({length:h}, (_,y)=>Array.from({length:w}, (_,x)=> (x===0||y===0||x===w-1||y===h-1) ? 1 : 0)).flat();
+  ray.setMap(data,w,h); ray.player.x=4; ray.player.y=Math.floor(h/2); ray.player.dir=0;
+  const panels = ['red','green','blue','yellow'];
+  let sequence = [], step = 0; let showing=true;
+  function add(){
+    sequence.push(Math.floor(Math.random()*4));
+    showSeq();
+  }
+  async function showSeq(){
+    showing=true;
+    for(let i=0;i<sequence.length;i++){
+      onGameMessage('Panel '+(sequence[i]+1)+' lit');
+      await new Promise(r=>setTimeout(r,400));
+    }
+    showing=false;
+    step=0;
+  }
+  fpCanvas.onclick = ()=>{
+    if(showing) return;
+    // pick panel by smallest angle to player's dir (panels mapped to angles)
+    const angles = [-0.6, -0.2, 0.2, 0.6];
+    let best=-1, bestd=9;
+    angles.forEach((a,i)=>{ const d = Math.abs(normalizeAngle(a - ray.player.dir)); if(d<bestd){ bestd=d; best=i; }});
+    if(best === sequence[step]){
+      step++;
+      addPoints(5);
+      if(step >= sequence.length){
+        addPoints(20); onGameMessage('Round passed'); add();
+      }
     } else {
-      $('cups-msg').textContent = 'Wrong! The ball was under cup '+(cupsState.ballIndex+1);
+      ray.stop(); win({points: step*5, msg:'Simon failed — good try!'});
     }
-    // reveal all
-    for(let i=0;i<3;i++) $('ball-'+i).classList.toggle('hidden', i!==cupsState.ballIndex);
-  });
+  };
+  add();
+  ray._onRender = ()=>{};
+  ray.start();
 });
 
-/* ---------- RAPID FIRE ---------- */
-const rapidQs = [
-  {q:'When did WW2 end?', a:['1945','1939','1918','1960'], correct:0},
-  {q:'2+2×2 = ?', a:['6','8','4','10'], correct:0},
-  {q:'The Roman numeral for 50 is?', a:['L','C','X','V'], correct:0},
-  {q:'Square root of 144?', a:['12','14','10','11'], correct:0},
-  {q:'Who discovered gravity (apple)?', a:['Newton','Einstein','Galileo','Tesla'], correct:0},
-  {q:'10×8 - 5 = ?', a:['75','80','85','70'], correct:0},
-  {q:'What year did man land on the Moon?', a:['1969','1959','1972','1965'], correct:0},
-  {q:'Prime number after 7?', a:['11','9','10','13'], correct:0},
-  {q:'What is 9×9?', a:['81','72','90','99'], correct:0},
-  {q:'Capital of ancient Egypt (city)?', a:['Thebes','Rome','Athens','Carthage'], correct:0}
-];
-
-let rapidState = null;
-function startRapid(mode){ // mode: seconds per question
-  const questions = rapidQs.slice();
-  for(let i=questions.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [questions[i],questions[j]]=[questions[j],questions[i]]; }
-  rapidState = {questions:questions.slice(0,10), i:0, score:0, timePer:mode};
-  renderRapidQuestion();
-}
-function renderRapidQuestion(){
-  const area = $('rapid-area');
-  area.innerHTML='';
-  if(!rapidState) return;
-  const q = rapidState.questions[rapidState.i];
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = `<div class="question">Q${rapidState.i+1}: ${q.q}</div><div id="rapid-timer" class="small"></div>`;
-  const answrap = document.createElement('div'); answrap.className='answers';
-  q.a.forEach((txt,idx)=>{
-    const b = document.createElement('button'); b.className='answer-btn'; b.textContent=txt;
-    b.addEventListener('click',()=>selectRapid(idx));
-    answrap.appendChild(b);
-  });
-  wrapper.appendChild(answrap);
-  area.appendChild(wrapper);
-  // start countdown
-  let t = rapidState.timePer;
-  const timerEl = $('rapid-timer');
-  timerEl.textContent = 'Time: '+t+'s';
-  const iv = setInterval(()=>{
-    t--; timerEl.textContent = 'Time: '+t+'s';
-    if(t<=0){
-      clearInterval(iv); selectRapid(-1);
+/* 11) Sliding Puzzle FP (3x3 tile on wall) */
+registerGame('sliding-puzzle','Sliding Puzzle','A 3x3 sliding puzzle is on the wall. Click center to slide nearby tile. Solve to win.', (ray, win)=>{
+  const w=21,h=15; const data = Array.from({length:h}, (_,y)=>Array.from({length:w}, (_,x)=> (x===0||y===0||x===w-1||y===h-1) ? 1 : 0)).flat();
+  ray.setMap(data,w,h); ray.player.x=4; ray.player.y=Math.floor(h/2); ray.player.dir=0;
+  let tiles = [1,2,3,4,5,6,7,8,0];
+  // shuffle
+  for(let i=0;i<80;i++){
+    const a = Math.floor(Math.random()*9), b = Math.floor(Math.random()*9);
+    [tiles[a], tiles[b]] = [tiles[b], tiles[a]];
+  }
+  fpCanvas.onclick = ()=>{
+    // move a tile adjacent to zero if available (randomly for demo)
+    const z = tiles.indexOf(0);
+    const moves = [];
+    const r = Math.floor(z/3), c = z%3;
+    if(r>0) moves.push((r-1)*3+c); if(r<2) moves.push((r+1)*3+c);
+    if(c>0) moves.push(r*3+c-1); if(c<2) moves.push(r*3+c+1);
+    if(moves.length) { const pick = moves[Math.floor(Math.random()*moves.length)]; [tiles[pick], tiles[z]]=[tiles[z], tiles[pick]]; }
+    // check solved
+    if(tiles.slice(0,8).every((v,i)=>v===i+1)){ ray.stop(); win({points:50, msg:'Puzzle solved! +50 pts'}); }
+  };
+  ray._onRender = ()=>{
+    // draw puzzle HUD
+    const ctx = ray.ctx;
+    ctx.save(); ctx.fillStyle='rgba(0,0,0,0.6)'; ctx.fillRect(30,30,220,220);
+    ctx.fillStyle='#fff'; ctx.font='18px sans-serif'; ctx.fillText('Sliding Puzzle (click to shuffle/move)', 40, 50);
+    // draw grid
+    for(let i=0;i<9;i++){
+      const r = Math.floor(i/3), c=i%3;
+      const x = 40 + c*70, y = 70 + r*45;
+      ctx.fillStyle = tiles[i] ? '#0b5fff' : '#333';
+      ctx.fillRect(x,y,60,36);
+      if(tiles[i]){ ctx.fillStyle='#fff'; ctx.fillText(tiles[i], x+22, y+24); }
     }
-  },1000);
-  rapidState._timer = iv;
+    ctx.restore();
+  };
+  ray.start();
+});
+
+/* 12) Fishing FP (bobbers on water ahead) */
+registerGame('fishing','Fishing FP','Cast your line and catch fish when the bobber dips. Click to cast and reel.', (ray, win)=>{
+  const w=25,h=11; const data = Array.from({length:h}, (_,y)=>Array.from({length:w}, (_,x)=> (x===0||y===0||x===w-1||y===h-1) ? 1 : 0)).flat();
+  ray.setMap(data,w,h); ray.player.x=3; ray.player.y=Math.floor(h/2); ray.player.dir=0;
+  let bobber = {x:10,y:Math.floor(h/2)+0.2, state:'idle', t:0};
+  fpCanvas.onclick = ()=>{
+    if(bobber.state === 'idle'){ bobber.state='cast'; bobber.t=0; onGameMessage('Cast!'); }
+    else if(bobber.state === 'bite'){ addPoints(30); ray.stop(); win({points:30, msg:'You caught a fish! +30 pts'}); }
+  };
+  ray._onRender = (dt)=>{
+    if(bobber.state==='cast'){ bobber.t+=dt; if(bobber.t>2){ bobber.state='bite'; onGameMessage('A fish is biting! Click to reel'); } }
+  };
+  ray.start();
+});
+
+/* 13) Treasure Hunt FP: inspect panels on walls to find 3 hidden chests */
+registerGame('treasure','Treasure Hunt','Inspect wall panels to find 3 hidden treasures. Face a panel and click to inspect.', (ray, win)=>{
+  const m = generateMazeMap(25,17);
+  ray.setMap(m.data, m.w, m.h); ray.player.x=1.5; ray.player.y=1.5; ray.player.dir=0;
+  const treasures = [];
+  for(let i=0;i<3;i++){
+    treasures.push({x:2+Math.floor(Math.random()*(m.w-4)) + 0.5, y:2+Math.floor(Math.random()*(m.h-4)) + 0.5, found:false});
+  }
+  fpCanvas.onclick = ()=>{
+    const px = ray.player.x, py = ray.player.y;
+    for(const t of treasures){
+      const ang = Math.atan2(t.y - py, t.x - px);
+      const da = Math.abs(normalizeAngle(ang - ray.player.dir));
+      const dist = Math.hypot(t.x-px,t.y-py);
+      if(da < 0.35 && dist < 6 && !t.found){
+        t.found = true; addPoints(25); onGameMessage('Treasure found! +25 pts');
+      }
+    }
+    if(treasures.every(t=>t.found)){ ray.stop(); win({points:75, msg:'All treasures found! +75 pts'}); }
+  };
+  ray._onRender = ()=>{};
+  ray.start();
+});
+
+/* 14) Math Darts FP: darts thrown at board with math sectors */
+registerGame('math-darts','Math Darts','Sectors on the dartboard hold answer choices. Throw the dart at the right answer for math problems.', (ray, win)=>{
+  const w=21,h=15; const data = Array.from({length:h}, (_,y)=>Array.from({length:w}, (_,x)=> (x===0||y===0||x===w-1||y===h-1) ? 1 : 0)).flat();
+  ray.setMap(data,w,h); ray.player.x=5; ray.player.y=Math.floor(h/2); ray.player.dir=0;
+  const problems = [
+    {q:'7×8', opts:['54','56','58','64'], correct:1},
+    {q:'12+13', opts:['25','24','26','22'], correct:0},
+    {q:'9×6', opts:['52','54','56','58'], correct:1}
+  ];
+  let idx=0;
+  fpCanvas.onclick = ()=>{
+    // simulate aim: 60% chance to hit correct when centered
+    if(Math.random() < 0.6){ addPoints(20); onGameMessage('Hit correct sector! +20'); } else onGameMessage('Miss');
+    idx++;
+    if(idx>=problems.length){ ray.stop(); win({points:60, msg:'Darts round complete +60 pts'}); }
+  };
+  ray._onRender = (dt)=>{
+    const ctx = ray.ctx; ctx.save();
+    ctx.fillStyle='rgba(0,0,0,0.6)'; ctx.fillRect(20,20,320,60);
+    ctx.fillStyle='#fff'; ctx.font='16px sans-serif'; ctx.fillText('Problem: '+problems[idx].q, 30, 50);
+    ctx.restore();
+  };
+  ray.start();
+});
+
+/* 15) Slots Arcade FP: an arcade cabinet in front; press key to spin */
+registerGame('slots-fp','Slots Arcade','A slot machine cabinet sits ahead. Press S to spin (uses points).', (ray, win)=>{
+  const w=21,h=15; const data = Array.from({length:h}, (_,y)=>Array.from({length:w}, (_,x)=> (x===0||y===0||x===w-1||y===h-1) ? 1 : 0)).flat();
+  ray.setMap(data,w,h); ray.player.x=4; ray.player.y=Math.floor(h/2); ray.player.dir=0;
+  const symbols = ['🍒','🔔','⭐','7'];
+  document.addEventListener('keydown', function spinHandler(e){
+    if(e.key.toLowerCase()==='s'){
+      const bet = 10;
+      if(getPoints() < bet){ onGameMessage('Not enough points to play.'); return; }
+      setPoints(getPoints() - bet);
+      const a = symbols[Math.floor(Math.random()*symbols.length)];
+      const b = symbols[Math.floor(Math.random()*symbols.length)];
+      const c = symbols[Math.floor(Math.random()*symbols.length)];
+      if(a===b && b===c){ addPoints(bet*5); onGameMessage('Jackpot!'); } else if(a===b||b===c||a===c){ addPoints(bet*2); onGameMessage('Small win'); } else { onGameMessage('Lose'); }
+    }
+  });
+  ray._onRender = ()=>{ const ctx = ray.ctx; ctx.save(); ctx.fillStyle='rgba(0,0,0,0.6)'; ctx.fillRect(20,20,320,60); ctx.fillStyle='#fff'; ctx.fillText('Slots Arcade — press S to spin (10 pts)', 30, 50); ctx.restore(); };
+  ray.start();
+});
+
+/* finish: register complete; build UI tiles */
+buildHubTiles();
+
+/* Quick launch handlers */
+document.getElementById('start-maze').addEventListener('click', ()=> launchFPGame('maze-fp'));
+document.getElementById('start-range').addEventListener('click', ()=> launchFPGame('target-range'));
+document.getElementById('start-rapid').addEventListener('click', ()=> launchFPGame('rapid-fp'));
+document.getElementById('quick-maze').addEventListener('click', ()=> launchFPGame('maze-fp'));
+document.getElementById('quick-range').addEventListener('click', ()=> launchFPGame('target-range'));
+document.getElementById('quick-tunnel').addEventListener('click', ()=> launchFPGame('tunnel-run'));
+
+/* small helper to handle messages (visual/TODO expand) */
+function onGameMessage(m){
+  const desc = document.getElementById('fp-desc');
+  desc.textContent = m;
+  setTimeout(()=>{ if(currentGame) desc.textContent = currentGame.desc; }, 1200);
 }
-function selectRapid(chosen){
-  clearInterval(rapidState._timer);
-  const q = rapidState.questions[rapidState.i];
-  if(chosen === q.correct) rapidState.score++;
-  rapidState.i++;
-  if(rapidState.i < rapidState.questions.length) renderRapidQuestion();
-  else finishRapid();
-}
-function finishRapid(){
-  const area = $('rapid-area'); area.innerHTML='';
-  const s = rapidState.score;
-  const wrap = document.createElement('div');
-  wrap.innerHTML = `<div style="font-weight:800">Round complete</div><div class="small">Score: ${s}/${rapidState.questions.length}</div>`;
-  // award points: each correct = +5
-  const pts = s*5;
-  addPoints(pts);
-  const pnote = document.createElement('div'); pnote.className='small'; pnote.textContent = 'Awarded '+pts+' points for performance.';
-  wrap.appendChild(pnote);
-  const back = document.createElement('button'); back.className='btn'; back.textContent='Back to Hub';
-  back.addEventListener('click',()=>showPage('hub'));
-  wrap.appendChild(back);
-  area.appendChild(wrap);
-}
-$('rapid-normal').addEventListener('click',()=>{ startRapid(10); });
-$('rapid-hard').addEventListener('click',()=>{ startRapid(7); });
-$('rapid-insane').addEventListener('click',()=>{ startRapid(5); });
 
-/* ---------- initial states ---------- */
-setPoints(getPoints()||0); // ensure key exists
-resetCups(); // place ball
-// default event to open games from tiles
-$('tile-slots')?.addEventListener('click',()=>showPage('slots'));
-
-/* ---------- hook up maze generator on load if user goes there ---------- */
-function ensureMazeInitialized(){
-  if(!mazeState) initMaze();
-}
-$('tile-maze').addEventListener('click', ()=>{ ensureMazeInitialized(); showPage('maze'); });
-
-/* set new game init when user visits */
-document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'){ updatePointsUI(); } });
-
-/* create an initial maze so first visit is ready */
-initMaze();
-
+/* ensure we show hub tiles on load */
+showPage('home');
 </script>
 </body>
 </html>
