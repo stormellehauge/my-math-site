@@ -15,50 +15,50 @@ function navigateTo(screenId) {
     window.scrollTo(0, 0);
 }
 // 3. TRIVIA CHALLENGE COMPILATION DATA BASE (100 Balanced Data Records)
-const triviaBank = {};
-for (let lvl = 1; lvl <= 10; lvl++) {
-    triviaBank[lvl] = [];
-    for (let q = 1; q <= 10; q++) {
-        let baseMultiplier = lvl * 3 + q;
-        let valA = baseMultiplier + 4;
-        let valB = q * lvl;
-        let correctAnswer = valA + valB;
-        let qText = Level $ {
-            lvl
-        } - Puzzle #$ {
-            q
-        }: Solve the operational logic sequence: What is $ {
-            valA
-        } + $ {
-            valB
-        } ? ;
-        if (lvl > 4) qText = Level $ {
-            lvl
-        } - Logic String #$ {
-            q
-        }: Find value X where X - $ {
-            valB
-        } = $ {
-            valA
-        }.;
-        if (lvl > 7) qText = Level $ {
-            lvl
-        } - Challenge Matrix #$ {
-            q
-        }: Evaluate evaluating
-        function sequence index step elements: $ {
-            valA
-        } + $ {
-            valB
-        }
-        equals what value ? ;
-        triviaBank[lvl].push({
-            q: qText,
-            options: [correctAnswer, correctAnswer - q - 2, correctAnswer + q + 3, correctAnswer * 2].sort(() => Math.random() - 0.5),
-            answer: correctAnswer
-        });
-    }
-}
+//const triviaBank = {};
+//for (let lvl = 1; lvl <= 10; lvl++) {
+    //triviaBank[lvl] = [];
+    //for (let q = 1; q <= 10; q++) {
+        //let baseMultiplier = lvl * 3 + q;
+        //let valA = baseMultiplier + 4;
+        //let valB = q * lvl;
+        //let correctAnswer = valA + valB;
+        //let qText = Level $ {
+            //lvl
+        //} - Puzzle #$ {
+            //q
+        //}: Solve the operational logic sequence: What is $ {
+            //valA
+        //} + $ {
+            //valB
+        //} ? ;
+        //if (lvl > 4) qText = Level $ {
+            //lvl
+        //} - Logic String #$ {
+            //q
+        //}: Find value X where X - $ {
+            //valB
+        //} = $ {
+            //valA
+        //}.;
+        //if (lvl > 7) qText = Level $ {
+            //lvl
+        //} - Challenge Matrix #$ {
+            //q
+        //}: Evaluate evaluating
+        //function sequence index step elements: $ {
+            //valA
+        //} + $ {
+            //valB
+        //}
+        //equals what value ? ;
+        //triviaBank[lvl].push({
+            //q: qText,
+            //options: [correctAnswer, correctAnswer - q - 2, correctAnswer + q + 3, correctAnswer * 2].sort(() => Math.random() - 0.5),
+            //answer: correctAnswer
+        //});
+    //}
+//}
 let currentLevel = 1;
 let currentQuestionIdx = 0;
 let highestUnlockedLevel = 1;
@@ -120,7 +120,9 @@ function loadTriviaQuestion() {
     } - Progress: $ {
         currentQuestionIdx + 1
     }
-    /10;const qData = triviaBank[currentLevel][currentQuestionIdx];const textElement = document.getElementById('trivia-question-text');if(textElement) textElement.innerText = qData.q;const optBox = document.getElementById('trivia-options-box');if(!optBox) return;optBox.innerHTML = "";qData.options.forEach(opt => {const btn = document.createElement('button');btn.className = "option-btn";btn.innerText = opt;btn.onclick = function() { evaluateAnswer(opt, qData.answer); };optBox.appendChild(btn);});}function evaluateAnswer(chosen, correct) {if(parseInt(chosen) === parseInt(correct)) {alert("Correct Logic! Moving forward...");currentQuestionIdx++;loadTriviaQuestion();} else {alert("Logic error sequence detected. Resetting level parameter loop elements.");currentQuestionIdx = 0;loadTriviaQuestion();}}function stopTriviaAndExit() {currentQuestionIdx = 0;renderLevelLobby();navigateTo('trivia-lobby-screen');}
+    /10;
+const qData = triviaBank[currentLevel][currentQuestionIdx];const textElement = document.getElementById('trivia-question-text');if(textElement) textElement.innerText = qData.q;const optBox = document.getElementById('trivia-options-box');if(!optBox) return;optBox.innerHTML = "";qData.options.forEach(opt => {const btn = document.createElement('button');btn.className = "option-btn";btn.innerText = opt;btn.onclick = function() { evaluateAnswer(opt, qData.answer); };optBox.appendChild(btn);});}function evaluateAnswer(chosen, correct) {if(parseInt(chosen) === parseInt(correct)) {alert("Correct Logic! Moving forward...");currentQuestionIdx++;loadTriviaQuestion();} else {alert("Logic error sequence detected. Resetting level parameter loop elements.");currentQuestionIdx = 0;loadTriviaQuestion();}}function stopTriviaAndExit() {currentQuestionIdx = 0;renderLevelLobby();navigateTo('trivia-lobby-screen');}
+
     // 4. RETRO GAMES MAIN INTERVAL STATE ROUTERS
     let gameIntervalLoop = null;
     const keysPressed = {};
