@@ -1,311 +1,799 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <script src="functions.js" defer></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Break The Logic</title>
-    <style>
-        /* Global Settings & Thick Black Font Typography Theme */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Arial Black', 'Arial', sans-serif;
-        }
-        body {
-            background-color: #0b0c10;
-            color: #111;
-            overflow-x: hidden;
-            min-height: 100vh;
-        }
-        
-        /* Immersive Background Wall of Shifting Numbers */
-        .number-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
-            opacity: 0.15;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 16px;
-            line-height: 1.1;
-            letter-spacing: 2px;
-            color: #45f3ff;
-            word-break: break-all;
-            user-select: none;
-            overflow: hidden;
-            padding: 5px;
-        }
-        
-        /* Navigation Screen Controller Base Matrix */
-        .screen {
-            display: none;
-            min-height: 100vh;
-            padding: 40px 20px;
-            width: 100%;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        .screen.active {
-            display: block;
-        }
-
-        /* SCREEN 1: Home Page Elements (Thick Black Font Maintained) */
-        #home-screen {
-            text-align: center;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        #home-screen.active {
-            display: flex;
-        }
-        .main-title {
-            font-size: 5rem;
-            font-weight: 900;
-            color: #000000;
-            text-transform: uppercase;
-            letter-spacing: -2px;
-            line-height: 0.9;
-            margin-bottom: 30px;
-            text-shadow: -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff, 0 10px 20px rgba(0,0,0,0.5);
-        }
-        @media (max-width: 768px) {
-            .main-title { font-size: 3rem; }
-        }
-        
-        /* High-Response Arcade Control Buttons */
-        .blast-btn {
-            background-color: #000000;
-            color: #ffffff;
-            border: 4px solid #ffffff;
-            padding: 20px 45px;
-            font-size: 1.8rem;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: all 0.2s ease-in-out;
-            box-shadow: 0 8px 0 #222;
-        }
-        .blast-btn:hover {
-            background-color: #45f3ff;
-            color: #000000;
-            border-color: #000000;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 0 #00b4cc;
-        }
-        .blast-btn:active {
-            transform: translateY(6px);
-            box-shadow: 0 2px 0 #222;
-        }
-
-        /* SCREEN 2: Choice Dashboard Grid */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-top: 50px;
-        }
-        @media (max-width: 600px) {
-            .dashboard-grid { grid-template-columns: 1fr; }
-        }
-        .dash-card {
-            background: white;
-            border: 5px solid #000;
-            padding: 40px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 6px 0 #000;
-        }
-        .dash-card:hover {
-            transform: translateY(-4px);
-            background: #45f3ff;
-            box-shadow: 0 10px 0 #000;
-        }
-        .dash-card h2 {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-        }
-        
-        .back-btn {
-            background: #000;
-            color: #fff;
-            padding: 12px 24px;
-            border: 2px solid #fff;
-            cursor: pointer;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            display: inline-block;
-            transition: all 0.2s ease;
-        }
-        .back-btn:hover {
-            background: #ff2a74;
-            color: #fff;
-            transform: scale(1.05);
-        }
-
-        /* SCREEN 3: Trivia Level Matrix Grid Layout */
-        .level-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-        }
-        .level-btn {
-            background: white;
-            border: 4px solid #000;
-            padding: 25px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 0 #000;
-        }
-        .level-btn:hover:not(.locked) {
-            background: #45f3ff;
-            transform: translateY(-3px);
-            box-shadow: 0 7px 0 #000;
-        }
-        .level-btn.locked {
-            background: #333;
-            color: #666;
-            cursor: not-allowed;
-            border-color: #222;
-            box-shadow: none;
-        }
-        .quiz-container {
-            background: white;
-            border: 5px solid #000;
-            padding: 30px;
-            margin-top: 20px;
-            box-shadow: 0 10px 0 rgba(0,0,0,0.3);
-        }
-        .options-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        .option-btn {
-            background: #fff;
-            border: 3px solid #000;
-            padding: 18px;
-            font-size: 1.2rem;
-            text-align: left;
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-        .option-btn:hover { 
-            background: #ff2a74; 
-            color: white;
-            padding-left: 25px;
-        }
-
-        /* SCREEN 4: Interactive Canvas Arcade Viewports */
-        .game-viewport {
-            background: #000;
-            width: 100%;
-            max-width: 500px;
-            height: 400px;
-            margin: 20px auto;
-            position: relative;
-            border: 5px solid #000;
-        }
-        canvas {
-            background: #000;
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-        .game-ui-overlay {
-            color: white;
-            text-align: center;
-            padding: 15px;
-            background: #111;
-            border: 3px solid #333;
-            font-size: 1.1rem;
-        }
-        
-        .section-header {
-            font-size: 3rem; 
-            text-align:center;
-            color: #ffffff;
-            text-shadow: 0 4px 10px rgba(0,0,0,0.8);
-            margin-bottom: 20px;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BREAK THE LOGIC</title>
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --accent:#0b5fff;
+      --card:#fff;
+      --muted:#666;
+      --shadow: 0 6px 20px rgba(15,20,40,0.08);
+      --title-font: "Inter", "Arial Black", "Arial", sans-serif;
+    }
+    html,body{height:100%;margin:0;background:var(--bg);font-family:Inter,system-ui,Arial,sans-serif;color:#111}
+    /* PI background */
+    body::before{
+      content: "π 3.1415926535897932384626433832795028841971  ";
+      position:fixed; inset:0; z-index:-1;
+      font-size:40px; line-height:1.4; color:rgba(0,0,0,0.03);
+      white-space:pre-wrap; display:block; padding:40px;
+      transform:rotate(-8deg) scaleY(1.1);
+      background: repeating-linear-gradient(90deg, rgba(0,0,0,0.005) 0 1px, transparent 1px 40px);
+    }
+    header{display:flex;align-items:center;justify-content:space-between;padding:28px 36px}
+    .brand{font-family:var(--title-font);font-weight:900;font-size:48px;color:#000;letter-spacing:1px}
+    .controls{display:flex;gap:12px;align-items:center}
+    .points{background:#fff;padding:8px 12px;border-radius:8px;box-shadow:var(--shadow);font-weight:700}
+    .btn{background:var(--accent);color:#fff;padding:12px 18px;border-radius:10px;border:0;cursor:pointer;font-weight:700;box-shadow:var(--shadow)}
+    .btn.secondary{background:#222;color:#fff}
+    main{padding:20px 36px}
+    .container{display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start}
+    .card{background:var(--card);padding:18px;border-radius:12px;box-shadow:var(--shadow)}
+    .hero{display:flex;gap:18px;align-items:center;padding:28px}
+    .hero .text{flex:1}
+    .hero h2{margin:0;font-size:28px}
+    nav .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
+    .game-tile{padding:14px;border-radius:10px;background:linear-gradient(180deg,#fff,#f7f8fc);cursor:pointer;border:1px solid rgba(0,0,0,0.03);display:flex;flex-direction:column;gap:10px}
+    .small{font-size:13px;color:var(--muted)}
+    /* content pages */
+    .page{display:none}
+    .page.active{display:block}
+    /* Game area */
+    .game-area{min-height:420px}
+    .center{display:flex;align-items:center;justify-content:center}
+    .controls-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .question{font-size:20px;margin:12px 0}
+    /* trivia */
+    .answers{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    .answer-btn{padding:12px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);cursor:pointer;background:#fff}
+    .answer-btn.correct{border-color:green;background:rgba(220,255,220,0.8)}
+    .answer-btn.wrong{border-color:red;background:rgba(255,220,220,0.8)}
+    .advance{display:inline-block;margin-top:12px;padding:10px 14px;border-radius:10px;background:#0a9e00;color:#fff; cursor:pointer}
+    /* maze */
+    #mazeCanvas{background:#111;border-radius:8px;display:block;margin:0 auto}
+    .compass{width:120px;height:120px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)}
+    .hud{display:flex;gap:12px;align-items:center;justify-content:center;margin-top:12px}
+    /* slots/cups */
+    .slot{display:flex;gap:8px;align-items:center;justify-content:center}
+    .reel{width:72px;height:72px;background:#fff;border-radius:8px;border:1px solid #eee;display:flex;align-items:center;justify-content:center;font-size:22px}
+    /* cups */
+    .cups{display:flex;gap:18px;justify-content:center;align-items:flex-end;margin-top:18px}
+    .cup{width:90px;height:90px;background:#e2e6f0;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
+    .ball{width:26px;height:26px;border-radius:50%;background:#f40;position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:block}
+    .hidden{display:none}
+    footer{padding:18px 36px;color:var(--muted);font-size:13px}
+    /* responsive */
+    @media(max-width:900px){
+      .container{grid-template-columns:1fr; padding-bottom:60px}
+      header{flex-direction:column;align-items:flex-start;gap:12px}
+    }
+  </style>
 </head>
 <body>
+  <header>
+    <div class="brand">BREAK THE LOGIC</div>
+    <div class="controls">
+      <div class="points">Points: <span id="points">0</span></div>
+      <button class="btn" id="to-home">Home</button>
+      <button class="btn secondary" id="to-hub">Game Hub</button>
+    </div>
+  </header>
 
-    <!-- Mathematical Void Data Streams -->
-    <div class="number-bg" id="matrix-bg"></div>
-
-    <!-- 1. HOME SITE DISPLAY MODULE -->
-    <section class="screen active" id="home-screen">
-        <h1 class="main-title">Break<br>The Logic</h1>
-        <button class="blast-btn" onclick="navigateTo('dash-screen')">Blast off to math</button>
-    </section>
-
-    <!-- 2. SYSTEM OPERATION CHOICE DASHBOARD -->
-    <section class="screen" id="dash-screen">
-        <button class="back-btn" onclick="navigateTo('home-screen')">Back</button>
-        <h1 class="section-header">CHOOSE YOUR PATH</h1>
-        <div class="dashboard-grid">
-            <div class="dash-card" onclick="navigateTo('trivia-lobby-screen')">
-                <h2>TRIVIA</h2>
-                <p>10 levels of mind-bending numerical logic challenges.</p>
+  <main>
+    <div class="container">
+      <section>
+        <!-- Home -->
+        <div id="home" class="page active card">
+          <div class="hero">
+            <div class="text">
+              <h2 style="margin-bottom:6px">Blast into games that train your brain.</h2>
+              <p class="small">Solve math trivia, navigate a dark maze with only a compass, try cups & balls, race through rapid-fire rounds, and more — all inside this mini game hub. Earn points and spend them in the game hub.</p>
+              <div class="controls-row">
+                <button class="btn" id="blast-math">Blast off to Math</button>
+                <button class="btn secondary" id="go-hub">Go to the Game Hub</button>
+              </div>
             </div>
-            <div class="dash-card" onclick="navigateTo('games-lobby-screen')">
-                <h2>GAMES</h2>
-                <p>Interactive arcade style numerical operations.</p>
+            <div style="width:220px">
+              <div style="background:linear-gradient(180deg,#fff,#f0f4ff);padding:18px;border-radius:12px;box-shadow:var(--shadow)">
+                <div style="font-weight:800;font-size:16px">Featured Game</div>
+                <div style="margin-top:8px" class="small">Math Trivia — 3 difficulty levels, advance when you score 7/10+</div>
+              </div>
             </div>
+          </div>
+
+          <div style="margin-top:18px" class="grid">
+            <div class="card">
+              <h3 style="margin:0 0 8px 0">Quick Start</h3>
+              <div class="small">Play the featured games or visit the hub for dozens more. Points you earn persist in this browser.</div>
+              <div style="margin-top:12px" class="controls-row">
+                <button class="btn" id="start-trivia">Play Trivia</button>
+                <button class="btn" id="start-maze">Play Maze (50pt win)</button>
+                <button class="btn" id="start-cups">Cups & Balls</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3 style="margin:0 0 8px 0">Game Hub</h3>
+              <div class="small">Access many games and your gambling machine.</div>
+              <div style="margin-top:12px" class="grid">
+                <div class="game-tile" id="tile-trivia"><strong>Math Trivia</strong><div class="small">3 levels, 10 questions each</div></div>
+                <div class="game-tile" id="tile-maze"><strong>Maze + Compass</strong><div class="small">Dark maze, find the exit</div></div>
+                <div class="game-tile" id="tile-slots"><strong>Gambling Machine</strong><div class="small">Play with points (simulated)</div></div>
+                <div class="game-tile" id="tile-cups"><strong>Cups & Balls</strong><div class="small">Find the hidden ball</div></div>
+                <div class="game-tile" id="tile-rapid"><strong>Rapid Fire</strong><div class="small">History+math timed rounds</div></div>
+                <div class="game-tile" id="tile-more"><strong>More Games</strong><div class="small">Tons of mini-games (placeholders)</div></div>
+              </div>
+            </div>
+          </div>
+
         </div>
-    </section>
 
-    <!-- 3. TRIVIA TRACK SELECTION SECTOR -->
-    <section class="screen" id="trivia-lobby-screen">
-        <button class="back-btn" onclick="navigateTo('dash-screen')">Back</button>
-        <h1 class="section-header">TRIVIA LEVELS</h1>
-        <div class="level-grid" id="level-matrix-container"></div>
-    </section>
-
-    <!-- ACTIVE QUESTION SOLVING ROOM -->
-    <section class="screen" id="trivia-play-screen">
-        <button class="back-btn" onclick="stopTriviaAndExit()">Quit Level</button>
-        <div class="quiz-container">
-            <h2 id="trivia-level-header" style="margin-bottom:10px;">Level 1</h2>
-            <div style="background:#eee; height:10px; width:100%; margin-bottom:20px;">
-                <div id="trivia-progress" style="background:#000; height:100%; width:0%;"></div>
-            </div>
-            <p id="trivia-question-text" style="font-size:1.4rem; margin-bottom:20px;">Question loading...</p>
-            <div class="options-grid" id="trivia-options-box"></div>
+        <!-- Hub -->
+        <div id="hub" class="page card">
+          <h2>Game Hub</h2>
+          <p class="small">Pick a game below. Points are stored in your browser.</p>
+          <div style="margin-top:12px" class="grid">
+            <div class="game-tile" id="hub-trivia">Math Trivia</div>
+            <div class="game-tile" id="hub-maze">Maze + Compass</div>
+            <div class="game-tile" id="hub-slots">Gambling Machine</div>
+            <div class="game-tile" id="hub-cups">Cups & Balls</div>
+            <div class="game-tile" id="hub-rapid">Rapid Fire History+Math</div>
+            <div class="game-tile" id="hub-insane">Insane Mode (5s)</div>
+            <div class="game-tile" id="hub-more">Many More Games…</div>
+            <div class="game-tile" id="hub-exit">Exit to Home</div>
+          </div>
         </div>
-    </section>
 
-    <!-- 4. RETRO GAMES ARCADE ROOM -->
-    <section class="screen" id="games-lobby-screen">
-        <button class="back-btn" onclick="navigateTo('dash-screen')">Back</button>
-        <h1 class="section-header">ARCADE ROOM</h1>
-        <div class="dashboard-grid">
-            <div class="dash-card" onclick="startPacman()">
-                <h2>MATH PACMAN</h2>
-                <p>Eat numbers matching the prime objective rules.</p>
-            </div>
-            <div class="dash-card" onclick="startSonar()">
-                <h2>SONAR HUNTER</h2>
-                <p>Use coordinates feedback logic to find hidden math keys.</p>
-            </div>
+        <!-- Trivia Page -->
+        <div id="trivia" class="page card">
+          <h2>Math Trivia</h2>
+          <div class="small">3 difficulty levels. Each game is 10 questions. Score 7/10 or higher to get the "Advance to next round" button.</div>
+          <div style="margin-top:12px">
+            <label>Level:
+              <select id="trivia-level">
+                <option value="0">Level 1 (Easy)</option>
+                <option value="1">Level 2 (Medium)</option>
+                <option value="2">Level 3 (Hard)</option>
+              </select>
+            </label>
+            <button class="btn" id="trivia-start">Start Round</button>
+          </div>
+
+          <div class="game-area" id="trivia-area" style="margin-top:16px"></div>
+          <div style="margin-top:10px">
+            <button class="btn" id="trivia-back">Back to Hub</button>
+          </div>
         </div>
-    </section>
 
-    <!-- GAME CANVAS INTERFACES -->
-    <section class="screen" id="game-pacman-screen">
-        <button class="back-btn" onclick="stopArcadeGames(); navigateTo('games-lobby-screen');">Exit Game</button>
-        <div class="game-ui-overlay">
+        <!-- Maze Page -->
+        <div id="maze" class="page card">
+          <h2>Dark Maze + Compass</h2>
+          <div class="small">Use arrow keys or WASD to move. You can only see a short radius around you. The compass shows direction to the exit.</div>
+          <div style="display:flex;gap:14px;align-items:flex-start;margin-top:12px;flex-wrap:wrap">
+            <canvas id="mazeCanvas" width="640" height="480"></canvas>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div class="compass" id="compassCanvas"></div>
+              <div class="hud">
+                <div class="small">Steps: <span id="maze-steps">0</span></div>
+                <div class="small">Remaining: <span id="maze-dist">—</span></div>
+              </div>
+              <div style="margin-top:12px">
+                <button class="btn" id="maze-new">Generate New Maze</button>
+                <button class="btn" id="maze-back">Back to Hub</button>
+              </div>
+            </div>
+          </div>
+        </div>
 
+        <!-- Slots -->
+        <div id="slots" class="page card">
+          <h2>Gambling Machine (Simulated)</h2>
+          <div class="small">Use points to play. This is just a simulated slot machine for points, no real money.</div>
+          <div style="margin-top:12px" class="slot">
+            <div class="reel" id="r1">?</div>
+            <div class="reel" id="r2">?</div>
+            <div class="reel" id="r3">?</div>
+          </div>
+          <div style="margin-top:12px" class="controls-row">
+            <label>Bet:
+              <input id="slot-bet" type="number" min="1" step="1" value="10" style="width:80px;padding:8px;border-radius:6px;border:1px solid #ddd">
+            </label>
+            <button class="btn" id="slot-play">Spin</button>
+            <button class="btn" id="slot-back">Back to Hub</button>
+          </div>
+          <div style="margin-top:12px" id="slot-msg" class="small"></div>
+        </div>
+
+        <!-- Cups -->
+        <div id="cups" class="page card">
+          <h2>Cups & Balls</h2>
+          <div class="small">Guess which cup holds the ball after a shuffle. Win points for correct picks.</div>
+          <div class="cups" style="margin-top:20px">
+            <div class="cup" data-i="0"><div class="ball" id="ball-0"></div></div>
+            <div class="cup" data-i="1"><div class="ball hidden" id="ball-1"></div></div>
+            <div class="cup" data-i="2"><div class="ball hidden" id="ball-2"></div></div>
+          </div>
+          <div class="controls-row" style="margin-top:18px">
+            <button class="btn" id="cups-shuffle">Shuffle</button>
+            <button class="btn" id="cups-back">Back to Hub</button>
+            <div class="small" id="cups-msg"></div>
+          </div>
+        </div>
+
+        <!-- Rapid Fire -->
+        <div id="rapid" class="page card">
+          <h2>Rapid Fire: History + Math</h2>
+          <div class="small">Pick a mode. In Insane, you have 5 seconds per question and very hard questions.</div>
+          <div style="margin-top:12px" class="controls-row">
+            <button class="btn" id="rapid-normal">Normal (10s)</button>
+            <button class="btn" id="rapid-hard">Hard (7s)</button>
+            <button class="btn" id="rapid-insane">Insane (5s)</button>
+            <button class="btn" id="rapid-back">Back to Hub</button>
+          </div>
+          <div id="rapid-area" style="margin-top:12px"></div>
+        </div>
+
+        <!-- More games placeholder -->
+        <div id="more" class="page card">
+          <h2>More Games</h2>
+          <p class="small">This area can be populated with more microgames. For now it's a collection of placeholders you can extend.</p>
+          <div style="margin-top:12px" class="grid">
+            <div class="game-tile">Pattern Memory</div>
+            <div class="game-tile">Equation Builder</div>
+            <div class="game-tile">Prime Hunter</div>
+            <div class="game-tile">Logic Puzzles</div>
+            <div class="game-tile">Sequence Solver</div>
+            <div class="game-tile">Speed Calculus</div>
+          </div>
+          <div style="margin-top:12px">
+            <button class="btn" id="more-back">Back to Hub</button>
+          </div>
+        </div>
+
+      </section>
+
+      <aside>
+        <div class="card">
+          <h3 style="margin:0 0 10px 0">Player</h3>
+          <div><strong id="playerName">Player</strong></div>
+          <div style="margin-top:8px" class="small">Points are saved locally in this browser.</div>
+          <hr style="margin:12px 0">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button class="btn" id="view-points">View Points</button>
+            <button class="btn secondary" id="reset-points">Reset Points</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:18px">
+          <h4 style="margin:0 0 8px 0">Game List</h4>
+          <div class="small">Quick access</div>
+          <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+            <button class="btn" id="quick-trivia">Math Trivia</button>
+            <button class="btn" id="quick-maze">Dark Maze</button>
+            <button class="btn" id="quick-slots">Slots</button>
+            <button class="btn" id="quick-cups">Cups</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="card">
+    Small demo suite — points are for in-app use only.
+  </footer>
+
+<script>
+/* Simple app state and helpers */
+const pages = {
+  home: document.getElementById('home'),
+  hub: document.getElementById('hub'),
+  trivia: document.getElementById('trivia'),
+  maze: document.getElementById('maze'),
+  slots: document.getElementById('slots'),
+  cups: document.getElementById('cups'),
+  rapid: document.getElementById('rapid'),
+  more: document.getElementById('more')
+};
+function showPage(name){
+  Object.values(pages).forEach(p=>p.classList.remove('active'));
+  if(pages[name]) pages[name].classList.add('active');
+  window.scrollTo(0,0);
+}
+function $(id){return document.getElementById(id)}
+/* Points management */
+const POINTS_KEY = 'btl_points_v1';
+function getPoints(){ return Number(localStorage.getItem(POINTS_KEY) || 0); }
+function setPoints(n){ localStorage.setItem(POINTS_KEY, String(n)); updatePointsUI(); }
+function addPoints(n){ setPoints(getPoints()+n); }
+function updatePointsUI(){ $('points').textContent = getPoints(); }
+
+/* Navigation hookups */
+$('to-home').addEventListener('click',()=>showPage('home'));
+$('to-hub').addEventListener('click',()=>showPage('hub'));
+$('go-hub').addEventListener('click',()=>showPage('hub'));
+$('blast-math').addEventListener('click',()=>{ showPage('trivia'); });
+$('start-trivia').addEventListener('click',()=>startTrivia());
+$('start-maze').addEventListener('click',()=>{ initMaze(); showPage('maze'); });
+$('start-cups').addEventListener('click',()=>{ resetCups(); showPage('cups'); });
+$('trivia-back').addEventListener('click',()=>showPage('hub'));
+$('maze-back').addEventListener('click',()=>showPage('hub'));
+$('slot-back').addEventListener('click',()=>showPage('hub'));
+$('cups-back').addEventListener('click',()=>showPage('hub'));
+$('rapid-back').addEventListener('click',()=>showPage('hub'));
+$('more-back').addEventListener('click',()=>showPage('hub'));
+
+/* Quick tiles */
+['tile-trivia','hub-trivia','quick-trivia'].forEach(id=>{ if($(id)) $(id).addEventListener('click',()=>showPage('trivia')) });
+['tile-maze','hub-maze','quick-maze'].forEach(id=>{ if($(id)) $(id).addEventListener('click',()=>{ initMaze(); showPage('maze'); }) });
+['tile-slots','hub-slots','quick-slots'].forEach(id=>{ if($(id)) $(id).addEventListener('click',()=>showPage('slots')) });
+['tile-cups','hub-cups','quick-cups'].forEach(id=>{ if($(id)) $(id).addEventListener('click',()=>{ resetCups(); showPage('cups'); }) });
+$('hub-more')?.addEventListener('click',()=>showPage('more'));
+$('tile-more')?.addEventListener('click',()=>showPage('more'));
+$('view-points').addEventListener('click',()=>alert('You have '+getPoints()+' points.'));
+$('reset-points').addEventListener('click',()=>{ if(confirm('Reset your points?')){ setPoints(0); } });
+
+updatePointsUI();
+
+/* ---------- TRIVIA GAME ---------- */
+const TRIVIA_QUESTIONS = [
+  // level 0 easy
+  [
+    {q:"What is 7 + 5?",a:["12","10","13","11"],correct:0},
+    {q:"What is 9 - 3?",a:["3","6","5","4"],correct:1},
+    {q:"What is 6 × 4?",a:["24","20","30","26"],correct:0},
+    {q:"What is 15 ÷ 3?",a:["5","6","4","3"],correct:0},
+    {q:"2^3 equals?",a:["8","6","9","4"],correct:0},
+    {q:"What is the next number: 2,4,6,?",a:["8","9","10","6"],correct:0},
+    {q:"Half of 50 is?",a:["25","20","30","15"],correct:0},
+    {q:"What is 3 + 9?",a:["12","13","11","14"],correct:0},
+    {q:"What is 10 - 7?",a:["3","4","2","5"],correct:0},
+    {q:"10% of 200 is?",a:["20","10","15","25"],correct:0}
+  ],
+  // level 1 medium
+  [
+    {q:"What is 12 × 12?",a:["144","154","124","142"],correct:0},
+    {q:"What is 45 ÷ 9?",a:["5","6","4","7"],correct:0},
+    {q:"What is 7^2?",a:["49","42","56","36"],correct:0},
+    {q:"If x+5=12, x=?",a:["7","6","8","5"],correct:0},
+    {q:"What is 15% of 200?",a:["30","25","20","35"],correct:0},
+    {q:"LCM of 4 and 6?",a:["12","24","6","8"],correct:0},
+    {q:"If 3x=24, x=?",a:["8","7","6","9"],correct:0},
+    {q:"What is 11×13?",a:["143","121","133","153"],correct:0},
+    {q:"Square root of 81?",a:["9","8","7","6"],correct:0},
+    {q:"What is 100/4?",a:["25","20","30","24"],correct:0}
+  ],
+  // level 2 hard
+  [
+    {q:"What is 17×19?",a:["323","361","289","307"],correct:0},
+    {q:"What is 13^2?",a:["169","179","163","156"],correct:0},
+    {q:"If 2x+3=19, x=?",a:["8","7","9","6"],correct:0},
+    {q:"What is 27×11?",a:["297","307","287","317"],correct:0},
+    {q:"What is 5! (factorial)?",a:["120","60","24","720"],correct:0},
+    {q:"What is gcd(48,18)?",a:["6","3","12","9"],correct:0},
+    {q:"If y^2=196, y=?",a:["14","13","12","15"],correct:0},
+    {q:"What is (3^4)?",a:["81","64","54","27"],correct:0},
+    {q:"Solve: 3x-7=11, x=?",a:["6","5","7","8"],correct:0},
+    {q:"What is 2^10?",a:["1024","512","2048","900"],correct:0}
+  ]
+];
+let triviaState = null;
+
+function startTrivia(levelIndex){
+  const lvl = Number($('trivia-level').value || 0);
+  const qset = TRIVIA_QUESTIONS[lvl].slice();
+  // shuffle
+  for(let i=qset.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [qset[i],qset[j]]=[qset[j],qset[i]]; }
+  triviaState = {level:lvl, questions:qset.slice(0,10), i:0, score:0};
+  renderTriviaQuestion();
+}
+$('trivia-start').addEventListener('click',()=>startTrivia());
+function renderTriviaQuestion(){
+  const area = $('trivia-area');
+  area.innerHTML='';
+  if(!triviaState) return;
+  const q = triviaState.questions[triviaState.i];
+  const qdiv = document.createElement('div');
+  qdiv.innerHTML = `<div class="question">Q${triviaState.i+1}: ${q.q}</div>`;
+  const answrap = document.createElement('div');
+  answrap.className='answers';
+  q.a.forEach((txt,idx)=>{
+    const b = document.createElement('button');
+    b.className='answer-btn';
+    b.textContent = txt;
+    b.addEventListener('click',()=>{
+      // lock answers
+      const correctIndex = q.correct;
+      Array.from(answrap.children).forEach((ch,ci)=>{
+        ch.disabled = true;
+        if(ci === correctIndex) ch.classList.add('correct');
+      });
+      if(idx === correctIndex){
+        triviaState.score++;
+      } else {
+        b.classList.add('wrong');
+      }
+      triviaState.i++;
+      // show next or results after brief delay
+      setTimeout(()=> {
+        if(triviaState.i < triviaState.questions.length){
+          renderTriviaQuestion();
+        } else {
+          renderTriviaResults();
+        }
+      },600);
+    });
+    answrap.appendChild(b);
+  });
+  qdiv.appendChild(answrap);
+  area.appendChild(qdiv);
+}
+function renderTriviaResults(){
+  const area = $('trivia-area'); area.innerHTML='';
+  const s = triviaState.score;
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `<div style="font-weight:800;font-size:18px">Round complete</div><div class="small">Score: ${s} / ${triviaState.questions.length}</div>`;
+  if(s >= 7){
+    const adv = document.createElement('button');
+    adv.className='advance';
+    adv.textContent = 'Advance to next round';
+    adv.addEventListener('click',()=>{
+      if(triviaState.level < TRIVIA_QUESTIONS.length-1){
+        $('trivia-level').value = triviaState.level+1;
+        startTrivia(triviaState.level+1);
+      } else {
+        alert('You finished the hardest level! Great job!');
+      }
+    });
+    wrap.appendChild(adv);
+    // award points for passing
+    addPoints(10);
+    const pnote = document.createElement('div'); pnote.className='small'; pnote.textContent = 'Awarded 10 points for passing this round.';
+    wrap.appendChild(pnote);
+  } else {
+    const retry = document.createElement('button'); retry.className='btn'; retry.textContent='Retry Level';
+    retry.addEventListener('click',()=>startTrivia(triviaState.level));
+    wrap.appendChild(retry);
+  }
+  const back = document.createElement('button'); back.className='btn secondary'; back.textContent='Back to Hub';
+  back.addEventListener('click',()=>showPage('hub'));
+  wrap.appendChild(document.createElement('div')).setAttribute('style','height:8px');
+  wrap.appendChild(back);
+  area.appendChild(wrap);
+}
+
+/* ---------- MAZE GAME ---------- */
+/* small maze generator + fog of war + compass */
+const mazeCanvas = $('mazeCanvas');
+const mazeCtx = mazeCanvas.getContext('2d');
+const compassWrap = $('compassCanvas');
+let mazeState = null;
+
+function initMaze(cols=21, rows=15, cellSize=32){
+  // generate perfect maze via DFS backtracker
+  if(cols%2===0) cols++; if(rows%2===0) rows++;
+  const gridW = cols, gridH = rows;
+  const maze = Array.from({length:gridH}, ()=>Array(gridW).fill(1)); // 1 wall, 0 path
+  // carve cells on odd coordinates
+  for(let y=1;y<gridH;y+=2) for(let x=1;x<gridW;x+=2) maze[y][x]=0;
+  // neighbors: up/down/left/right by 2
+  function indexNeighbors(x,y){
+    const n=[];
+    if(y-2>0) n.push([x,y-2]);
+    if(y+2<gridH-1) n.push([x,y+2]);
+    if(x-2>0) n.push([x-2,y]);
+    if(x+2<gridW-1) n.push([x+2,y]);
+    return n;
+  }
+  // DFS stack
+  const stack=[];
+  const start = [1,1];
+  stack.push(start);
+  const visited = new Set([start.join(',')]);
+  while(stack.length){
+    const [cx,cy] = stack[stack.length-1];
+    const neigh = indexNeighbors(cx,cy).filter(n=>!visited.has(n.join(',')));
+    if(neigh.length){
+      const n = neigh[Math.floor(Math.random()*neigh.length)];
+      // knock down wall between
+      const wx = (cx + n[0])/2, wy=(cy+n[1])/2;
+      maze[wy][wx]=0;
+      visited.add(n.join(','));
+      stack.push(n);
+    } else stack.pop();
+  }
+  // set player start and exit
+  const player = {x:1,y:1};
+  const exit = {x:gridW-2,y:gridH-2};
+  mazeState = {maze,gridW,gridH,cellSize,player,exit,steps:0,vision:3};
+  // resize canvas to fit
+  mazeCanvas.width = gridW * cellSize;
+  mazeCanvas.height = gridH * cellSize;
+  drawMaze();
+  updateMazeHUD();
+  drawCompass();
+}
+
+function drawMaze(){
+  const s = mazeState;
+  const ctx = mazeCtx;
+  ctx.clearRect(0,0,mazeCanvas.width,mazeCanvas.height);
+  // draw floor
+  ctx.fillStyle = '#222';
+  ctx.fillRect(0,0,mazeCanvas.width,mazeCanvas.height);
+  // draw paths and walls
+  for(let y=0;y<s.gridH;y++){
+    for(let x=0;x<s.gridW;x++){
+      if(s.maze[y][x]===1){
+        ctx.fillStyle = '#0b1220';
+        ctx.fillRect(x*s.cellSize,y*s.cellSize,s.cellSize,s.cellSize);
+      } else {
+        ctx.fillStyle = '#111827';
+        ctx.fillRect(x*s.cellSize,y*s.cellSize,s.cellSize,s.cellSize);
+      }
+    }
+  }
+  // fog of war
+  ctx.save();
+  ctx.fillStyle='rgba(0,0,0,0.94)';
+  ctx.fillRect(0,0,mazeCanvas.width,mazeCanvas.height);
+  ctx.globalCompositeOperation='destination-out';
+  const px = s.player.x*s.cellSize + s.cellSize/2;
+  const py = s.player.y*s.cellSize + s.cellSize/2;
+  const radius = s.cellSize * s.vision;
+  const grad = ctx.createRadialGradient(px,py, radius*0.2, px,py,radius);
+  grad.addColorStop(0,'rgba(0,0,0,1)');
+  grad.addColorStop(1,'rgba(0,0,0,0.9)');
+  ctx.fillStyle = grad;
+  ctx.beginPath(); ctx.arc(px,py,radius,0,Math.PI*2); ctx.fill();
+  ctx.globalCompositeOperation='source-over';
+  ctx.restore();
+
+  // draw exit as green square (visible only through fog)
+  ctx.fillStyle = '#0f9d58';
+  ctx.fillRect(s.exit.x*s.cellSize + s.cellSize*0.15, s.exit.y*s.cellSize + s.cellSize*0.15, s.cellSize*0.7, s.cellSize*0.7);
+
+  // draw player as a bright circle
+  ctx.fillStyle = '#ffd700';
+  ctx.beginPath(); ctx.arc(px,py,s.cellSize*0.3,0,Math.PI*2); ctx.fill();
+}
+
+function updateMazeHUD(){
+  $('maze-steps').textContent = mazeState.steps;
+  const dist = Math.hypot(mazeState.exit.x - mazeState.player.x, mazeState.exit.y - mazeState.player.y);
+  $('maze-dist').textContent = Math.round(dist);
+}
+
+function drawCompass(){
+  // render compass as an arrow pointing to exit; show angle.
+  const wrap = compassWrap;
+  wrap.innerHTML = '';
+  const size = 110;
+  const canvas = document.createElement('canvas');
+  canvas.width = size; canvas.height = size;
+  wrap.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  function render(){
+    ctx.clearRect(0,0,size,size);
+    // circle
+    ctx.fillStyle = '#0b5fff'; ctx.beginPath(); ctx.arc(size/2,size/2, size/2-2,0,Math.PI*2); ctx.fill();
+    // arrow
+    const dx = (mazeState.exit.x - mazeState.player.x);
+    const dy = (mazeState.exit.y - mazeState.player.y);
+    const angle = Math.atan2(dy, dx);
+    ctx.save();
+    ctx.translate(size/2,size/2);
+    ctx.rotate(angle);
+    ctx.fillStyle='#fff';
+    ctx.beginPath(); ctx.moveTo(size*0.18,0); ctx.lineTo(-size*0.08,size*0.08); ctx.lineTo(-size*0.08,-size*0.08); ctx.closePath(); ctx.fill();
+    ctx.restore();
+    // distance small text
+    const dist = Math.round(Math.hypot(dx,dy));
+    ctx.fillStyle='rgba(255,255,255,0.9)';
+    ctx.font='12px sans-serif';
+    ctx.textAlign='center'; ctx.fillText('Exit: '+dist, size/2, size-12);
+  }
+  render();
+}
+
+/* movement */
+window.addEventListener('keydown',(e)=>{
+  if(!mazeState || pages.maze.classList.contains('active')===false) return;
+  const key = e.key.toLowerCase();
+  const dir = (key==='arrowup' || key==='w')? [0,-1]:
+              (key==='arrowdown' || key==='s')? [0,1]:
+              (key==='arrowleft' || key==='a')? [-1,0]:
+              (key==='arrowright' || key==='d')? [1,0]: null;
+  if(!dir) return;
+  e.preventDefault();
+  const nx = mazeState.player.x + dir[0];
+  const ny = mazeState.player.y + dir[1];
+  if(nx<0 || ny<0 || nx>=mazeState.gridW || ny>=mazeState.gridH) return;
+  if(mazeState.maze[ny][nx]===0){
+    mazeState.player.x = nx; mazeState.player.y = ny; mazeState.steps++;
+    drawMaze(); updateMazeHUD(); drawCompass();
+    checkMazeWin();
+  }
+});
+
+function checkMazeWin(){
+  if(mazeState.player.x === mazeState.exit.x && mazeState.player.y === mazeState.exit.y){
+    addPoints(50);
+    setTimeout(()=> {
+      alert('You found the exit! +50 points awarded.');
+      showPage('hub');
+    }, 60);
+  }
+}
+
+$('maze-new').addEventListener('click',()=>initMaze());
+
+/* ---------- SLOTS ---------- */
+const slotSymbols = ['🍒','🍋','🔔','⭐','7'];
+$('slot-play').addEventListener('click', async ()=>{
+  const bet = Number($('slot-bet').value || 0);
+  if(bet <= 0){ $('slot-msg').textContent = 'Enter a bet > 0.'; return; }
+  if(getPoints() < bet){ $('slot-msg').textContent = 'Not enough points.'; return; }
+  // lock play
+  $('slot-play').disabled = true;
+  let r1=$('r1'), r2=$('r2'), r3=$('r3');
+  // spin animation
+  for(let i=0;i<12;i++){
+    r1.textContent = slotSymbols[Math.floor(Math.random()*slotSymbols.length)];
+    r2.textContent = slotSymbols[Math.floor(Math.random()*slotSymbols.length)];
+    r3.textContent = slotSymbols[Math.floor(Math.random()*slotSymbols.length)];
+    await new Promise(r=>setTimeout(r, 60 + i*10));
+  }
+  // determine result
+  const a = r1.textContent, b=r2.textContent, c=r3.textContent;
+  let won = 0;
+  if(a===b && b===c){ // jackpot
+    won = bet * 5;
+  } else if(a===b || b===c || a===c){
+    won = bet * 2;
+  } else won = -bet;
+  setPoints(getPoints() + won);
+  if(won>0) $('slot-msg').textContent = `You won ${won} points!`;
+  else $('slot-msg').textContent = `You lost ${bet} points.`;
+  $('slot-play').disabled = false;
+});
+/* ---------- CUPS & BALLS ---------- */
+let cupsState = {ballIndex:0,shuffling:false};
+function resetCups(){
+  // randomly place ball
+  cupsState.ballIndex = Math.floor(Math.random()*3);
+  for(let i=0;i<3;i++){
+    const ball = $('ball-'+i);
+    if(i===cupsState.ballIndex){ ball.classList.remove('hidden'); } else { ball.classList.add('hidden'); }
+  }
+  $('cups-msg').textContent = 'Click shuffle, then choose a cup.';
+}
+$('cups-shuffle').addEventListener('click', async ()=>{
+  cupsState.shuffling = true;
+  $('cups-msg').textContent = 'Shuffling...';
+  // show ball for a brief moment then hide
+  for(let i=0;i<3;i++) $('ball-'+i).classList.add('hidden');
+  await new Promise(r=>setTimeout(r,600));
+  // shuffle animation: random swaps
+  for(let i=0;i<10;i++){
+    const a=Math.floor(Math.random()*3), b=Math.floor(Math.random()*3);
+    [cupsState.ballIndex] = [ (cupsState.ballIndex===a?b:(cupsState.ballIndex===b?a:cupsState.ballIndex)) ];
+    // small delay
+    await new Promise(r=>setTimeout(r,150));
+  }
+  $('cups-msg').textContent = 'Pick a cup!';
+  cupsState.shuffling = false;
+});
+document.querySelectorAll('.cup').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    if(cupsState.shuffling) return;
+    const idx = Number(el.getAttribute('data-i'));
+    if(idx === cupsState.ballIndex){
+      $('cups-msg').textContent = 'Correct! +20 points';
+      addPoints(20);
+    } else {
+      $('cups-msg').textContent = 'Wrong! The ball was under cup '+(cupsState.ballIndex+1);
+    }
+    // reveal all
+    for(let i=0;i<3;i++) $('ball-'+i).classList.toggle('hidden', i!==cupsState.ballIndex);
+  });
+});
+
+/* ---------- RAPID FIRE ---------- */
+const rapidQs = [
+  {q:'When did WW2 end?', a:['1945','1939','1918','1960'], correct:0},
+  {q:'2+2×2 = ?', a:['6','8','4','10'], correct:0},
+  {q:'The Roman numeral for 50 is?', a:['L','C','X','V'], correct:0},
+  {q:'Square root of 144?', a:['12','14','10','11'], correct:0},
+  {q:'Who discovered gravity (apple)?', a:['Newton','Einstein','Galileo','Tesla'], correct:0},
+  {q:'10×8 - 5 = ?', a:['75','80','85','70'], correct:0},
+  {q:'What year did man land on the Moon?', a:['1969','1959','1972','1965'], correct:0},
+  {q:'Prime number after 7?', a:['11','9','10','13'], correct:0},
+  {q:'What is 9×9?', a:['81','72','90','99'], correct:0},
+  {q:'Capital of ancient Egypt (city)?', a:['Thebes','Rome','Athens','Carthage'], correct:0}
+];
+
+let rapidState = null;
+function startRapid(mode){ // mode: seconds per question
+  const questions = rapidQs.slice();
+  for(let i=questions.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [questions[i],questions[j]]=[questions[j],questions[i]]; }
+  rapidState = {questions:questions.slice(0,10), i:0, score:0, timePer:mode};
+  renderRapidQuestion();
+}
+function renderRapidQuestion(){
+  const area = $('rapid-area');
+  area.innerHTML='';
+  if(!rapidState) return;
+  const q = rapidState.questions[rapidState.i];
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = `<div class="question">Q${rapidState.i+1}: ${q.q}</div><div id="rapid-timer" class="small"></div>`;
+  const answrap = document.createElement('div'); answrap.className='answers';
+  q.a.forEach((txt,idx)=>{
+    const b = document.createElement('button'); b.className='answer-btn'; b.textContent=txt;
+    b.addEventListener('click',()=>selectRapid(idx));
+    answrap.appendChild(b);
+  });
+  wrapper.appendChild(answrap);
+  area.appendChild(wrapper);
+  // start countdown
+  let t = rapidState.timePer;
+  const timerEl = $('rapid-timer');
+  timerEl.textContent = 'Time: '+t+'s';
+  const iv = setInterval(()=>{
+    t--; timerEl.textContent = 'Time: '+t+'s';
+    if(t<=0){
+      clearInterval(iv); selectRapid(-1);
+    }
+  },1000);
+  rapidState._timer = iv;
+}
+function selectRapid(chosen){
+  clearInterval(rapidState._timer);
+  const q = rapidState.questions[rapidState.i];
+  if(chosen === q.correct) rapidState.score++;
+  rapidState.i++;
+  if(rapidState.i < rapidState.questions.length) renderRapidQuestion();
+  else finishRapid();
+}
+function finishRapid(){
+  const area = $('rapid-area'); area.innerHTML='';
+  const s = rapidState.score;
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `<div style="font-weight:800">Round complete</div><div class="small">Score: ${s}/${rapidState.questions.length}</div>`;
+  // award points: each correct = +5
+  const pts = s*5;
+  addPoints(pts);
+  const pnote = document.createElement('div'); pnote.className='small'; pnote.textContent = 'Awarded '+pts+' points for performance.';
+  wrap.appendChild(pnote);
+  const back = document.createElement('button'); back.className='btn'; back.textContent='Back to Hub';
+  back.addEventListener('click',()=>showPage('hub'));
+  wrap.appendChild(back);
+  area.appendChild(wrap);
+}
+$('rapid-normal').addEventListener('click',()=>{ startRapid(10); });
+$('rapid-hard').addEventListener('click',()=>{ startRapid(7); });
+$('rapid-insane').addEventListener('click',()=>{ startRapid(5); });
+
+/* ---------- initial states ---------- */
+setPoints(getPoints()||0); // ensure key exists
+resetCups(); // place ball
+// default event to open games from tiles
+$('tile-slots')?.addEventListener('click',()=>showPage('slots'));
+
+/* ---------- hook up maze generator on load if user goes there ---------- */
+function ensureMazeInitialized(){
+  if(!mazeState) initMaze();
+}
+$('tile-maze').addEventListener('click', ()=>{ ensureMazeInitialized(); showPage('maze'); });
+
+/* set new game init when user visits */
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'){ updatePointsUI(); } });
+
+/* create an initial maze so first visit is ready */
+initMaze();
+
+</script>
+</body>
+</html>
