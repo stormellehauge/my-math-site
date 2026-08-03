@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Break The Logic</title>
     <style>
-        /* Global Settings & Digital Matrix Background */
+        /* Global Settings & Thick Black Font Typography Theme */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -19,7 +19,7 @@
             min-height: 100vh;
         }
         
-        /* Dense Background Wall of Numbers */
+        /* Immersive Background Wall of Shifting Numbers */
         .number-bg {
             position: fixed;
             top: 0;
@@ -39,7 +39,7 @@
             padding: 5px;
         }
         
-        /* Navigation Screen Controller Matrix */
+        /* Navigation Screen Controller Base Matrix */
         .screen {
             display: none;
             min-height: 100vh;
@@ -52,7 +52,7 @@
             display: block;
         }
 
-        /* SCREEN 1: Home Page Elements */
+        /* SCREEN 1: Home Page Elements (Thick Black Font Maintained) */
         #home-screen {
             text-align: center;
             display: none;
@@ -78,7 +78,7 @@
             .main-title { font-size: 3rem; }
         }
         
-        /* Button Styling */
+        /* High-Response Arcade Control Buttons */
         .blast-btn {
             background-color: #000000;
             color: #ffffff;
@@ -102,7 +102,7 @@
             box-shadow: 0 2px 0 #222;
         }
 
-        /* SCREEN 2: Main Choice Dashboard */
+        /* SCREEN 2: Choice Dashboard Grid */
         .dashboard-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -149,7 +149,7 @@
             transform: scale(1.05);
         }
 
-        /* SCREEN 3: Trivia Level Matrix */
+        /* SCREEN 3: Trivia Level Matrix Grid Layout */
         .level-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -206,7 +206,7 @@
             padding-left: 25px;
         }
 
-        /* SCREEN 4: Games Viewports */
+        /* SCREEN 4: Interactive Canvas Arcade Viewports */
         .game-viewport {
             background: #000;
             width: 100%;
@@ -242,18 +242,18 @@
 </head>
 <body>
 
-    <!-- Mathematical Background Layer -->
+    <!-- Mathematical Void Data Streams -->
     <div class="number-bg" id="matrix-bg"></div>
 
-    <!-- 1. HOME SCREEN -->
+    <!-- 1. HOME SITE DISPLAY MODULE -->
     <section class="screen active" id="home-screen">
         <h1 class="main-title">Break<br>The Logic</h1>
         <button class="blast-btn" onclick="navigateTo('dash-screen')">Blast off to math</button>
     </section>
 
-    <!-- 2. GAME OR TRIVIA DASHBOARD -->
+    <!-- 2. SYSTEM OPERATION CHOICE DASHBOARD -->
     <section class="screen" id="dash-screen">
-        <button class="back-btn" onclick="navigateTo('home-screen')">⏮ Back</button>
+        <button class="back-btn" onclick="navigateTo('home-screen')">Back</button>
         <h1 class="section-header">CHOOSE YOUR PATH</h1>
         <div class="dashboard-grid">
             <div class="dash-card" onclick="navigateTo('trivia-lobby-screen')">
@@ -267,16 +267,16 @@
         </div>
     </section>
 
-    <!-- 3. TRIVIA LOBBY -->
+    <!-- 3. TRIVIA TRACK SELECTION SECTOR -->
     <section class="screen" id="trivia-lobby-screen">
-        <button class="back-btn" onclick="navigateTo('dash-screen')">⏮ Back</button>
+        <button class="back-btn" onclick="navigateTo('dash-screen')">Back</button>
         <h1 class="section-header">TRIVIA LEVELS</h1>
         <div class="level-grid" id="level-matrix-container"></div>
     </section>
 
-    <!-- TRIVIA GAMEPLAY VIEW -->
+    <!-- ACTIVE QUESTION SOLVING ROOM -->
     <section class="screen" id="trivia-play-screen">
-        <button class="back-btn" onclick="stopTriviaAndExit()">🏳 Quit Level</button>
+        <button class="back-btn" onclick="stopTriviaAndExit()">Quit Level</button>
         <div class="quiz-container">
             <h2 id="trivia-level-header" style="margin-bottom:10px;">Level 1</h2>
             <div style="background:#eee; height:10px; width:100%; margin-bottom:20px;">
@@ -287,9 +287,9 @@
         </div>
     </section>
 
-    <!-- 4. GAMES LOBBY -->
+    <!-- 4. RETRO GAMES ARCADE ROOM -->
     <section class="screen" id="games-lobby-screen">
-        <button class="back-btn" onclick="navigateTo('dash-screen')">⏮ Back</button>
+        <button class="back-btn" onclick="navigateTo('dash-screen')">Back</button>
         <h1 class="section-header">ARCADE ROOM</h1>
         <div class="dashboard-grid">
             <div class="dash-card" onclick="startPacman()">
@@ -303,11 +303,8 @@
         </div>
     </section>
 
-    <!-- PACMAN SCREEN -->
+    <!-- GAME CANVAS INTERFACES -->
     <section class="screen" id="game-pacman-screen">
         <button class="back-btn" onclick="stopArcadeGames(); navigateTo('games-lobby-screen');">Exit Game</button>
         <div class="game-ui-overlay">
-            <span id="pacman-score">Objective: Eat EVEN Numbers | Score: 0</span>
-        </div>
-        <div class="game-viewport">
 
