@@ -13,7 +13,7 @@
             font-family: 'Arial Black', 'Arial', sans-serif;
         }
         body {
-            background-color: #0b0c10; /* Darker mathematical void background */
+            background-color: #0b0c10;
             color: #111;
             overflow-x: hidden;
             min-height: 100vh;
@@ -27,12 +27,12 @@
             width: 100vw;
             height: 100vh;
             z-index: -1;
-            opacity: 0.15; /* Perfectly balanced visibility */
+            opacity: 0.15;
             font-family: 'Courier New', Courier, monospace;
             font-size: 16px;
             line-height: 1.1;
             letter-spacing: 2px;
-            color: #45f3ff; /* Electric mathematical cyan */
+            color: #45f3ff;
             word-break: break-all;
             user-select: none;
             overflow: hidden;
@@ -52,7 +52,7 @@
             display: block;
         }
 
-        /* SCREEN 1: Home Page Elements (Kept Exactly the Same Layout) */
+        /* SCREEN 1: Home Page Elements */
         #home-screen {
             text-align: center;
             display: none;
@@ -67,19 +67,18 @@
         .main-title {
             font-size: 5rem;
             font-weight: 900;
-            color: #000000; /* Maintained the thick black font */
+            color: #000000;
             text-transform: uppercase;
             letter-spacing: -2px;
             line-height: 0.9;
             margin-bottom: 30px;
-            /* White text outline to make it burst out cleanly over the dark numbers background */
             text-shadow: -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff, 0 10px 20px rgba(0,0,0,0.5);
         }
         @media (max-width: 768px) {
             .main-title { font-size: 3rem; }
         }
         
-        /* Advanced Arcade-Style Button Styling */
+        /* Button Styling */
         .blast-btn {
             background-color: #000000;
             color: #ffffff;
@@ -133,7 +132,6 @@
             text-transform: uppercase;
         }
         
-        /* Clean Back and Control Buttons */
         .back-btn {
             background: #000;
             color: #fff;
@@ -208,7 +206,7 @@
             padding-left: 25px;
         }
 
-        /* SCREEN 4: Games Selector & Viewports */
+        /* SCREEN 4: Games Viewports */
         .game-viewport {
             background: #000;
             width: 100%;
@@ -233,7 +231,6 @@
             font-size: 1.1rem;
         }
         
-        /* Text Color Adaptations for Headings over dark canvas area */
         .section-header {
             font-size: 3rem; 
             text-align:center;
@@ -245,7 +242,7 @@
 </head>
 <body>
 
-    <!-- Mathematical Matrix Screen Background (Dense Walls of Numbers) -->
+    <!-- Mathematical Background Layer -->
     <div class="number-bg" id="matrix-bg"></div>
 
     <!-- 1. HOME SCREEN -->
@@ -279,7 +276,7 @@
 
     <!-- TRIVIA GAMEPLAY VIEW -->
     <section class="screen" id="trivia-play-screen">
-        <button class="back-btn" onclick="navigateTo('trivia-lobby-screen')">🏳 Quit Level</button>
+        <button class="back-btn" onclick="stopTriviaAndExit()">🏳 Quit Level</button>
         <div class="quiz-container">
             <h2 id="trivia-level-header" style="margin-bottom:10px;">Level 1</h2>
             <div style="background:#eee; height:10px; width:100%; margin-bottom:20px;">
@@ -302,4 +299,15 @@
             <div class="dash-card" onclick="startSonar()">
                 <h2>SONAR HUNTER</h2>
                 <p>Use coordinates feedback logic to find hidden math keys.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- PACMAN SCREEN -->
+    <section class="screen" id="game-pacman-screen">
+        <button class="back-btn" onclick="stopArcadeGames(); navigateTo('games-lobby-screen');">Exit Game</button>
+        <div class="game-ui-overlay">
+            <span id="pacman-score">Objective: Eat EVEN Numbers | Score: 0</span>
+        </div>
+        <div class="game-viewport">
 
