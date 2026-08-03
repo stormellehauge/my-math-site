@@ -3,915 +3,920 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>BREAK THE LOGIC — Full Bundle</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<title>BREAK THE LOGIC — Math Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600;800;900&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;600;800;900&display=swap');
   :root{
-    --bg:#071021;
-    --panel:#0b1220;
-    --accent:#0b5fff;
-    --muted:#94a6c6;
-    --card:#071229;
+    --bg:#f6fbff;
+    --card:#ffffff;
+    --accent:#1a73e8;
+    --accent-2:#0b5fff;
+    --muted:#5b6b86;
+    --success:#08c27b;
+    --danger:#ef4444;
+    --math:linear-gradient(90deg,#e6f0ff,#f3fbff);
   }
-  html,body{height:100%;margin:0;background:linear-gradient(180deg,#021021,#071021);font-family:Inter,system-ui,Arial,sans-serif;color:#e6eef9}
-  header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px}
-  .brand{font-weight:900;font-size:44px;color:#fff;letter-spacing:1px}
-  .controls{display:flex;gap:10px;align-items:center}
-  .points{background:linear-gradient(90deg,#071021,#0b1220);padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);font-weight:700}
-  .btn{background:var(--accent);color:#02102a;padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:700;box-shadow:0 8px 30px rgba(11,95,255,0.12)}
-  .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#fff}
-  main{padding:12px 20px}
-  .layout{display:grid;grid-template-columns:1fr 360px;gap:18px}
-  .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+  html,body{height:100%;margin:0;background:var(--bg);font-family:Inter,system-ui,Arial,sans-serif;color:#0b1b2b}
+  body::before{
+    content: "π 3.14159265358979323846264338327950288419716939937510  ";
+    position:fixed; inset:0; z-index:-1; opacity:0.06; font-size:36px; line-height:1.4; color:#0b1b2b;
+    transform:rotate(-6deg); white-space:pre-wrap; padding:30px;
+  }
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid rgba(11,27,43,0.04);background:var(--card)}
+  .brand{font-weight:900;font-size:36px;color:#061226}
+  .controls{display:flex;gap:12px;align-items:center}
+  .points{background:var(--math);padding:8px 12px;border-radius:10px;border:1px solid rgba(11,27,43,0.06);font-weight:800}
+  .btn{background:var(--accent);color:#fff;padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:700;box-shadow:0 8px 24px rgba(11,95,255,0.12)}
+  .btn.secondary{background:transparent;border:1px solid rgba(11,27,43,0.06);color:#061226}
+  main{padding:18px 28px}
+  .layout{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start}
+  .card{background:var(--card);padding:14px;border-radius:12px;box-shadow:0 8px 24px rgba(11,27,43,0.04)}
   .small{font-size:13px;color:var(--muted)}
-  .tile-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-  .game-tile{padding:12px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(255,255,255,0.02));cursor:pointer;border:1px solid rgba(255,255,255,0.02)}
-  #sceneContainer{width:100%;height:560px;border-radius:10px;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center;position:relative}
-  #compassCanvas{position:absolute;right:18px;top:18px;width:120px;height:120px;pointer-events:none}
-  .shop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-  .avatar-card{background:linear-gradient(180deg,#071021,#0b1220);padding:8px;border-radius:8px;text-align:center;border:1px solid rgba(255,255,255,0.03)}
-  .leaderboard{display:flex;flex-direction:column;gap:8px}
-  .lb-row{display:flex;align-items:center;gap:8px;padding:6px;border-radius:6px;background:rgba(255,255,255,0.02)}
-  .avatar-pill{width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;color:#02102a;background:#fff}
-  #hudTop{position:absolute;left:18px;top:18px;color:#fff;z-index:3}
-  .mini{font-size:12px;color:#dce9ff}
-  footer{margin-top:12px;color:var(--muted);font-size:13px;padding:12px 20px}
+  .game-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
+  .tile{padding:12px;border-radius:10px;border:1px solid rgba(11,27,43,0.04);cursor:pointer;background:linear-gradient(180deg,#fff,#f7fbff);transition:transform 220ms}
+  .tile:hover{transform:translateY(-6px)}
+  .tier-bar{display:flex;gap:8px;align-items:center}
+  .tier-pill{padding:8px 10px;border-radius:999px;background:linear-gradient(90deg,#fff,#f3f8ff);font-weight:700;border:1px solid rgba(11,27,43,0.03)}
+  .tier-progress{height:12px;background:rgba(11,27,43,0.06);border-radius:999px;overflow:hidden}
+  .tier-progress > .fill{height:100%;background:linear-gradient(90deg,var(--accent-2),#27d3ff);width:0%}
+  /* pages */
+  .page{display:none}
+  .page.active{display:block}
+  /* trivia UI */
+  .question{font-size:20px;margin:14px 0}
+  .answers{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .ans-btn{padding:12px;border-radius:10px;border:1px solid rgba(11,27,43,0.06);background:#fff;cursor:pointer; font-weight:600}
+  .ans-btn.correct{background:linear-gradient(90deg,#e6fff1,#bff6d9);border-color:rgba(8,194,123,0.8)}
+  .ans-btn.wrong{background:linear-gradient(90deg,#ffecec,#ffd6d6);border-color:rgba(239,68,68,0.8)}
+  /* fireworks canvas */
+  #fxCanvas{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:9999}
+  /* math style */
+  .math-head{font-family:Inter,serif;font-weight:800;color:#08102a;letter-spacing:1px}
+  footer{margin-top:18px;padding:12px;color:var(--muted);font-size:13px;text-align:center}
   @media(max-width:980px){ .layout{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
 <header>
-  <div class="brand">BREAK THE LOGIC</div>
+  <div>
+    <div class="brand">BREAK THE LOGIC</div>
+    <div class="small">Math games hub — train logic, speed, and math knowledge</div>
+  </div>
   <div class="controls">
     <div class="points">Points: <span id="points">0</span></div>
-    <button class="btn" id="open-hub">Game Hub</button>
-    <button class="btn secondary" id="open-shop">Avatar Shop</button>
+    <div style="min-width:260px">
+      <div class="tier-bar">
+        <div class="tier-pill" id="tierLabel">Tier: Chill</div>
+        <div style="flex:1" class="tier-progress" aria-hidden>
+          <div class="fill" id="tierFill"></div>
+        </div>
+        <div class="small" id="nextTierText">0 / 1000</div>
+      </div>
+    </div>
+    <button class="btn" id="toHub">Game Hub</button>
+    <button class="btn secondary" id="toTrivia">Trivia</button>
   </div>
 </header>
 
 <main>
   <div class="layout">
     <section>
-      <div class="card">
-        <h2 style="margin:0 0 8px 0">World Hub — All Games</h2>
-        <p class="small">Click a tile to enter a themed location. Click inside the 3D view to enable pointer lock (mouse look). Use WASD to move. Avatar selection and leaderboard persist locally.</p>
-
-        <div id="sceneContainer">
-          <!-- Three.js renderer goes here -->
-          <div id="hudTop" class="mini">Mode: <strong id="modeLabel">Hub</strong></div>
-          <canvas id="compassCanvas" width="240" height="240"></canvas>
+      <div class="card page active" id="hub">
+        <h2 class="math-head">Game Hub — Math Edition</h2>
+        <p class="small">All games are math-focused. Earn points to climb tiers and unlock more content. Fireworks celebrate wins!</p>
+        <div class="game-grid" id="gamesList">
+          <!-- Game tiles injected here -->
         </div>
-
-        <div style="margin-top:12px" class="tile-grid" id="gameTiles"></div>
-        <div style="margin-top:12px;display:flex;gap:8px">
-          <button class="btn" id="btnLeaderboard">Leaderboard</button>
-          <button class="btn" id="btnSlots">Casino</button>
-          <button class="btn secondary" id="btnBigWorld">Enter the Open World</button>
+        <div style="margin-top:12px" class="card">
+          <h3 style="margin:0">Quick Stats</h3>
+          <div class="small" id="statsText" style="margin-top:8px">Play to earn points and climb tiers.</div>
         </div>
       </div>
 
-      <div style="margin-top:12px" class="card">
-        <h3 style="margin:0 0 8px 0">Quick Play</h3>
-        <div class="small">Some quick launch buttons for popular games.</div>
-        <div style="margin-top:10px;display:flex;gap:8px">
-          <button class="btn" id="quickMaze">Enchanted Maze</button>
-          <button class="btn" id="quickFarm">Farm</button>
-          <button class="btn" id="quickRain">Rainforest</button>
+      <div class="card page" id="triviaPage">
+        <h2 class="math-head">Trivia</h2>
+        <div class="small">Choose a category and level. Math has 100 levels — higher levels are harder. Each round = 10 questions. Score ≥ 7/10 to pass and unlock next level.</div>
+
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <label>Category:
+            <select id="triviaCategory">
+              <option value="math">Math (100 levels)</option>
+              <option value="history">History of Math</option>
+              <option value="geometry">Geometry</option>
+            </select>
+          </label>
+
+          <label id="levelLabel">Level:
+            <select id="triviaLevel"></select>
+          </label>
+
+          <button class="btn" id="startTrivia">Start Round</button>
+          <div style="flex:1"></div>
+          <div class="small">Pass = fireworks + points</div>
+        </div>
+
+        <div id="triviaArea" style="margin-top:12px"></div>
+        <div style="margin-top:10px">
+          <button class="btn secondary" id="backFromTrivia">Back to Hub</button>
         </div>
       </div>
+
+      <div class="card page" id="rapidPage">
+        <h2 class="math-head">Rapid Fire</h2>
+        <div class="small">Answer as many quick questions as possible before the timer. Choose difficulty.</div>
+        <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+          <label>Difficulty:
+            <select id="rapidDifficulty">
+              <option value="easy">Easy (6s)</option>
+              <option value="medium">Medium (4s)</option>
+              <option value="hard">Hard (2.5s)</option>
+            </select>
+          </label>
+          <button class="btn" id="startRapid">Start Rapid</button>
+          <div style="flex:1"></div>
+          <div class="small" id="rapidScore">Score: 0</div>
+        </div>
+        <div id="rapidArea" style="margin-top:12px"></div>
+        <div style="margin-top:10px">
+          <button class="btn secondary" id="backRapid">Back to Hub</button>
+        </div>
+      </div>
+
+      <div class="card page" id="mazePage">
+        <h2 class="math-head">Math Maze</h2>
+        <div class="small">Navigate a maze, but each locked gate requires solving a math problem to open. Solve puzzles, reach the center to win points.</div>
+        <div style="margin-top:8px;">
+          <button class="btn" id="startMaze">Start Math Maze</button>
+          <button class="btn secondary" id="backMaze">Back to Hub</button>
+        </div>
+        <div id="mazeArea" style="margin-top:12px"></div>
+      </div>
+
+      <div class="card page" id="patternPage">
+        <h2 class="math-head">Pattern Builder</h2>
+        <div class="small">Identify the number pattern and continue it. Sequences of increasing difficulty.</div>
+        <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+          <label>Level:
+            <select id="patternLevel"></select>
+          </label>
+          <button class="btn" id="startPattern">Start</button>
+          <div style="flex:1"></div>
+          <div class="small" id="patternScore">Score: 0</div>
+        </div>
+        <div id="patternArea" style="margin-top:12px"></div>
+        <div style="margin-top:10px">
+          <button class="btn secondary" id="backPattern">Back to Hub</button>
+        </div>
+      </div>
+
+      <div class="card page" id="probPage">
+        <h2 class="math-head">Probability Cups</h2>
+        <div class="small">Choose the cup with best expected value given odds or solve probability puzzles. Practice reasoning under uncertainty.</div>
+        <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+          <button class="btn" id="startProb">Start Probability Game</button>
+          <div style="flex:1"></div>
+          <div class="small" id="probScore">Score: 0</div>
+        </div>
+        <div id="probArea" style="margin-top:12px"></div>
+        <div style="margin-top:10px">
+          <button class="btn secondary" id="backProb">Back to Hub</button>
+        </div>
+      </div>
+
     </section>
 
     <aside>
       <div class="card">
-        <h3 style="margin:0 0 8px 0">Avatar Station</h3>
-        <div class="small">Buy numeric avatars (cosmetic). The "∞" avatar is an ultra-rare top item.</div>
-        <div style="margin-top:8px" id="avatarShop" class="shop-grid"></div>
-        <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
-          <div class="small">Selected:</div><div id="selectedAvatar" class="avatar-pill">1</div>
-          <div style="flex:1"></div>
-          <button class="btn secondary" id="openAvatarShop">Open Shop</button>
+        <h3 style="margin:0">Your Profile</h3>
+        <div class="small" style="margin-top:8px" id="profileText">Start playing to earn points and climb tiers.</div>
+        <div style="margin-top:12px">
+          <button class="btn secondary" id="exportPoints">Export Points</button>
+          <button class="btn secondary" id="resetPoints">Reset Points</button>
         </div>
       </div>
 
       <div class="card" style="margin-top:12px">
-        <h4 style="margin:0 0 8px 0">Top 10 (Local)</h4>
-        <div class="leaderboard" id="leaderboardList"></div>
-        <div style="margin-top:8px">
-          <input id="playerName" placeholder="Your name" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#fff">
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <button class="btn" id="submitScore">Submit Score</button>
-            <button class="btn secondary" id="clearLB">Clear</button>
-          </div>
-        </div>
+        <h4 style="margin:0">Top Achievements</h4>
+        <div class="small" id="topList" style="margin-top:8px">Your top rounds and recent wins will appear here.</div>
       </div>
     </aside>
   </div>
 </main>
 
-<footer>
-  This single-file bundle contains many in-browser game scenes and a procedural open world. Local-only storage by default. For global leaderboards or real multiplayer you can wire a backend to the provided hooks.
-</footer>
+<canvas id="fxCanvas"></canvas>
 
-<!-- Three.js from CDN -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+<footer>
+  Designed for math practice and entertaining animations. Points are stored locally in your browser.
+</footer>
 
 <script>
 /* ---------------------------
-   App state & local storage
+   Storage & tiers
    --------------------------- */
-const POINTS_KEY = 'btl_full_points';
-const AVATAR_KEY = 'btl_full_avatar';
-const LB_KEY = 'btl_full_lb';
-
+const POINTS_KEY = 'btl_math_points_v1';
+const HISTORY_KEY = 'btl_math_history_v1';
 function getPoints(){ return Number(localStorage.getItem(POINTS_KEY) || 0); }
-function setPoints(v){ localStorage.setItem(POINTS_KEY, String(v)); renderPoints(); }
-function addPoints(v){ setPoints(getPoints() + v); }
-function renderPoints(){ document.getElementById('points').textContent = getPoints(); }
+function setPoints(n){ localStorage.setItem(POINTS_KEY, String(n)); renderPoints(); }
+function addPoints(n){ setPoints(Math.max(0, getPoints() + n)); recordHistory('points', n); }
+function recordHistory(type, val){ const history = JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]'); history.unshift({t:Date.now(), type, val, points:getPoints()}); localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0,200))); renderTopList(); }
 
-function getAvatar(){ return localStorage.getItem(AVATAR_KEY) || '1'; }
-function setAvatar(a){ localStorage.setItem(AVATAR_KEY, String(a)); renderSelectedAvatar(); }
-
-function getLB(){ try { return JSON.parse(localStorage.getItem(LB_KEY) || '[]'); } catch(e){ return []; } }
-function setLB(arr){ localStorage.setItem(LB_KEY, JSON.stringify(arr)); renderLeaderboard(); }
-
-if(!localStorage.getItem(AVATAR_KEY)) localStorage.setItem(AVATAR_KEY,'1');
+const TIERS = [
+  {name:'Chill', min:0},
+  {name:'Bronze', min:1000},
+  {name:'Silver', min:1500},
+  {name:'Gold', min:2000},
+  {name:'Diamond', min:2500},
+  {name:'Legendary', min:3000},
+  {name:'Wizard', min:3500}
+];
+function getTier(points){
+  let cur = TIERS[0];
+  for(const t of TIERS) if(points >= t.min) cur = t;
+  // next
+  let next = TIERS.find(t=>t.min > points);
+  return {current:cur, next: next || null};
+}
+function renderPoints(){
+  document.getElementById('points').textContent = getPoints();
+  const tierInfo = getTier(getPoints());
+  document.getElementById('tierLabel').textContent = `Tier: ${tierInfo.current.name}`;
+  const nextText = tierInfo.next ? `${getPoints()} / ${tierInfo.next.min}` : `${getPoints()} / max`;
+  document.getElementById('nextTierText').textContent = nextText;
+  const fill = tierInfo.next ? Math.min(1, (getPoints() - tierInfo.current.min) / (tierInfo.next.min - tierInfo.current.min)) : 1;
+  document.getElementById('tierFill').style.width = `${Math.round(fill*100)}%`;
+  document.getElementById('statsText').textContent = `Points: ${getPoints()} • Tier: ${tierInfo.current.name}`;
+}
 renderPoints();
 
-/* ---------------------------
-   Avatar shop (many items incl ∞)
-   --------------------------- */
-const avatarItems = [];
-for(let i=1;i<=20;i++) avatarItems.push({id:String(i), price:i*40});
-avatarItems.push({id:'∞', price: 1000000000});
-const avatarShopEl = document.getElementById('avatarShop');
-
-function makeAvatarDataURL(label, bg='#ffffff'){
-  const c = document.createElement('canvas'); c.width = 128; c.height = 128;
-  const ctx = c.getContext('2d');
-  ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(64,64,60,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle = '#02102a'; ctx.font='bold 48px Inter,Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText(String(label), 64,64);
-  return c.toDataURL();
+function renderTopList(){
+  const history = JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]').slice(0,6);
+  const el = document.getElementById('topList');
+  if(!history.length){ el.textContent = 'No achievements yet. Win rounds to see fireworks and be listed here.'; return; }
+  el.innerHTML = history.map(h=>{
+    const d = new Date(h.t); const when = d.toLocaleString();
+    if(h.type==='win') return `${when}: Won ${h.val} pts`;
+    if(h.type==='points') return `${when}: ${h.val>0?'+':''}${h.val} pts (total ${h.points})`;
+    return `${when}: ${h.type} ${h.val}`;
+  }).join('<br>');
 }
-
-function renderAvatarShop(){
-  avatarShopEl.innerHTML = '';
-  avatarItems.forEach(it=>{
-    const div = document.createElement('div'); div.className='avatar-card';
-    const img = document.createElement('img'); img.src = makeAvatarDataURL(it.id); img.style.width='64px'; img.style.height='64px';
-    const title = document.createElement('div'); title.style.marginTop='6px'; title.innerHTML = `<div style="font-weight:800">${it.id}</div><div class="small">Price: ${it.price.toLocaleString()}</div>`;
-    const btn = document.createElement('button'); btn.className='btn'; btn.textContent = 'Buy/Select';
-    btn.style.marginTop='8px';
-    btn.onclick = ()=>{
-      // selection or buy
-      if(getAvatar() === String(it.id)){ alert('Avatar already selected.'); return; }
-      if(getPoints() < it.price){ alert(it.id==='∞' ? 'Infinity avatar is ultra-rare. Earn more points or special unlocks.' : 'Not enough points.'); return; }
-      if(confirm(`Buy avatar ${it.id} for ${it.price.toLocaleString()} points?`)){
-        addPoints(-it.price);
-        setAvatar(it.id);
-        alert('Purchased & selected avatar '+it.id);
-      }
-    };
-    div.appendChild(img); div.appendChild(title); div.appendChild(btn);
-    avatarShopEl.appendChild(div);
-  });
-  renderSelectedAvatar();
-}
-function renderSelectedAvatar(){ document.getElementById('selectedAvatar').textContent = getAvatar(); }
-renderAvatarShop();
+renderTopList();
 
 /* ---------------------------
-   Leaderboard local top 10
+   Navigation & game list
    --------------------------- */
-function renderLeaderboard(){
-  const arr = getLB().slice(0,10);
-  const el = document.getElementById('leaderboardList');
-  el.innerHTML = '';
-  arr.forEach((r,i)=>{
-    const row = document.createElement('div'); row.className='lb-row';
-    const place = document.createElement('div'); place.textContent = '#'+(i+1);
-    const pill = document.createElement('div'); pill.className='avatar-pill'; pill.textContent = r.avatar || '1';
-    const meta = document.createElement('div'); meta.style.flex='1';
-    meta.innerHTML = `<div style="font-weight:800">${r.name}</div><div class="small">Score: ${r.score} • ${new Date(r.ts).toLocaleString()}</div>`;
-    row.appendChild(place); row.appendChild(pill); row.appendChild(meta);
-    el.appendChild(row);
-  });
+const pages = {
+  hub: document.getElementById('hub'),
+  trivia: document.getElementById('triviaPage'),
+  rapid: document.getElementById('rapidPage'),
+  maze: document.getElementById('mazePage'),
+  pattern: document.getElementById('patternPage'),
+  prob: document.getElementById('probPage')
+};
+function showPage(id){
+  Object.values(pages).forEach(p=>p.classList.remove('active'));
+  if(id==='hub') pages.hub.classList.add('active');
+  if(id==='trivia') pages.trivia.classList.add('active');
+  if(id==='rapid') pages.rapid.classList.add('active');
+  if(id==='maze') pages.maze.classList.add('active');
+  if(id==='pattern') pages.pattern.classList.add('active');
+  if(id==='prob') pages.prob.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
 }
-renderLeaderboard();
 
-document.getElementById('submitScore').addEventListener('click', ()=>{
-  const name = (document.getElementById('playerName').value || 'Player').slice(0,24);
-  const score = getPoints();
-  const row = {name, avatar:getAvatar(), score, ts:Date.now()};
-  const arr = getLB(); arr.push(row); arr.sort((a,b)=>b.score-a.score);
-  setLB(arr.slice(0,50));
-  alert('Score submitted locally.');
+document.getElementById('toHub').addEventListener('click', ()=> showPage('hub'));
+document.getElementById('toTrivia').addEventListener('click', ()=> showPage('trivia'));
+
+/* build game tiles (5 math games) */
+const games = [
+  {id:'trivia', title:'Trivia (10 Qs)', desc:'Math, History of Math, Geometry — 100 math levels'},
+  {id:'rapid', title:'Rapid Fire', desc:'Timed arithmetic rounds (speed & accuracy)'},
+  {id:'maze', title:'Math Maze', desc:'Solve math gates to progress; reach the center'},
+  {id:'pattern', title:'Pattern Builder', desc:'Find and continue number sequences'},
+  {id:'prob', title:'Probability Cups', desc:'Choose best expected value / probability puzzles'}
+];
+const gamesList = document.getElementById('gamesList');
+games.forEach(g=>{
+  const div = document.createElement('div'); div.className='tile';
+  div.innerHTML = `<div style="font-weight:800">${g.title}</div><div class="small">${g.desc}</div>`;
+  div.onclick = ()=>{
+    if(g.id==='trivia') showPage('trivia');
+    if(g.id==='rapid') showPage('rapid');
+    if(g.id==='maze') showPage('maze');
+    if(g.id==='pattern') showPage('pattern');
+    if(g.id==='prob') showPage('prob');
+  };
+  gamesList.appendChild(div);
 });
-document.getElementById('clearLB').addEventListener('click', ()=>{ if(confirm('Clear local leaderboard?')){ setLB([]); }});
 
 /* ---------------------------
-   Scene manager and FP engine (Three.js)
+   Fireworks (canvas + sound)
    --------------------------- */
-const container = document.getElementById('sceneContainer');
-const compassCanvas = document.getElementById('compassCanvas');
-const compCtx = compassCanvas.getContext('2d');
+const fxCanvas = document.getElementById('fxCanvas');
+fxCanvas.width = innerWidth; fxCanvas.height = innerHeight;
+const fxCtx = fxCanvas.getContext('2d');
+window.addEventListener('resize', ()=>{ fxCanvas.width = innerWidth; fxCanvas.height = innerHeight; });
 
-let renderer, scene, camera, clock, player = {x:1.5,y:1.6,z:1.5,yaw:0,pitch:0};
-let currentSceneId = 'hub';
-let mazeGrid = null, exitPoint = null;
-let animLoopId = null;
-let moveState = {f:false,b:false,l:false,r:false};
-const THREE = window.THREE;
-
-function initRenderer(){
-  renderer = new THREE.WebGLRenderer({antialias:true});
-  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio||1));
-  renderer.setSize(container.clientWidth, container.clientHeight);
-  renderer.setClearColor(0x021022);
-  container.innerHTML = ''; container.appendChild(renderer.domElement);
-  scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(75, container.clientWidth/container.clientHeight, 0.1, 1000);
-  camera.position.set(player.x, player.y, player.z);
-  clock = new THREE.Clock();
-  scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-  const dir = new THREE.DirectionalLight(0xffffff,0.6); dir.position.set(5,10,3); scene.add(dir);
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(1000,1000), new THREE.MeshStandardMaterial({color:0x071026}));
-  ground.rotation.x = -Math.PI/2; ground.position.y = 0; scene.add(ground);
-  window.addEventListener('resize', ()=> { renderer.setSize(container.clientWidth, container.clientHeight); camera.aspect = container.clientWidth / container.clientHeight; camera.updateProjectionMatrix(); });
-  setupPointerLock(renderer.domElement);
-}
-
-function setupPointerLock(dom){
-  dom.addEventListener('click', ()=> dom.requestPointerLock && dom.requestPointerLock());
-  document.addEventListener('pointerlockchange', () => {
-    if(document.pointerLockElement === dom) document.addEventListener('mousemove', onMouseMove);
-    else document.removeEventListener('mousemove', onMouseMove);
-  });
-  function onMouseMove(e){
-    const s = 0.0022;
-    player.yaw -= e.movementX * s;
-    player.pitch -= e.movementY * s;
-    player.pitch = Math.max(-Math.PI/2+0.1, Math.min(Math.PI/2-0.1, player.pitch));
-  }
-  document.addEventListener('keydown', e=>{ if(e.key==='w'||e.key==='ArrowUp') moveState.f=true; if(e.key==='s'||e.key==='ArrowDown') moveState.b=true; if(e.key==='a'||e.key==='ArrowLeft') moveState.l=true; if(e.key==='d'||e.key==='ArrowRight') moveState.r=true; });
-  document.addEventListener('keyup', e=>{ if(e.key==='w'||e.key==='ArrowUp') moveState.f=false; if(e.key==='s'||e.key==='ArrowDown') moveState.b=false; if(e.key==='a'||e.key==='ArrowLeft') moveState.l=false; if(e.key==='d'||e.key==='ArrowRight') moveState.r=false; });
-}
-
-/* utility - create color textures procedurally */
-function canvasTexture(color, w=256,h=256, pattern=false){
-  const c = document.createElement('canvas'); c.width=w; c.height=h;
-  const ctx = c.getContext('2d');
-  ctx.fillStyle = color; ctx.fillRect(0,0,w,h);
-  if(pattern){
-    ctx.fillStyle = 'rgba(255,255,255,0.03)';
-    for(let i=0;i<200;i++){ ctx.fillRect(Math.random()*w, Math.random()*h, Math.random()*3, Math.random()*3); }
-  }
-  const tex = new THREE.CanvasTexture(c); tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(2,2);
-  return tex;
-}
-
-/* Scenes registry */
-const scenes = {}; // id -> {setup, tick, cleanup, label}
-function registerScene(id, label, setupFn, tickFn, cleanupFn){ scenes[id] = {setup:setupFn, tick:tickFn || (()=>{}), cleanup:cleanupFn || (()=>{}) , label}; }
-
-/* General animation loop */
-function startLoop(){
-  if(!renderer) initRenderer();
-  if(animLoopId) cancelAnimationFrame(animLoopId);
-  clock.startTime = performance.now();
-  function loop(){
-    const dt = Math.min(0.06, clock.getDelta());
-    // movement
-    const speed = 3.0;
-    let dx = 0, dz = 0;
-    if(moveState.f) { dx += Math.cos(player.yaw); dz += Math.sin(player.yaw); }
-    if(moveState.b) { dx -= Math.cos(player.yaw); dz -= Math.sin(player.yaw); }
-    if(moveState.l) { dx += Math.cos(player.yaw - Math.PI/2); dz += Math.sin(player.yaw - Math.PI/2); }
-    if(moveState.r) { dx += Math.cos(player.yaw + Math.PI/2); dz += Math.sin(player.yaw + Math.PI/2); }
-    const len = Math.hypot(dx,dz);
-    if(len > 0.001){ dx = dx/len * speed * dt; dz = dz/len * speed * dt; tryMove(dx,dz); }
-    camera.rotation.order = 'YXZ'; camera.rotation.y = player.yaw; camera.rotation.x = player.pitch;
-    camera.position.set(player.x, player.y, player.z);
-    // scene tick
-    if(currentSceneId && scenes[currentSceneId]) scenes[currentSceneId].tick(dt);
-    renderer.render(scene, camera);
-    updateCompass();
-    animLoopId = requestAnimationFrame(loop);
-  }
-  loop();
-}
-
-/* basic collision test using underlying grid if present */
-function tryMove(dx, dz){
-  const nx = player.x + dx, nz = player.z + dz;
-  // scene-specific collision logic: if active scene defines isColliding
-  const sc = scenes[currentSceneId];
-  if(sc && sc.isColliding){
-    if(!sc.isColliding(nx, nz)) { player.x = nx; player.z = nz; }
-  } else {
-    player.x = nx; player.z = nz;
-  }
-}
-
-/* compass drawing */
-function updateCompass(){
-  const w = compassCanvas.width, h = compassCanvas.height;
-  compCtx.clearRect(0,0,w,h);
-  compCtx.fillStyle = 'rgba(4,8,16,0.6)'; compCtx.beginPath(); compCtx.arc(w/2,h/2,w/2-6,0,Math.PI*2); compCtx.fill();
-  if(exitPoint && (currentSceneId==='maze' || currentSceneId==='openworld')){
-    const dx = exitPoint.x - player.x, dz = exitPoint.z - player.z;
-    const angle = Math.atan2(dz, dx);
-    const relative = angle - player.yaw;
-    compCtx.save(); compCtx.translate(w/2, h/2); compCtx.rotate(relative);
-    compCtx.fillStyle = '#8ef1a2';
-    compCtx.beginPath(); compCtx.moveTo(0,-34); compCtx.lineTo(10,-10); compCtx.lineTo(3,-10); compCtx.lineTo(3,34); compCtx.lineTo(-3,34); compCtx.lineTo(-3,-10); compCtx.lineTo(-10,-10); compCtx.closePath(); compCtx.fill();
-    compCtx.restore();
-    const dist = Math.round(Math.hypot(dx,dz));
-    compCtx.fillStyle = '#cfeee1'; compCtx.textAlign='center'; compCtx.font='16px Inter,Arial';
-    compCtx.fillText(dist + ' steps', w/2, h-18);
-  } else {
-    compCtx.fillStyle='#fff'; compCtx.font='18px Inter,Arial'; compCtx.textAlign='center';
-    compCtx.fillText('—', w/2, h/2);
-  }
-}
-
-/* ---------------------------
-   Scene: Hub (simple decorative sky)
-   --------------------------- */
-registerScene('hub', 'Hub',
-  (sceneObj)=>{
-    // clear any children that are scene-built
-    // add a decorative skybox-ish sphere and ambient particles
-    const skyGeo = new THREE.SphereGeometry(120, 32, 32);
-    const skyMat = new THREE.MeshBasicMaterial({color:0x021021, side:THREE.BackSide});
-    const sky = new THREE.Mesh(skyGeo, skyMat); sky.name = 'hub_sky'; scene.add(sky);
-    // simple floating orbs
-    const orbs = new THREE.Group(); orbs.name='hub_orbs';
-    for(let i=0;i<18;i++){
-      const s = new THREE.Mesh(new THREE.SphereGeometry(0.28,8,8), new THREE.MeshBasicMaterial({color: 0x3fb0ff, transparent:true, opacity:0.9}));
-      s.position.set((Math.random()-0.5)*20, 1.2 + Math.random()*4, (Math.random()-0.5)*20);
-      orbs.add(s);
+let fxParticles = [];
+function playFireworks(x=null,y=null){
+  // x,y in page coords, default center top
+  const cx = x || window.innerWidth/2;
+  const cy = y || window.innerHeight/3;
+  // generate bursts
+  for(let b=0;b<3;b++){
+    const hue = Math.floor(Math.random()*360);
+    for(let i=0;i<60;i++){
+      const speed = 1 + Math.random()*4;
+      const angle = Math.random()*Math.PI*2;
+      fxParticles.push({
+        x: cx,
+        y: cy,
+        vx: Math.cos(angle)*speed*(0.6 + Math.random()*1.6),
+        vy: Math.sin(angle)*speed*(0.6 + Math.random()*1.6),
+        life: 60 + Math.floor(Math.random()*40),
+        hue,
+        size: 1 + Math.random()*2
+      });
     }
-    scene.add(orbs);
-  },
-  (dt) => {
-    // animate hub orbs
-    const orbs = scene.getObjectByName('hub_orbs');
-    if(orbs) orbs.children.forEach((c,i)=>{ c.position.y += Math.sin((performance.now()*0.001) + i)*dt*0.1; });
-  },
-  ()=>{
-    // cleanup hub
-    const sky = scene.getObjectByName('hub_sky'); if(sky) scene.remove(sky);
-    const orbs = scene.getObjectByName('hub_orbs'); if(orbs) scene.remove(orbs);
   }
-);
+  // sound (chirp burst)
+  try{
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const now = ac.currentTime;
+    for(let i=0;i<6;i++){
+      const o = ac.createOscillator(); const g = ac.createGain();
+      o.type = 'sine'; o.frequency.value = 300 + i*120 + (Math.random()*80);
+      g.gain.value = 0.0001;
+      o.connect(g); g.connect(ac.destination);
+      o.start(now + i*0.02);
+      g.gain.linearRampToValueAtTime(0.18, now + i*0.02 + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + i*0.02 + 0.26);
+      o.stop(now + i*0.02 + 0.28);
+    }
+  }catch(e){ /* audio may be disabled */ }
+}
+// animation loop for fireworks
+function fxLoop(){
+  fxCtx.clearRect(0,0,fxCanvas.width, fxCanvas.height);
+  for(let i=fxParticles.length-1;i>=0;i--){
+    const p = fxParticles[i];
+    p.x += p.vx; p.y += p.vy; p.vy += 0.06; p.life--;
+    fxCtx.beginPath();
+    fxCtx.fillStyle = `hsl(${p.hue} 80% 60% / ${Math.max(0, p.life/100)})`;
+    fxCtx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+    fxCtx.fill();
+    if(p.life <= 0){ fxParticles.splice(i,1); }
+  }
+  requestAnimationFrame(fxLoop);
+}
+fxLoop();
+
+/* call when player wins a round */
+function celebrateWin(pointsAwarded, x, y){
+  addPoints(pointsAwarded);
+  recordHistory('win', pointsAwarded);
+  playFireworks(x, y);
+}
 
 /* ---------------------------
-   Scene: Enchanted Maze (detailed walls with vines & tapestry)
+   TRIVIA: math generator and question handling
    --------------------------- */
-function generateMazeGrid(cols=31, rows=21){
+
+/* Fill levels 1..100 for math. Generator scales with level:
+   - low levels: small ints, operations add/sub
+   - mid: multiplication, division, exponents small
+   - high: multi-step, fractions, modular reasoning
+*/
+function randInt(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
+
+function generateMathQuestion(level){
+  // clamp level 1..100
+  level = Math.max(1, Math.min(100, Math.round(level)));
+  // define difficulty buckets
+  if(level <= 10){
+    // simple add/sub
+    const a = randInt(1,10), b = randInt(1,10);
+    return {q:`${a} + ${b} = ?`, choices:shuffle([String(a+b), String(a+b+1), String(Math.abs(a-b)), String(a*b)]), answer:String(a+b)};
+  } else if(level <= 25){
+    const a = randInt(2,15), b=randInt(2,12);
+    return {q:`${a} × ${b} = ?`, choices:shuffle([String(a*b), String(a*b+randInt(1,5)), String(a*b-randInt(1,5)), String(a+b)]), answer:String(a*b)};
+  } else if(level <= 40){
+    const a = randInt(10,50); const b = randInt(2,10);
+    return {q:`${a} ÷ ${b} = ? (nearest integer)`, choices:shuffle([String(Math.round(a/b)), String(Math.floor(a/b)), String(Math.ceil(a/b)), String(Math.round((a+b)/b))]), answer:String(Math.round(a/b))};
+  } else if(level <= 55){
+    const a = randInt(2,8), b = randInt(2,6);
+    return {q:`What is ${a}^${b}?`, choices:shuffle([String(Math.pow(a,b)), String(Math.pow(a,b)+randInt(1,20)), String(Math.pow(a,b)-randInt(1,20)), String(Math.pow(a+1,b))]), answer:String(Math.pow(a,b))};
+  } else if(level <= 70){
+    // combined operations
+    const a = randInt(5,30), b = randInt(2,10), c = randInt(1,10);
+    const val = a + b*c;
+    return {q:`${a} + ${b} × ${c} = ?`, choices:shuffle([String(val), String(val+1), String(val-1), String(a*b+c)]), answer:String(val)};
+  } else if(level <= 85){
+    // fractions simple
+    const a = randInt(1,9), b = randInt(1,9), c = randInt(1,9);
+    const val = (a/b) + (c/b);
+    const ans = Number((val).toFixed(2));
+    const choices = shuffle([String(ans), String(Number((val+0.5).toFixed(2))), String(Number((val-0.25).toFixed(2))), String(Number((val+0.1).toFixed(2)))]);
+    return {q:`${a}/${b} + ${c}/${b} = ? (rounded to 2 dp)`, choices, answer:String(ans)};
+  } else {
+    // multi-step algebra or primes
+    const a = randInt(2,12), b = randInt(2,12), c = randInt(1,10);
+    const val = (a*b) - c;
+    return {q:`Solve for x: ${a}x - ${c} = ${a*b}. What is x?`, choices:shuffle([String((a*b + c)/a), String(a*b), String(b), String(Math.floor((a*b + c)/a))]), answer:String((a*b + c)/a)};
+  }
+}
+
+/* small shuffle util */
+function shuffle(arr){ const r = arr.slice(); for(let i=r.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [r[i], r[j]]=[r[j], r[i]]; } return r; }
+
+/* History of math - curated sample Qs (we'll rotate) */
+const HISTORY_QS = [
+  {q:'Who is known as the father of geometry?', choices:['Euclid','Pythagoras','Archimedes','Newton'], answer:'Euclid'},
+  {q:'Which civilization contributed the number zero as a positional digit?', choices:['Maya','Greeks','Romans','Persians'], answer:'Maya'},
+  {q:'Who formulated the laws of planetary motion?', choices:['Kepler','Galileo','Copernicus','Pythagoras'], answer:'Kepler'},
+  {q:'Which mathematician created calculus (independently with Newton)?', choices:['Leibniz','Euler','Gauss','Fermat'], answer:'Leibniz'},
+  {q:'What ancient mathematician approximated π using polygons?', choices:['Archimedes','Euclid','Hypatia','Thales'], answer:'Archimedes'}
+];
+/* Geometry Qs sample */
+const GEOMETRY_QS = [
+  {q:'Sum of interior angles of a triangle?', choices:['180°','90°','360°','270°'], answer:'180°'},
+  {q:'A right triangle with legs 3 and 4 has hypotenuse?', choices:['5','6','7','4'], answer:'5'},
+  {q:'Area of circle radius r?', choices:['πr²','2πr','πr','πr³'], answer:'πr²'},
+  {q:'If two lines are parallel they never meet: True/False?', choices:['True','False','Sometimes','Only in Euclid'], answer:'True'},
+  {q:'Number of faces on a cube?', choices:['6','8','4','12'], answer:'6'}
+];
+
+/* populate level select for math 1..100 */
+const levelSelect = document.getElementById('triviaLevel');
+function populateLevels(){
+  levelSelect.innerHTML = '';
+  for(let i=1;i<=100;i++){
+    const o = document.createElement('option'); o.value = i; o.textContent = `Level ${i}`;
+    levelSelect.appendChild(o);
+  }
+}
+populateLevels();
+
+/* trivia state */
+let triviaState = null;
+
+document.getElementById('startTrivia').addEventListener('click', ()=> {
+  const cat = document.getElementById('triviaCategory').value;
+  const level = Number(levelSelect.value || 1);
+  startTriviaRound(cat, level);
+});
+
+function startTriviaRound(category, level){
+  // prepare 10 questions
+  const questions = [];
+  if(category === 'math'){
+    for(let i=0;i<10;i++) questions.push(generateMathQuestion(level + Math.floor(i/3))); // slight variance
+  } else if(category === 'history'){
+    // sample rotate or fill with math generators if not enough
+    for(let i=0;i<10;i++) questions.push(HISTORY_QS[i % HISTORY_QS.length]);
+  } else if(category === 'geometry'){
+    for(let i=0;i<10;i++) questions.push(GEOMETRY_QS[i % GEOMETRY_QS.length]);
+  }
+  triviaState = {category,level, questions, i:0, score:0};
+  renderTriviaQuestion();
+}
+
+function renderTriviaQuestion(){
+  const area = document.getElementById('triviaArea');
+  area.innerHTML = '';
+  if(!triviaState) return;
+  const q = triviaState.questions[triviaState.i];
+  const qdiv = document.createElement('div');
+  qdiv.innerHTML = `<div class="question">Q${triviaState.i+1}: ${q.q}</div>`;
+  const answrap = document.createElement('div'); answrap.className='answers';
+  (q.choices || q.a || q.A || []).forEach?.();
+  // ensure we have choices array
+  const choices = q.choices || q.a || q.options || ['?'];
+  choices.forEach((txt)=>{
+    const b = document.createElement('button'); b.className='ans-btn'; b.textContent = txt;
+    b.addEventListener('click', ()=>{
+      // reveal correct
+      const correct = String(q.answer);
+      Array.from(answrap.children).forEach(ch=>{
+        ch.disabled = true;
+        if(ch.textContent === correct) ch.classList.add('correct');
+      });
+      if(b.textContent === correct){
+        triviaState.score++;
+        b.classList.add('correct');
+      } else {
+        b.classList.add('wrong');
+      }
+      // next after slight delay
+      setTimeout(()=> {
+        triviaState.i++;
+        if(triviaState.i < triviaState.questions.length) renderTriviaQuestion();
+        else renderTriviaResults();
+      }, 700);
+    });
+    answrap.appendChild(b);
+  });
+  qdiv.appendChild(answrap);
+  area.appendChild(qdiv);
+}
+
+function renderTriviaResults(){
+  const area = document.getElementById('triviaArea'); area.innerHTML = '';
+  const s = triviaState.score;
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `<div style="font-weight:800;font-size:18px">Round complete</div><div class="small">Score: ${s} / ${triviaState.questions.length}</div>`;
+  if(s >= 7){
+    const adv = document.createElement('button'); adv.className='btn'; adv.textContent = 'Advance to next level';
+    adv.addEventListener('click', ()=>{
+      if(triviaState.category === 'math'){
+        const next = Math.min(100, triviaState.level+1);
+        levelSelect.value = next;
+        startTriviaRound('math', next);
+      } else {
+        // just restart same category
+        startTriviaRound(triviaState.category, triviaState.level);
+      }
+    });
+    wrap.appendChild(adv);
+    // award points scaled by level
+    const pts = Math.max(20, Math.round(30 + triviaState.level * 1.2));
+    const pnote = document.createElement('div'); pnote.className='small'; pnote.textContent = `Awarded ${pts} points for passing this round`;
+    wrap.appendChild(pnote);
+    // celebrate
+    celebrateWin(pts, window.innerWidth/2, window.innerHeight/3);
+  } else {
+    const retry = document.createElement('button'); retry.className='btn'; retry.textContent = 'Retry Level';
+    retry.addEventListener('click', ()=> startTriviaRound(triviaState.category, triviaState.level));
+    wrap.appendChild(retry);
+    const note = document.createElement('div'); note.className='small'; note.textContent = 'Score 7/10 or more to advance.';
+    wrap.appendChild(note);
+  }
+  const back = document.createElement('button'); back.className='btn secondary'; back.textContent='Back to Hub';
+  back.addEventListener('click', ()=> showPage('hub'));
+  wrap.appendChild(document.createElement('div'));
+  wrap.appendChild(back);
+  area.appendChild(wrap);
+}
+
+/* ---------------------------
+   Rapid Fire (timed per question)
+   --------------------------- */
+let rapidState = null;
+document.getElementById('startRapid').addEventListener('click', ()=> {
+  const diff = document.getElementById('rapidDifficulty').value;
+  startRapid(diff);
+});
+
+function generateRapidQuestion(){
+  // reuse math generator but lower complexity
+  const q = generateMathQuestion(randInt(1,60));
+  // ensure numeric choices string array
+  return q;
+}
+
+function startRapid(mode){
+  const timePer = mode==='easy'?6: mode==='medium'?4 : 2.5;
+  const questions = [];
+  for(let i=0;i<15;i++) questions.push(generateRapidQuestion());
+  rapidState = {questions, i:0, score:0, timePer, timerId:null};
+  renderRapidQuestion();
+}
+
+function renderRapidQuestion(){
+  const area = document.getElementById('rapidArea'); area.innerHTML = '';
+  if(!rapidState) return;
+  const q = rapidState.questions[rapidState.i];
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = `<div class="question">Q${rapidState.i+1}: ${q.q}</div><div class="small">Time: <span id="rapidTime">${rapidState.timePer.toFixed(1)}</span>s</div>`;
+  const answrap = document.createElement('div'); answrap.className='answers';
+  q.choices.forEach((txt)=>{
+    const b = document.createElement('button'); b.className='ans-btn'; b.textContent = txt;
+    b.addEventListener('click', ()=> {
+      clearInterval(rapidState.timerId);
+      if(txt === String(q.answer)) rapidState.score++;
+      rapidState.i++;
+      if(rapidState.i < rapidState.questions.length) renderRapidQuestion();
+      else finishRapid();
+    });
+    answrap.appendChild(b);
+  });
+  wrapper.appendChild(answrap);
+  area.appendChild(wrapper);
+  // countdown
+  let t = rapidState.timePer;
+  document.getElementById('rapidTime').textContent = t.toFixed(1);
+  rapidState.timerId = setInterval(()=>{
+    t -= 0.1; if(t < -0.1) t = -0.1;
+    document.getElementById('rapidTime').textContent = t.toFixed(1);
+    if(t <= 0){
+      clearInterval(rapidState.timerId);
+      rapidState.i++;
+      if(rapidState.i < rapidState.questions.length) renderRapidQuestion();
+      else finishRapid();
+    }
+  },100);
+}
+
+function finishRapid(){
+  const area = document.getElementById('rapidArea'); area.innerHTML = '';
+  const s = rapidState.score;
+  const pts = s*8;
+  area.innerHTML = `<div style="font-weight:800">Round complete</div><div class="small">Score: ${s} / ${rapidState.questions.length} — Awarded ${pts} pts</div>`;
+  addPoints(pts); recordHistory('win', pts);
+  if(s >= Math.ceil(rapidState.questions.length*0.6)) celebrateWin(pts, window.innerWidth/2, window.innerHeight/3);
+  document.getElementById('rapidScore').textContent = `Score: ${s}`;
+}
+
+/* ---------------------------
+   Math Maze (top-down grid with gate puzzles)
+   --------------------------- */
+let mazeState = null;
+function makeMaze(cols=11, rows=11){
+  // simple randomized DFS
   if(cols%2===0) cols++; if(rows%2===0) rows++;
-  const gridW = cols, gridH = rows;
-  const grid = Array.from({length:gridH}, ()=>Array(gridW).fill(1));
-  for(let y=1;y<gridH;y+=2) for(let x=1;x<gridW;x+=2) grid[y][x]=0;
-  function neighbors(x,y){
-    const n=[]; if(y-2>0) n.push([x,y-2]); if(y+2<gridH-1) n.push([x,y+2]); if(x-2>0) n.push([x-2,y]); if(x+2<gridW-1) n.push([x+2,y]); return n;
+  const grid = Array.from({length:rows}, ()=>Array(cols).fill(1));
+  for(let y=1;y<rows;y+=2) for(let x=1;x<cols;x+=2) grid[y][x] = 0;
+  function neigh(x,y){
+    const n = [];
+    if(y-2>0) n.push([x,y-2]);
+    if(y+2<rows-1) n.push([x,y+2]);
+    if(x-2>0) n.push([x-2,y]);
+    if(x+2<cols-1) n.push([x+2,y]);
+    return n;
   }
   const stack = [[1,1]]; const visited = new Set(['1,1']);
   while(stack.length){
     const [cx,cy] = stack[stack.length-1];
-    const opts = neighbors(cx,cy).filter(n=>!visited.has(n.join(',')));
+    const opts = neigh(cx,cy).filter(n=>!visited.has(n.join(',')));
     if(opts.length){
-      const n = opts[Math.floor(Math.random()*opts.length)]; const wx=(cx+n[0])/2, wy=(cy+n[1])/2; grid[wy][wx]=0; visited.add(n.join(',')); stack.push(n);
+      const n = opts[Math.floor(Math.random()*opts.length)];
+      const wx = (cx+n[0])/2, wy = (cy+n[1])/2;
+      grid[wy][wx] = 0; visited.add(n.join(',')); stack.push(n);
     } else stack.pop();
   }
-  return {grid, w:gridW, h:gridH};
+  return {grid, w:cols, h:rows};
 }
 
-registerScene('maze','Enchanted Maze',
-  (sceneObj)=>{
-    // build maze geometry
-    const m = generateMazeGrid(31,21);
-    mazeGrid = m;
-    exitPoint = {x: m.w-2 + 0.5, z: m.h-2 + 0.5};
-    // wall material with vine texture
-    const vineTex = canvasTexture('#3b6b3b',256,256,true);
-    const wallMat = new THREE.MeshStandardMaterial({map: vineTex, roughness:0.95});
-    const wallGeo = new THREE.BoxGeometry(1,2,1);
-    const group = new THREE.Group(); group.name='maze_group';
+document.getElementById('startMaze').addEventListener('click', ()=> startMathMaze());
+function startMathMaze(){
+  const area = document.getElementById('mazeArea');
+  area.innerHTML = '';
+  const size = 420;
+  const canvas = document.createElement('canvas'); canvas.width = size; canvas.height = size; area.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  const m = makeMaze(15,15);
+  mazeState = {m, cell: size / m.w, px:1, py:1, solvedGates:0, gates:[]};
+  // place gates (some wall cells will be gates requiring a math Q to open)
+  for(let g=0; g<8; g++){
+    // pick a wall cell adjacent to a path
+    let placed=false;
+    for(let attempts=0; attempts<200 && !placed; attempts++){
+      const gx = randInt(1,m.w-2), gy = randInt(1,m.h-2);
+      if(m.grid[gy][gx] === 1){
+        // check neighbors for path
+        const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+        let hasPath=false;
+        for(const d of dirs) { const nx=gx+d[0], ny=gy+d[1]; if(m.grid[ny][nx]===0) hasPath=true; }
+        if(hasPath){
+          m.grid[gy][gx]=2; // gate
+          mazeState.gates.push({x:gx,y:gy,locked:true});
+          placed=true;
+        }
+      }
+    }
+  }
+  // exit at center
+  const ex = Math.floor(m.w/2), ey = Math.floor(m.h/2);
+  m.grid[ey][ex] = 3; mazeState.exit = {x:ex,y:ey};
+  drawMaze();
+  // controls: arrow keys to move on grid
+  function move(dx,dy){
+    const nx = mazeState.px + dx, ny = mazeState.py + dy;
+    if(nx<0||ny<0||nx>=m.w||ny>=m.h) return;
+    const cell = m.grid[ny][nx];
+    if(cell === 1) return; // wall
+    if(cell === 2){
+      // locked gate => pose math question
+      const q = generateMathQuestion(randInt(1,30));
+      const ans = prompt(`Gate math puzzle: ${q.q}\nChoices: ${q.choices.join(' | ')}`);
+      if(ans === null) return;
+      if(String(ans).trim() === String(q.answer)){
+        // unlock gate
+        m.grid[ny][nx] = 0; mazeState.solvedGates++;
+        recordHistory('points', 5);
+        drawMaze();
+        celebrateWin(5, canvas.getBoundingClientRect().left + (nx+0.5)*mazeState.cell, canvas.getBoundingClientRect().top + (ny+0.5)*mazeState.cell);
+      } else {
+        alert('Incorrect. Try again later.');
+        return;
+      }
+    } else {
+      mazeState.px = nx; mazeState.py = ny;
+    }
+    drawMaze();
+    if(nx===mazeState.exit.x && ny===mazeState.exit.y){
+      // win
+      const pts = 80 + mazeState.solvedGates*10;
+      celebrateWin(pts, canvas.width/2, canvas.height/3);
+      alert(`You reached the center! +${pts} points`);
+      document.removeEventListener('keydown', keyMove);
+      // update top stats
+    }
+  }
+  function keyMove(e){
+    if(e.key === 'ArrowUp' || e.key === 'w') move(0,-1);
+    if(e.key === 'ArrowDown' || e.key === 's') move(0,1);
+    if(e.key === 'ArrowLeft' || e.key === 'a') move(-1,0);
+    if(e.key === 'ArrowRight' || e.key === 'd') move(1,0);
+  }
+  document.addEventListener('keydown', keyMove);
+  function drawMaze(){
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    // nice background
+    ctx.fillStyle = '#eef6ff'; ctx.fillRect(0,0,canvas.width, canvas.height);
+    // draw cells
     for(let y=0;y<m.h;y++){
       for(let x=0;x<m.w;x++){
-        if(m.grid[y][x]===1){
-          const mesh = new THREE.Mesh(wallGeo, wallMat);
-          mesh.position.set(x,1,y);
-          group.add(mesh);
-          // occasional hanging tapestry
-          if(Math.random() < 0.05){
-            const tex = canvasTexture('#6b2b2b',512,512,false);
-            const tap = new THREE.Mesh(new THREE.PlaneGeometry(3,2.2), new THREE.MeshStandardMaterial({map:tex}));
-            tap.position.set(x + (Math.random()-0.5)*0.1, 1.1, y + 0.51);
-            tap.rotation.y = Math.random()*0.6;
-            group.add(tap);
-          }
+        const val = m.grid[y][x];
+        const px = x*mazeState.cell, py = y*mazeState.cell;
+        if(val === 1){ // wall
+          ctx.fillStyle = '#1b5c3a';
+          ctx.fillRect(px,py,mazeState.cell,mazeState.cell);
+          // plant overlay
+          ctx.fillStyle = 'rgba(255,255,255,0.02)';
+          ctx.fillRect(px+2,py+2,mazeState.cell-4,mazeState.cell-4);
+        } else if(val === 2){ // gate
+          ctx.fillStyle = '#ffecb3';
+          ctx.fillRect(px,py,mazeState.cell,mazeState.cell);
+          ctx.fillStyle = '#6a3bdb';
+          ctx.fillRect(px+mazeState.cell*0.2,py+mazeState.cell*0.2,mazeState.cell*0.6,mazeState.cell*0.6);
+        } else if(val === 3){
+          // exit tapestry rock
+          ctx.fillStyle = '#ffe0f0';
+          ctx.fillRect(px,py,mazeState.cell,mazeState.cell);
+          ctx.fillStyle = '#ef476f';
+          ctx.beginPath(); ctx.arc(px + mazeState.cell/2, py + mazeState.cell/2, mazeState.cell*0.24, 0, Math.PI*2); ctx.fill();
         } else {
-          // ground vegetation
-          if(Math.random() < 0.05){
-            const g = new THREE.Mesh(new THREE.BoxGeometry(0.12,0.5,0.02), new THREE.MeshStandardMaterial({color:0x1f8b2a}));
-            g.position.set(x,0.25,y); group.add(g);
-          }
+          // path
+          ctx.fillStyle = '#f8fff7'; ctx.fillRect(px,py,mazeState.cell,mazeState.cell);
         }
       }
     }
-    // glowing exit rock
-    const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.45,0), new THREE.MeshStandardMaterial({color:0x7fffcc, emissive:0x2fffb2, emissiveIntensity:0.6}));
-    rock.position.set(exitPoint.x, 0.4, exitPoint.z); rock.name='maze_exit'; group.add(rock);
-    scene.add(group);
-    // starting position
-    player.x = 1.5; player.z = 1.5; player.yaw = 0; player.pitch = 0;
-    camera.position.set(player.x, player.y, player.z);
-  },
-  (dt)=>{
-    // animate ruglight or subtle effects
-    const rock = scene.getObjectByName('maze_exit');
-    if(rock) rock.rotation.y += dt*0.7;
-    // check for proximity to exit
-    if(exitPoint){
-      const dist = Math.hypot(player.x - exitPoint.x, player.z - exitPoint.z);
-      if(dist < 0.9){
-        // award points and notify
-        addPoints(50);
-        alert('You discovered the glowing rock! +50 pts awarded.');
-        // cleanup and return to hub
-        enterHub();
-      }
-    }
-  },
-  ()=>{
-    // cleanup maze group
-    const grp = scene.getObjectByName('maze_group'); if(grp) scene.remove(grp);
-    exitPoint = null; mazeGrid = null;
+    // draw player
+    ctx.fillStyle = '#1b2bff';
+    ctx.beginPath(); ctx.arc((mazeState.px+0.5)*mazeState.cell, (mazeState.py+0.5)*mazeState.cell, mazeState.cell*0.28, 0, Math.PI*2); ctx.fill();
   }
-);
-scenes['maze'].isColliding = function(nx, nz){
-  if(!mazeGrid) return false;
-  const r = 0.28;
-  const checks = [[nx+r, nz],[nx-r,nz],[nx,nz+r],[nx,nz-r],[nx,nz]];
-  for(const [cx,cz] of checks){
-    const gx = Math.floor(cx), gz = Math.floor(cz);
-    if(gx<0 || gz<0 || gx>=mazeGrid.w || gz>=mazeGrid.h) return true;
-    if(mazeGrid.grid[gz][gx] === 1) return true;
-  }
-  return false;
-};
-
-/* ---------------------------
-   Stage 2 Scenes: Farm, City, Rainforest, Snowy Mountain, Ranch, Arcade, Harbor
-   Each is themed and contains a small playable mechanic
-   --------------------------- */
-
-/* Farm: collect eggs from moving chickens */
-registerScene('farm','Sunny Farm',
-  (s)=>{
-    const grp = new THREE.Group(); grp.name='farm_group';
-    // ground
-    const grass = new THREE.Mesh(new THREE.PlaneGeometry(80,80), new THREE.MeshStandardMaterial({color:0x4b8b3b}));
-    grass.rotation.x = -Math.PI/2; grass.position.y = 0; grp.add(grass);
-    // barn
-    const barn = new THREE.Mesh(new THREE.BoxGeometry(6,4,6), new THREE.MeshStandardMaterial({color:0x8b2b2b}));
-    barn.position.set(8,2,0); grp.add(barn);
-    // fences
-    for(let i=0;i<6;i++){
-      const p = new THREE.Mesh(new THREE.BoxGeometry(0.2,0.6,2), new THREE.MeshStandardMaterial({color:0x8b6a3b}));
-      p.position.set(-4 + i*1.2, 0.3, 6); grp.add(p);
-    }
-    // simple cows/ sheep as moving boxes (animated)
-    const animals = new THREE.Group(); animals.name='farm_animals';
-    for(let i=0;i<6;i++){
-      const a = new THREE.Mesh(new THREE.BoxGeometry(0.8,0.6,1.2), new THREE.MeshStandardMaterial({color: i%2?0xffffff:0x8b7a6b}));
-      a.position.set((Math.random()-0.5)*10,0.3,(Math.random()-0.5)*10);
-      a.userData = {type:'cow',dir:Math.random()*Math.PI*2};
-      animals.add(a);
-    }
-    grp.add(animals);
-    scene.add(grp);
-    // player start
-    player.x = 0; player.z = -6; player.yaw = Math.PI/2; camera.position.set(player.x, player.y, player.z);
-    // interactive: collect eggs from chickens => spawn small spheres by clicking near them
-    s.userData = {eggsCollected:0};
-  },
-  (dt)=>{
-    const animals = scene.getObjectByName('farm_animals');
-    if(animals){
-      animals.children.forEach(a=>{
-        a.position.x += Math.cos(a.userData.dir) * dt * 0.8;
-        a.position.z += Math.sin(a.userData.dir) * dt * 0.8;
-        if(Math.random() < 0.005) a.userData.dir += (Math.random()-0.5)*1.2;
-      });
-    }
-  },
-  ()=>{
-    const g = scene.getObjectByName('farm_group'); if(g) scene.remove(g);
-  }
-);
-
-/* City: plaza puzzle (activate 3 lamps in time) */
-registerScene('city','Neon City Plaza',
-  (s)=>{
-    const grp = new THREE.Group(); grp.name='city_group';
-    // neon ground
-    const plaza = new THREE.Mesh(new THREE.PlaneGeometry(80,80), new THREE.MeshStandardMaterial({color:0x101022}));
-    plaza.rotation.x = -Math.PI/2; plaza.position.y = 0; grp.add(plaza);
-    // skyscrapers simplified
-    for(let i=0;i<10;i++){
-      const b = new THREE.Mesh(new THREE.BoxGeometry(2,6+Math.random()*10,2), new THREE.MeshStandardMaterial({color: 0x1a1f2f}));
-      b.position.set((Math.random()-0.5)*30, b.geometry.parameters.height/2, (Math.random()-0.5)*30);
-      grp.add(b);
-    }
-    // lamps
-    const lamps = new THREE.Group(); lamps.name='city_lamps';
-    for(let i=0;i<4;i++){
-      const lam = new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,3), new THREE.MeshStandardMaterial({color:0xddddff}));
-      lam.position.set(-2 + i*2.4, 1.5, 2);
-      lamps.add(lam);
-    }
-    grp.add(lamps);
-    scene.add(grp);
-    player.x = 0; player.z = -4; player.yaw = 0; camera.position.set(player.x, player.y, player.z);
-    // puzzle state
-    s.userData = {activated:0};
-  },
-  (dt)=>{
-    // rotating small lights
-    const lamps = scene.getObjectByName('city_lamps');
-    if(lamps) lamps.children.forEach((l,i)=>{ l.material.emissive = new THREE.Color(i%2?0x0055ff:0xff5500); });
-  },
-  ()=>{ const g = scene.getObjectByName('city_group'); if(g) scene.remove(g); }
-);
-
-/* Rainforest Glade: birds & waterfall, point-of-interest find quest */
-registerScene('rainforest','Rainforest Glade',
-  (s)=>{
-    const grp = new THREE.Group(); grp.name='rain_group';
-    // wet ground
-    const ground = new THREE.Mesh(new THREE.PlaneGeometry(120,120), new THREE.MeshStandardMaterial({color:0x113322}));
-    ground.rotation.x = -Math.PI/2; grp.add(ground);
-    // trees (cylinders + cones)
-    for(let i=0;i<40;i++){
-      const tx = (Math.random()-0.5)*60, tz = (Math.random()-0.5)*60;
-      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.6,5,6), new THREE.MeshStandardMaterial({color:0x5a3b2b}));
-      trunk.position.set(tx,2.5,tz); grp.add(trunk);
-      const leaves = new THREE.Mesh(new THREE.ConeGeometry(1.8,4,8), new THREE.MeshStandardMaterial({color:0x1f7b2a}));
-      leaves.position.set(tx,5.2,tz); grp.add(leaves);
-    }
-    // waterfall plane with animated particles (simple)
-    const falls = new THREE.Mesh(new THREE.PlaneGeometry(8,10), new THREE.MeshStandardMaterial({color:0x88ccff, transparent:true, opacity:0.9}));
-    falls.position.set(12,5,12); falls.rotation.y = -Math.PI/4; grp.add(falls);
-    scene.add(grp);
-    player.x = 0; player.z = -10; player.yaw = 0; camera.position.set(player.x, player.y, player.z);
-    // simple birds as moving spheres
-    const birds = new THREE.Group(); birds.name='rain_birds';
-    for(let i=0;i<10;i++){ const b = new THREE.Mesh(new THREE.SphereGeometry(0.12,6,6), new THREE.MeshStandardMaterial({color:0xffd700})); b.position.set((Math.random()-0.5)*20, 3+Math.random()*2, (Math.random()-0.5)*20); b.userData = {ang: Math.random()*Math.PI*2}; birds.add(b); }
-    grp.add(birds);
-  },
-  (dt)=>{
-    const birds = scene.getObjectByName('rain_birds');
-    if(birds) birds.children.forEach(b=>{ b.userData.ang += dt; b.position.x += Math.cos(b.userData.ang)*dt*0.8; b.position.z += Math.sin(b.userData.ang)*dt*0.8; });
-  },
-  ()=>{ const g = scene.getObjectByName('rain_group'); if(g) scene.remove(g); }
-);
-
-/* Snowy mountain: slippery slopes and a collectible flag */
-registerScene('snow','Snowy Mountain',
-  (s)=>{
-    const grp = new THREE.Group(); grp.name='snow_group';
-    // mounds: boxes scaled
-    for(let i=0;i<40;i++){
-      const m = new THREE.Mesh(new THREE.BoxGeometry(3,1.5,3), new THREE.MeshStandardMaterial({color:0xffffff}));
-      m.position.set((Math.random()-0.5)*80, 0.75, (Math.random()-0.5)*80); grp.add(m);
-    }
-    // flag
-    const flag = new THREE.Mesh(new THREE.PlaneGeometry(1.2,0.8), new THREE.MeshStandardMaterial({color:0xff0000}));
-    flag.position.set(6,1.2,6); grp.add(flag);
-    scene.add(grp);
-    player.x = 0; player.z = -8; camera.position.set(player.x, player.y, player.z);
-    s.userData = {foundFlag:false};
-  },
-  (dt)=>{
-    // nothing complex; maybe drifting snow
-  },
-  ()=>{ const g = scene.getObjectByName('snow_group'); if(g) scene.remove(g); }
-);
-
-/* Ranch: herding mini (move animals to pen) */
-registerScene('ranch','Ranch & Grazing',
-  (s)=>{
-    const grp = new THREE.Group(); grp.name='ranch_group';
-    const ground = new THREE.Mesh(new THREE.PlaneGeometry(120,120), new THREE.MeshStandardMaterial({color:0x8dbb6a}));
-    ground.rotation.x = -Math.PI/2; grp.add(ground);
-    // animals
-    const animals = new THREE.Group(); animals.name='ranch_animals';
-    for(let i=0;i<10;i++){
-      const a = new THREE.Mesh(new THREE.BoxGeometry(0.8,0.6,1.2), new THREE.MeshStandardMaterial({color:0x9a7b5c}));
-      a.position.set((Math.random()-0.5)*20,0.3,(Math.random()-0.5)*20);
-      animals.add(a);
-    }
-    grp.add(animals);
-    scene.add(grp);
-    player.x = -6; player.z = -6; camera.position.set(player.x, player.y, player.z);
-  },
-  (dt)=>{
-    // animals wander
-    const anim = scene.getObjectByName('ranch_animals');
-    if(anim) anim.children.forEach(a=>{ a.position.x += (Math.random()-0.5)*dt*1.2; a.position.z += (Math.random()-0.5)*dt*1.2; });
-  },
-  ()=>{ const g = scene.getObjectByName('ranch_group'); if(g) scene.remove(g); }
-);
-
-/* Arcade: neon cabinet minigame: press S to play improved slots (visual) */
-registerScene('arcade','Neon Arcade',
-  (s)=>{
-    const grp = new THREE.Group(); grp.name='arcade_group';
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(60,60), new THREE.MeshStandardMaterial({color:0x05020a}));
-    floor.rotation.x = -Math.PI/2; grp.add(floor);
-    // arcade cabinet (box)
-    const cab = new THREE.Mesh(new THREE.BoxGeometry(1.6,2.2,0.8), new THREE.MeshStandardMaterial({color:0x000000}));
-    cab.position.set(0,1.1,0); grp.add(cab);
-    scene.add(grp);
-    player.x = 0; player.z = -3; camera.position.set(player.x, player.y, player.z);
-    s.userData = {inCabinet:false};
-  },
-  (dt)=>{
-    // show instructions in HUD when in arcade scene
-  },
-  ()=>{ const g = scene.getObjectByName('arcade_group'); if(g) scene.remove(g); }
-);
-
-/* Harbor: fishing minigame (click to cast) */
-registerScene('harbor','Seaside Harbor',
-  (s)=>{
-    const grp = new THREE.Group(); grp.name='harbor_group';
-    const water = new THREE.Mesh(new THREE.PlaneGeometry(200,200), new THREE.MeshStandardMaterial({color:0x0b4e6a}));
-    water.rotation.x = -Math.PI/2; grp.add(water);
-    const dock = new THREE.Mesh(new THREE.BoxGeometry(8,0.6,3), new THREE.MeshStandardMaterial({color:0x513b2b}));
-    dock.position.set(0,0.3,4); grp.add(dock);
-    scene.add(grp);
-    player.x = 0; player.z = -6; camera.position.set(player.x, player.y, player.z);
-  },
-  (dt)=>{},
-  ()=>{ const g = scene.getObjectByName('harbor_group'); if(g) scene.remove(g); }
-);
-
-/* ---------------------------
-   Stage 3: Big Open World with procedural terrain + quests
-   --------------------------- */
-/* Simple Perlin-like noise (value noise) for terrain */
-function seededRandom(s){ let t = s*132542; return function(){ t = Math.sin(t)*10000; return t - Math.floor(t); }; }
-function makeNoise(w,h,seed=1){
-  const rand = seededRandom(seed||1);
-  const data = new Float32Array((w+1)*(h+1));
-  for(let y=0;y<=h;y++) for(let x=0;x<=w;x++) data[y*(w+1)+x] = rand();
-  function sample(u,v){
-    // bilinear interpolate
-    const x0 = Math.floor(u), y0 = Math.floor(v);
-    const sx = u - x0, sy = v - y0;
-    const n00 = data[y0*(w+1)+x0], n10 = data[y0*(w+1)+x0+1], n01 = data[(y0+1)*(w+1)+x0], n11 = data[(y0+1)*(w+1)+x0+1];
-    const nx0 = n00*(1-sx)+n10*sx; const nx1 = n01*(1-sx)+n11*sx;
-    return nx0*(1-sy) + nx1*sy;
-  }
-  return sample;
 }
 
-/* open world scene */
-registerScene('openworld','The Great Expedition',
-  (s)=>{
-    // generate simple heightfield mesh
-    const size = 120;
-    const segments = 128;
-    const hmap = makeNoise(segments, segments, Math.floor(Math.random()*9999));
-    const geo = new THREE.PlaneGeometry(size, size, segments, segments);
-    for(let i=0;i<geo.attributes.position.count;i++){
-      const vx = geo.attributes.position.getX(i) / (size/segments) + segments/2;
-      const vz = geo.attributes.position.getY(i) / (size/segments) + segments/2;
-      const n = hmap(vx, vz);
-      const height = (n - 0.5) * 12; // amplify
-      geo.attributes.position.setZ(i, height);
-    }
-    geo.computeVertexNormals();
-    const mat = new THREE.MeshStandardMaterial({color:0x2a7b3a, flatShading:true});
-    const terrain = new THREE.Mesh(geo, mat); terrain.rotation.x = -Math.PI/2; terrain.receiveShadow=true; terrain.name='terrain';
-    scene.add(terrain);
-    // a few trees or rocks depending on height
-    const veg = new THREE.Group(); veg.name='terrain_veg';
-    for(let i=0;i<200;i++){
-      const px = (Math.random()-0.5) * size, pz = (Math.random()-0.5) * size;
-      // sample height roughly by finding nearest vertex (simple)
-      // map px to u index
-      const ix = Math.floor((px/size + 0.5)*segments), iz = Math.floor((pz/size + 0.5)*segments);
-      const n = Math.max(0, Math.min(segments, ix)) + Math.max(0, Math.min(segments, iz))*(segments+1);
-      // place tree/rock
-      if(Math.random() < 0.7){
-        const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.4,3,6), new THREE.MeshStandardMaterial({color:0x5a3b2b}));
-        tr.position.set(px, 1.5 + Math.random()*0.5, pz);
-        const leaves = new THREE.Mesh(new THREE.ConeGeometry(1.2,2.6,8), new THREE.MeshStandardMaterial({color:0x2b7b32}));
-        leaves.position.set(px, 3.2 + Math.random()*0.2, pz); veg.add(tr); veg.add(leaves);
-      } else {
-        const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.5,0), new THREE.MeshStandardMaterial({color:0x8b8b8b}));
-        rock.position.set(px, 0.4 + Math.random()*0.4, pz); veg.add(rock);
-      }
-    }
-    scene.add(veg);
-    // player spawn near center
-    player.x = 2; player.z = 2; camera.position.set(player.x, player.y, player.z);
-    // create quests: several rock locations
-    const quests = [];
-    for(let i=0;i<6;i++){
-      const qx = (Math.random()-0.5)*(size*0.6), qz = (Math.random()-0.5)*(size*0.6);
-      quests.push({x:qx, z:qz, difficulty: 1 + Math.floor(Math.random()*3), found:false});
-      // mark visually as stones
-      const stone = new THREE.Mesh(new THREE.IcosahedronGeometry(0.5,0), new THREE.MeshStandardMaterial({color:0xfff3b0}));
-      stone.position.set(qx, 0.5 + Math.random()*0.3, qz); scene.add(stone);
-    }
-    s.userData = {quests, activeQuestIndex:0};
-    exitPoint = null; // compass will show active quest rather than exit
-    // spawn simple bird flocks
-    const birds = new THREE.Group(); birds.name='owls';
-    for(let i=0;i<12;i++){ const b = new THREE.Mesh(new THREE.SphereGeometry(0.12,6,6), new THREE.MeshStandardMaterial({color:0xffe100})); b.position.set((Math.random()-0.5)*size*0.6,3+(Math.random()*4), (Math.random()-0.5)*size*0.6); b.userData={ang:Math.random()*Math.PI*2}; birds.add(b); }
-    scene.add(birds);
-    // set isColliding to false for open world (free roam) but keep bounds
-    s.isColliding = function(nx,nz){
-      const half = size/2;
-      if(nx < -half+1 || nz < -half+1 || nx > half-1 || nz > half-1) return true;
-      return false;
-    };
-  },
-  (dt)=>{
-    // animate birds
-    const birds = scene.getObjectByName('owls');
-    if(birds) birds.children.forEach(b=>{ b.userData.ang += dt*0.8; b.position.x += Math.cos(b.userData.ang)*dt*1.2; b.position.z += Math.sin(b.userData.ang)*dt*1.2; });
-    // check for quest proximity
-    const s = scenes['openworld'];
-    if(s && s.userData && s.userData.quests){
-      const qi = s.userData.activeQuestIndex;
-      if(typeof qi === 'number' && s.userData.quests[qi]){
-        const q = s.userData.quests[qi];
-        const dist = Math.hypot(player.x - q.x, player.z - q.z);
-        // set compass target
-        exitPoint = {x:q.x, z:q.z};
-        if(dist < 2.0 && !q.found){
-          q.found = true;
-          const earned = q.difficulty * 80;
-          addPoints(earned);
-          alert(`Quest found! Difficulty ${q.difficulty} — +${earned} pts`);
-          // advance to next quest
-          let next = qi + 1;
-          while(next < s.userData.quests.length && s.userData.quests[next].found) next++;
-          if(next >= s.userData.quests.length){
-            alert('All quests found in this expedition!');
-            exitPoint = null;
-            // optional reward
-          } else s.userData.activeQuestIndex = next;
-        }
-      }
-    }
-  },
-  ()=>{
-    // cleanup: remove terrain & veg
-    const t = scene.getObjectByName('terrain'); if(t) scene.remove(t);
-    const v = scene.getObjectByName('terrain_veg'); if(v) scene.remove(v);
-    const birds = scene.getObjectByName('owls'); if(birds) scene.remove(birds);
-    exitPoint = null;
+/* ---------------------------
+   Pattern Builder
+   --------------------------- */
+function generatePattern(level){
+  // returns {seq:[], next: value}
+  // level controls complexity; use common sequences
+  level = Math.max(1, Math.min(50, level));
+  const types = ['arithmetic','geometric','fib-like','alternating','square'];
+  const t = types[level % types.length];
+  if(t==='arithmetic'){
+    const a = randInt(1,6), d = randInt(1,10) + Math.floor(level/8);
+    const seq = [a, a+d, a+2*d, a+3*d, a+4*d];
+    return {seq, next: a+5*d, type:'Arithmetic (+'+d+')'};
+  } else if(t==='geometric'){
+    const a = randInt(1,4), r = randInt(2,4);
+    const seq = [a, a*r, a*r*r, a*r*r*r, a*r*r*r*r];
+    return {seq, next: a*Math.pow(r,5), type:'Geometric (×'+r+')'};
+  } else if(t==='fib-like'){
+    const a = randInt(1,5), b = randInt(1,6);
+    const seq = [a,b,a+b,b+(a+b),(a+b)+(b+(a+b))];
+    return {seq, next: seq[3] + seq[4], type:'Fibonacci-like'};
+  } else if(t==='alternating'){
+    const a = randInt(1,6), b = randInt(7,12);
+    const seq = [a,b,a+b,a+2*b,a+3*b];
+    return {seq, next: a+4*b, type:'Alternating'};
+  } else {
+    const start = randInt(1,6);
+    const seq = [start, start+1, start+4, start+9, start+16]; // squares pattern
+    return {seq, next: start+25, type:'Squares offset'};
   }
-);
+}
+document.getElementById('startPattern').addEventListener('click', ()=> {
+  const sel = document.getElementById('patternLevel'); if(!sel.options.length){ for(let i=1;i<=30;i++){ const o = document.createElement('option'); o.value=i; o.text=`Level ${i}`; sel.appendChild(o);} }
+  startPatternRound(Number(sel.value||1));
+});
+let patternState = null;
+function startPatternRound(level){
+  const area = document.getElementById('patternArea'); area.innerHTML = '';
+  patternState = {level, i:0, score:0};
+  renderPatternQuestion();
+}
+function renderPatternQuestion(){
+  const area = document.getElementById('patternArea'); area.innerHTML = '';
+  const p = generatePattern(patternState.level + patternState.i);
+  const div = document.createElement('div');
+  div.innerHTML = `<div class="small">Type: ${p.type}</div><div class="question">Complete the sequence: ${p.seq.join(', ')}, ...</div>`;
+  const input = document.createElement('input'); input.type='number'; input.style.padding='8px'; input.style.borderRadius='8px'; input.style.border='1px solid rgba(11,27,43,0.06)';
+  const ok = document.createElement('button'); ok.className='btn'; ok.textContent='Submit';
+  ok.style.marginLeft='8px';
+  ok.onclick = ()=>{
+    const val = Number(input.value);
+    if(String(val) === String(p.next)){
+      patternState.score++; addPoints(15); recordHistory('win', 15); celebrateWin(15);
+      alert('Correct! +15 pts');
+    } else alert('Incorrect. The correct answer was '+p.next);
+    patternState.i++;
+    if(patternState.i < 5) renderPatternQuestion();
+    else { area.innerHTML = `<div class="small">Round complete — Score ${patternState.score} / 5</div>`; document.getElementById('patternScore').textContent = `Score: ${patternState.score}`; }
+  };
+  div.appendChild(input); div.appendChild(ok); area.appendChild(div);
+}
 
 /* ---------------------------
-   HUD interactions & scene switching
+   Probability Cups
    --------------------------- */
-const gameTiles = [
-  {id:'maze', title:'Enchanted Maze', desc:'Moss, vines, tapestry. Find the glowing rock (+50).'},
-  {id:'farm', title:'Sunny Farm', desc:'Collect eggs and watch animals.'},
-  {id:'rainforest', title:'Rainforest Glade', desc:'Birds, waterfall, and hidden points of interest.'},
-  {id:'snow', title:'Snowy Mountain', desc:'Find the flag on a snowy peak.'},
-  {id:'ranch', title:'Ranch', desc:'Herd animals and earn rewards.'},
-  {id:'arcade', title:'Neon Arcade', desc:'Neon cabinet — spin for tickets.'},
-  {id:'harbor', title:'Seaside Harbor', desc:'Cast a line and catch fish.'},
-  {id:'openworld', title:'The Great Expedition', desc:'Large open world with compass quests (big game).'}
-];
-
-function buildTiles(){
-  const el = document.getElementById('gameTiles');
-  el.innerHTML='';
-  gameTiles.forEach(t=>{
-    const d = document.createElement('div'); d.className='game-tile';
-    d.innerHTML = `<strong>${t.title}</strong><div class="small">${t.desc}</div>`;
-    d.onclick = ()=> enterScene(t.id);
-    el.appendChild(d);
-  });
+document.getElementById('startProb').addEventListener('click', ()=> startProbRound());
+let probState = null;
+function startProbRound(){
+  const area = document.getElementById('probArea'); area.innerHTML = '';
+  const q = generateProbQuestion();
+  probState = {q, score:0};
+  renderProb(q);
 }
-buildTiles();
-
-function enterScene(id){
-  // cleanup previous
-  if(currentSceneId && scenes[currentSceneId]) {
-    try { scenes[currentSceneId].cleanup(scene); } catch(e){ console.warn(e); }
-  }
-  // set label
-  document.getElementById('modeLabel').textContent = scenes[id].label;
-  currentSceneId = id;
-  if(!renderer) initRenderer();
-  // call setup for scene
-  scenes[id].setup(scene);
-  // start main loop
-  startLoop();
-}
-
-/* return to hub */
-function enterHub(){
-  if(currentSceneId && scenes[currentSceneId]) scenes[currentSceneId].cleanup(scene);
-  currentSceneId = 'hub';
-  document.getElementById('modeLabel').textContent = scenes['hub'].label;
-  scenes['hub'].setup(scene);
-  startLoop();
-}
-
-/* UI hooks */
-document.getElementById('open-hub').addEventListener('click', ()=> enterHub());
-document.getElementById('quickMaze').addEventListener('click', ()=> enterScene('maze'));
-document.getElementById('quickFarm').addEventListener('click', ()=> enterScene('farm'));
-document.getElementById('quickRain').addEventListener('click', ()=> enterScene('rainforest'));
-document.getElementById('open-shop').addEventListener('click', ()=> window.scrollTo({top:document.getElementById('avatarShop').offsetTop-40, behavior:'smooth'}));
-document.getElementById('openAvatarShop').addEventListener('click', ()=> window.scrollTo({top:document.getElementById('avatarShop').offsetTop-40, behavior:'smooth'}));
-document.getElementById('btnLeaderboard').addEventListener('click', ()=> window.scrollTo({top:document.getElementById('leaderboardList').offsetTop-40, behavior:'smooth'}));
-document.getElementById('btnSlots').addEventListener('click', ()=> openSlotsModal());
-document.getElementById('btnBigWorld').addEventListener('click', ()=> enterScene('openworld'));
-
-/* Avatar selection rendering */
-renderSelectedAvatar();
-
-/* ---------------------------
-   Slots Modal (improved "casino")
-   --------------------------- */
-function openSlotsModal(){
-  const modal = document.createElement('div'); modal.style.position='fixed'; modal.style.left=0; modal.style.top=0; modal.style.right=0; modal.style.bottom=0; modal.style.display='flex'; modal.style.alignItems='center'; modal.style.justifyContent='center'; modal.style.background='rgba(0,0,0,0.7)'; modal.style.zIndex=9999;
-  const box = document.createElement('div'); box.style.width='720px'; box.style.padding='18px'; box.style.borderRadius='12px'; box.style.background='linear-gradient(180deg,#071021,#0b1220)'; box.style.border='1px solid rgba(255,255,255,0.04)';
-  box.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0">Casino Slots — High Roller</h3><button id="closeSlots" class="btn secondary">Close</button></div>
-    <div style="margin-top:12px;display:flex;gap:10px;align-items:center;justify-content:center">
-      <div id="slotReel1" style="width:140px;height:140px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:60px">🍒</div>
-      <div id="slotReel2" style="width:140px;height:140px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:60px">🍋</div>
-      <div id="slotReel3" style="width:140px;height:140px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:60px">🔔</div>
-    </div>
-    <div style="margin-top:12px;display:flex;gap:8px;align-items:center;justify-content:center">
-      <label class="small">Bet: <input id="slotBet" type="number" min="1" value="20" style="width:100px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#fff"></label>
-      <button id="spinSlots" class="btn">Spin</button>
-      <div id="slotResult" class="small" style="margin-left:12px"></div>
-    </div>
-    <div style="margin-top:12px" class="small">This is a polished demo slot — odds vary, play responsibly (points are in-app only).</div>`;
-  modal.appendChild(box); document.body.appendChild(modal);
-  document.getElementById('closeSlots').onclick = ()=> { modal.remove(); renderPoints(); };
-  const reelEls = [document.getElementById('slotReel1'), document.getElementById('slotReel2'), document.getElementById('slotReel3')];
-  const symbols = ['🍒','🍋','🔔','⭐','7','💎'];
-  document.getElementById('spinSlots').onclick = async ()=>{
-    const bet = Math.max(1, Number(document.getElementById('slotBet').value || 20));
-    if(getPoints() < bet){ document.getElementById('slotResult').textContent = 'Not enough points.'; return; }
-    addPoints(-bet);
-    document.getElementById('slotResult').textContent = 'Spinning...';
-    // spin animation with easing and stagger
-    for(let i=0;i<3;i++){
-      await spinReel(reelEls[i], symbols, 22 + i*6, 6 + i*6);
-    }
-    const v1 = reelEls[0].textContent, v2 = reelEls[1].textContent, v3 = reelEls[2].textContent;
-    let payout = 0;
-    if(v1===v2 && v2===v3) payout = bet * 12;
-    else if(v1===v2 || v2===v3 || v1===v3) payout = bet * 2;
-    if(payout>0){ addPoints(payout); document.getElementById('slotResult').textContent = `You won ${payout} pts!`; } else document.getElementById('slotResult').textContent = `Lost ${bet} pts.`;
+function generateProbQuestion(){
+  // generate a simple expected value question with three cups offering different payouts/odds
+  const base = randInt(5,30);
+  // cup A: prob p1 payout a1, B p2, etc.
+  const p1 = Math.random()*0.6 + 0.1;
+  const p2 = Math.random()*0.6 + 0.05;
+  const p3 = Math.random()*0.6 + 0.02;
+  const a1 = base + randInt(0, base);
+  const a2 = base + randInt(0, base+10);
+  const a3 = base + randInt(0, base+20);
+  return {
+    prompt: `Choose the best expected value.`,
+    cups: [
+      {label:'A', p: Number(p1.toFixed(2)), payout:a1, ev: Number((p1*a1).toFixed(2))},
+      {label:'B', p: Number(p2.toFixed(2)), payout:a2, ev: Number((p2*a2).toFixed(2))},
+      {label:'C', p: Number(p3.toFixed(2)), payout:a3, ev: Number((p3*a3).toFixed(2))}
+    ]
   };
 }
-async function spinReel(el, symbols, cycles, baseDelay){
-  for(let j=0;j<cycles;j++){
-    el.textContent = symbols[Math.floor(Math.random()*symbols.length)];
-    await new Promise(r=>setTimeout(r, baseDelay + Math.floor(Math.random()*20)));
+function renderProb(q){
+  const area = document.getElementById('probArea'); area.innerHTML = '';
+  const header = document.createElement('div'); header.innerHTML = `<div class="question">${q.prompt}</div><div class="small">Click a cup to choose the best EV.</div>`;
+  area.appendChild(header);
+  const row = document.createElement('div'); row.style.display='flex'; row.style.gap='12px'; row.style.marginTop='12px';
+  q.cups.forEach((c, idx)=>{
+    const cup = document.createElement('div'); cup.style.flex='1'; cup.style.padding='12px'; cup.style.border='1px solid rgba(11,27,43,0.06)'; cup.style.borderRadius='10px'; cup.style.textAlign='center'; cup.style.background='#fff';
+    cup.innerHTML = `<div style="font-weight:800;font-size:18px">${c.label}</div><div class="small">Payout: ${c.payout}</div><div class="small">Chance: ${Math.round(c.p*100)}%</div>`;
+    cup.onclick = ()=>{
+      // determine correct cup by comparing ev
+      const best = q.cups.reduce((a,b)=> a.ev > b.ev ? a : b);
+      if(c.label === best.label){
+        addPoints(20); recordHistory('win',20); celebrateWin(20);
+        alert(`Correct — cup ${c.label} has the highest EV (${c.ev}). +20 pts`);
+      } else {
+        alert(`Incorrect. Best was ${best.label} (EV ${best.ev}).`);
+      }
+      renderProb(generateProbQuestion());
+    };
+    row.appendChild(cup);
+  });
+  area.appendChild(row);
+}
+
+/* ---------------------------
+   Misc UI & export/reset
+   --------------------------- */
+document.getElementById('backFromTrivia').addEventListener('click', ()=> showPage('hub'));
+document.getElementById('backRapid').addEventListener('click', ()=> showPage('hub'));
+document.getElementById('backMaze').addEventListener('click', ()=> showPage('hub'));
+document.getElementById('backPattern').addEventListener('click', ()=> showPage('hub'));
+document.getElementById('backProb').addEventListener('click', ()=> showPage('hub'));
+
+document.getElementById('exportPoints').addEventListener('click', ()=>{
+  const data = {points:getPoints(), history: JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]')};
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'btl_points.json'; a.click();
+});
+document.getElementById('resetPoints').addEventListener('click', ()=> {
+  if(confirm('Reset points and history?')){
+    localStorage.removeItem(POINTS_KEY); localStorage.removeItem(HISTORY_KEY);
+    renderPoints(); renderTopList();
+    alert('Reset done.');
   }
-  el.textContent = symbols[Math.floor(Math.random()*symbols.length)];
-}
+});
 
-/* ---------------------------
-   Initialization: start in hub
-   --------------------------- */
-enterHub();
-renderPoints();
-renderLeaderboard();
+/* helper random */
+function randInt(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
 
-/* ---------------------------
-   Extra helpers (saving state hooks)
-   --------------------------- */
-// Hook to automatically show avatar on leaderboard entries and other UI
-function autoApplyAvatarToLB(){
-  const lb = getLB(); // nothing by default; used when submitting
-  // for server integration, call API here...
-}
+/* initial setup: populate pattern levels select */
+(function init(){
+  const sel = document.getElementById('patternLevel');
+  for(let i=1;i<=30;i++){ const o=document.createElement('option'); o.value=i; o.text=`Level ${i}`; sel.appendChild(o); }
+  // default points if none
+  if(!localStorage.getItem(POINTS_KEY)) setPoints(0);
+  renderPoints(); renderTopList();
+})();
 
-/* End of bundle script */
 </script>
 </body>
 </html>
