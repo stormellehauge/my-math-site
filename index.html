@@ -3,564 +3,919 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>BREAK THE LOGIC — Math Hub (Fixed Home)</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600;800&display=swap" rel="stylesheet">
+<title>BREAK THE LOGIC — Math Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600;800;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#f6fbff; --card:#ffffff; --accent:#1a73e8; --muted:#5b6b86;
+    --bg:#f6fbff;
+    --card:#ffffff;
+    --accent:#1a73e8;
+    --accent-2:#0b5fff;
+    --muted:#5b6b86;
+    --success:#08c27b;
+    --danger:#ef4444;
+    --math:linear-gradient(90deg,#e6f0ff,#f3fbff);
   }
-  *{box-sizing:border-box}
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:#072033}
-  header{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:var(--card);border-bottom:1px solid rgba(7,32,51,0.06)}
-  .brand{font-weight:800;font-size:20px}
-  .controls{display:flex;gap:10px;align-items:center}
-  .points{background:linear-gradient(90deg,#fff,#f3fbff);padding:8px 12px;border-radius:10px;border:1px solid rgba(7,32,51,0.04);font-weight:700}
-  main{padding:16px 20px}
-  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-  .tile{background:var(--card);border-radius:10px;padding:12px;border:1px solid rgba(7,32,51,0.06);min-height:120px;position:relative}
-  .tile h3{margin:0 0 6px 0;font-size:16px}
+  html,body{height:100%;margin:0;background:var(--bg);font-family:Inter,system-ui,Arial,sans-serif;color:#0b1b2b}
+  body::before{
+    content: "π 3.14159265358979323846264338327950288419716939937510  ";
+    position:fixed; inset:0; z-index:-1; opacity:0.06; font-size:36px; line-height:1.4; color:#0b1b2b;
+    transform:rotate(-6deg); white-space:pre-wrap; padding:30px;
+  }
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid rgba(11,27,43,0.04);background:var(--card)}
+  .brand{font-weight:900;font-size:36px;color:#061226}
+  .controls{display:flex;gap:12px;align-items:center}
+  .points{background:var(--math);padding:8px 12px;border-radius:10px;border:1px solid rgba(11,27,43,0.06);font-weight:800}
+  .btn{background:var(--accent);color:#fff;padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:700;box-shadow:0 8px 24px rgba(11,95,255,0.12)}
+  .btn.secondary{background:transparent;border:1px solid rgba(11,27,43,0.06);color:#061226}
+  main{padding:18px 28px}
+  .layout{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start}
+  .card{background:var(--card);padding:14px;border-radius:12px;box-shadow:0 8px 24px rgba(11,27,43,0.04)}
   .small{font-size:13px;color:var(--muted)}
-  .playRow{display:flex;gap:8px;align-items:center;margin-top:10px}
-  .btn{background:var(--accent);color:white;padding:8px 10px;border-radius:8px;border:0;cursor:pointer;font-weight:700}
-  .btn.secondary{background:transparent;border:1px solid rgba(7,32,51,0.08);color:#072033}
-  .gameArea{margin-top:10px;border-top:1px dashed rgba(7,32,51,0.04);padding-top:10px;display:none}
-  .gameArea.show{display:block}
-  .answers{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px}
-  .ans-btn{padding:10px;border-radius:8px;border:1px solid rgba(7,32,51,0.06);background:#fff;cursor:pointer;font-weight:700}
-  canvas{width:100%;height:auto;border-radius:8px;background:#f7fbff;border:1px solid rgba(7,32,51,0.04)}
-  /* fireworks canvas behind but still pointer-events none */
-  #fxCanvas{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:999}
-  @media(max-width:900px){ .grid{grid-template-columns:1fr} }
+  .game-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
+  .tile{padding:12px;border-radius:10px;border:1px solid rgba(11,27,43,0.04);cursor:pointer;background:linear-gradient(180deg,#fff,#f7fbff);transition:transform 220ms}
+  .tile:hover{transform:translateY(-6px)}
+  .tier-bar{display:flex;gap:8px;align-items:center}
+  .tier-pill{padding:8px 10px;border-radius:999px;background:linear-gradient(90deg,#fff,#f3f8ff);font-weight:700;border:1px solid rgba(11,27,43,0.03)}
+  .tier-progress{height:12px;background:rgba(11,27,43,0.06);border-radius:999px;overflow:hidden}
+  .tier-progress > .fill{height:100%;background:linear-gradient(90deg,var(--accent-2),#27d3ff);width:0%}
+  /* pages */
+  .page{display:none}
+  .page.active{display:block}
+  /* trivia UI */
+  .question{font-size:20px;margin:14px 0}
+  .answers{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .ans-btn{padding:12px;border-radius:10px;border:1px solid rgba(11,27,43,0.06);background:#fff;cursor:pointer; font-weight:600}
+  .ans-btn.correct{background:linear-gradient(90deg,#e6fff1,#bff6d9);border-color:rgba(8,194,123,0.8)}
+  .ans-btn.wrong{background:linear-gradient(90deg,#ffecec,#ffd6d6);border-color:rgba(239,68,68,0.8)}
+  /* fireworks canvas */
+  #fxCanvas{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:9999}
+  /* math style */
+  .math-head{font-family:Inter,serif;font-weight:800;color:#08102a;letter-spacing:1px}
+  footer{margin-top:18px;padding:12px;color:var(--muted);font-size:13px;text-align:center}
+  @media(max-width:980px){ .layout{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
 <header>
-  <div class="brand">BREAK THE LOGIC — Math Hub</div>
+  <div>
+    <div class="brand">BREAK THE LOGIC</div>
+    <div class="small">Math games hub — train logic, speed, and math knowledge</div>
+  </div>
   <div class="controls">
     <div class="points">Points: <span id="points">0</span></div>
-    <button class="btn secondary" id="resetBtn">Reset</button>
+    <div style="min-width:260px">
+      <div class="tier-bar">
+        <div class="tier-pill" id="tierLabel">Tier: Chill</div>
+        <div style="flex:1" class="tier-progress" aria-hidden>
+          <div class="fill" id="tierFill"></div>
+        </div>
+        <div class="small" id="nextTierText">0 / 1000</div>
+      </div>
+    </div>
+    <button class="btn" id="toHub">Game Hub</button>
+    <button class="btn secondary" id="toTrivia">Trivia</button>
   </div>
 </header>
 
 <main>
-  <div class="grid" id="tilesGrid">
-    <!-- Tiles will be created by script -->
+  <div class="layout">
+    <section>
+      <div class="card page active" id="hub">
+        <h2 class="math-head">Game Hub — Math Edition</h2>
+        <p class="small">All games are math-focused. Earn points to climb tiers and unlock more content. Fireworks celebrate wins!</p>
+        <div class="game-grid" id="gamesList">
+          <!-- Game tiles injected here -->
+        </div>
+        <div style="margin-top:12px" class="card">
+          <h3 style="margin:0">Quick Stats</h3>
+          <div class="small" id="statsText" style="margin-top:8px">Play to earn points and climb tiers.</div>
+        </div>
+      </div>
+
+      <div class="card page" id="triviaPage">
+        <h2 class="math-head">Trivia</h2>
+        <div class="small">Choose a category and level. Math has 100 levels — higher levels are harder. Each round = 10 questions. Score ≥ 7/10 to pass and unlock next level.</div>
+
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <label>Category:
+            <select id="triviaCategory">
+              <option value="math">Math (100 levels)</option>
+              <option value="history">History of Math</option>
+              <option value="geometry">Geometry</option>
+            </select>
+          </label>
+
+          <label id="levelLabel">Level:
+            <select id="triviaLevel"></select>
+          </label>
+
+          <button class="btn" id="startTrivia">Start Round</button>
+          <div style="flex:1"></div>
+          <div class="small">Pass = fireworks + points</div>
+        </div>
+
+        <div id="triviaArea" style="margin-top:12px"></div>
+        <div style="margin-top:10px">
+          <button class="btn secondary" id="backFromTrivia">Back to Hub</button>
+        </div>
+      </div>
+
+      <div class="card page" id="rapidPage">
+        <h2 class="math-head">Rapid Fire</h2>
+        <div class="small">Answer as many quick questions as possible before the timer. Choose difficulty.</div>
+        <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+          <label>Difficulty:
+            <select id="rapidDifficulty">
+              <option value="easy">Easy (6s)</option>
+              <option value="medium">Medium (4s)</option>
+              <option value="hard">Hard (2.5s)</option>
+            </select>
+          </label>
+          <button class="btn" id="startRapid">Start Rapid</button>
+          <div style="flex:1"></div>
+          <div class="small" id="rapidScore">Score: 0</div>
+        </div>
+        <div id="rapidArea" style="margin-top:12px"></div>
+        <div style="margin-top:10px">
+          <button class="btn secondary" id="backRapid">Back to Hub</button>
+        </div>
+      </div>
+
+      <div class="card page" id="mazePage">
+        <h2 class="math-head">Math Maze</h2>
+        <div class="small">Navigate a maze, but each locked gate requires solving a math problem to open. Solve puzzles, reach the center to win points.</div>
+        <div style="margin-top:8px;">
+          <button class="btn" id="startMaze">Start Math Maze</button>
+          <button class="btn secondary" id="backMaze">Back to Hub</button>
+        </div>
+        <div id="mazeArea" style="margin-top:12px"></div>
+      </div>
+
+      <div class="card page" id="patternPage">
+        <h2 class="math-head">Pattern Builder</h2>
+        <div class="small">Identify the number pattern and continue it. Sequences of increasing difficulty.</div>
+        <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+          <label>Level:
+            <select id="patternLevel"></select>
+          </label>
+          <button class="btn" id="startPattern">Start</button>
+          <div style="flex:1"></div>
+          <div class="small" id="patternScore">Score: 0</div>
+        </div>
+        <div id="patternArea" style="margin-top:12px"></div>
+        <div style="margin-top:10px">
+          <button class="btn secondary" id="backPattern">Back to Hub</button>
+        </div>
+      </div>
+
+      <div class="card page" id="probPage">
+        <h2 class="math-head">Probability Cups</h2>
+        <div class="small">Choose the cup with best expected value given odds or solve probability puzzles. Practice reasoning under uncertainty.</div>
+        <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+          <button class="btn" id="startProb">Start Probability Game</button>
+          <div style="flex:1"></div>
+          <div class="small" id="probScore">Score: 0</div>
+        </div>
+        <div id="probArea" style="margin-top:12px"></div>
+        <div style="margin-top:10px">
+          <button class="btn secondary" id="backProb">Back to Hub</button>
+        </div>
+      </div>
+
+    </section>
+
+    <aside>
+      <div class="card">
+        <h3 style="margin:0">Your Profile</h3>
+        <div class="small" style="margin-top:8px" id="profileText">Start playing to earn points and climb tiers.</div>
+        <div style="margin-top:12px">
+          <button class="btn secondary" id="exportPoints">Export Points</button>
+          <button class="btn secondary" id="resetPoints">Reset Points</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <h4 style="margin:0">Top Achievements</h4>
+        <div class="small" id="topList" style="margin-top:8px">Your top rounds and recent wins will appear here.</div>
+      </div>
+    </aside>
   </div>
 </main>
 
 <canvas id="fxCanvas"></canvas>
 
-<script>
-/*
-  Simplified, robust single-file app.
-  All games are embedded in tiles on the home page.
-  Play/Close buttons work in-place.
-*/
+<footer>
+  Designed for math practice and entertaining animations. Points are stored locally in your browser.
+</footer>
 
-/* Storage & points */
-const POINTS_KEY = 'btl_points_fixed_home_v1';
-if(!localStorage.getItem(POINTS_KEY)) localStorage.setItem(POINTS_KEY,'0');
+<script>
+/* ---------------------------
+   Storage & tiers
+   --------------------------- */
+const POINTS_KEY = 'btl_math_points_v1';
+const HISTORY_KEY = 'btl_math_history_v1';
 function getPoints(){ return Number(localStorage.getItem(POINTS_KEY) || 0); }
-function setPoints(v){ localStorage.setItem(POINTS_KEY, String(v)); renderPoints(); }
-function addPoints(n){ setPoints(Math.max(0, getPoints() + n)); showFloatingPoints(n); }
-function renderPoints(){ document.getElementById('points').textContent = getPoints(); }
+function setPoints(n){ localStorage.setItem(POINTS_KEY, String(n)); renderPoints(); }
+function addPoints(n){ setPoints(Math.max(0, getPoints() + n)); recordHistory('points', n); }
+function recordHistory(type, val){ const history = JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]'); history.unshift({t:Date.now(), type, val, points:getPoints()}); localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0,200))); renderTopList(); }
+
+const TIERS = [
+  {name:'Chill', min:0},
+  {name:'Bronze', min:1000},
+  {name:'Silver', min:1500},
+  {name:'Gold', min:2000},
+  {name:'Diamond', min:2500},
+  {name:'Legendary', min:3000},
+  {name:'Wizard', min:3500}
+];
+function getTier(points){
+  let cur = TIERS[0];
+  for(const t of TIERS) if(points >= t.min) cur = t;
+  // next
+  let next = TIERS.find(t=>t.min > points);
+  return {current:cur, next: next || null};
+}
+function renderPoints(){
+  document.getElementById('points').textContent = getPoints();
+  const tierInfo = getTier(getPoints());
+  document.getElementById('tierLabel').textContent = `Tier: ${tierInfo.current.name}`;
+  const nextText = tierInfo.next ? `${getPoints()} / ${tierInfo.next.min}` : `${getPoints()} / max`;
+  document.getElementById('nextTierText').textContent = nextText;
+  const fill = tierInfo.next ? Math.min(1, (getPoints() - tierInfo.current.min) / (tierInfo.next.min - tierInfo.current.min)) : 1;
+  document.getElementById('tierFill').style.width = `${Math.round(fill*100)}%`;
+  document.getElementById('statsText').textContent = `Points: ${getPoints()} • Tier: ${tierInfo.current.name}`;
+}
 renderPoints();
 
-document.getElementById('resetBtn').addEventListener('click', ()=> {
-  if(confirm('Reset points?')){ localStorage.removeItem(POINTS_KEY); localStorage.setItem(POINTS_KEY,'0'); renderPoints(); alert('Reset done'); }
+function renderTopList(){
+  const history = JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]').slice(0,6);
+  const el = document.getElementById('topList');
+  if(!history.length){ el.textContent = 'No achievements yet. Win rounds to see fireworks and be listed here.'; return; }
+  el.innerHTML = history.map(h=>{
+    const d = new Date(h.t); const when = d.toLocaleString();
+    if(h.type==='win') return `${when}: Won ${h.val} pts`;
+    if(h.type==='points') return `${when}: ${h.val>0?'+':''}${h.val} pts (total ${h.points})`;
+    return `${when}: ${h.type} ${h.val}`;
+  }).join('<br>');
+}
+renderTopList();
+
+/* ---------------------------
+   Navigation & game list
+   --------------------------- */
+const pages = {
+  hub: document.getElementById('hub'),
+  trivia: document.getElementById('triviaPage'),
+  rapid: document.getElementById('rapidPage'),
+  maze: document.getElementById('mazePage'),
+  pattern: document.getElementById('patternPage'),
+  prob: document.getElementById('probPage')
+};
+function showPage(id){
+  Object.values(pages).forEach(p=>p.classList.remove('active'));
+  if(id==='hub') pages.hub.classList.add('active');
+  if(id==='trivia') pages.trivia.classList.add('active');
+  if(id==='rapid') pages.rapid.classList.add('active');
+  if(id==='maze') pages.maze.classList.add('active');
+  if(id==='pattern') pages.pattern.classList.add('active');
+  if(id==='prob') pages.prob.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.getElementById('toHub').addEventListener('click', ()=> showPage('hub'));
+document.getElementById('toTrivia').addEventListener('click', ()=> showPage('trivia'));
+
+/* build game tiles (5 math games) */
+const games = [
+  {id:'trivia', title:'Trivia (10 Qs)', desc:'Math, History of Math, Geometry — 100 math levels'},
+  {id:'rapid', title:'Rapid Fire', desc:'Timed arithmetic rounds (speed & accuracy)'},
+  {id:'maze', title:'Math Maze', desc:'Solve math gates to progress; reach the center'},
+  {id:'pattern', title:'Pattern Builder', desc:'Find and continue number sequences'},
+  {id:'prob', title:'Probability Cups', desc:'Choose best expected value / probability puzzles'}
+];
+const gamesList = document.getElementById('gamesList');
+games.forEach(g=>{
+  const div = document.createElement('div'); div.className='tile';
+  div.innerHTML = `<div style="font-weight:800">${g.title}</div><div class="small">${g.desc}</div>`;
+  div.onclick = ()=>{
+    if(g.id==='trivia') showPage('trivia');
+    if(g.id==='rapid') showPage('rapid');
+    if(g.id==='maze') showPage('maze');
+    if(g.id==='pattern') showPage('pattern');
+    if(g.id==='prob') showPage('prob');
+  };
+  gamesList.appendChild(div);
 });
 
-/* small fireworks/confetti visual (non-blocking) */
-const fxCanvas = document.getElementById('fxCanvas'); fxCanvas.width = innerWidth; fxCanvas.height = innerHeight; const fxCtx = fxCanvas.getContext('2d');
+/* ---------------------------
+   Fireworks (canvas + sound)
+   --------------------------- */
+const fxCanvas = document.getElementById('fxCanvas');
+fxCanvas.width = innerWidth; fxCanvas.height = innerHeight;
+const fxCtx = fxCanvas.getContext('2d');
 window.addEventListener('resize', ()=>{ fxCanvas.width = innerWidth; fxCanvas.height = innerHeight; });
-let particles = [];
-function spawnConfetti(x=window.innerWidth/2, y=window.innerHeight/3, count=60){
-  for(let i=0;i<count;i++) particles.push({x,y,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.8)*6,life:80+Math.random()*40,size:3+Math.random()*8,h:Math.random()*360});
-}
-function spawnFirework(x,y,count=80){
-  for(let i=0;i<count;i++){
-    const a = Math.random()*Math.PI*2, s = 1+Math.random()*5;
-    particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:80+Math.random()*60,size:1+Math.random()*3,h:Math.random()*360});
+
+let fxParticles = [];
+function playFireworks(x=null,y=null){
+  // x,y in page coords, default center top
+  const cx = x || window.innerWidth/2;
+  const cy = y || window.innerHeight/3;
+  // generate bursts
+  for(let b=0;b<3;b++){
+    const hue = Math.floor(Math.random()*360);
+    for(let i=0;i<60;i++){
+      const speed = 1 + Math.random()*4;
+      const angle = Math.random()*Math.PI*2;
+      fxParticles.push({
+        x: cx,
+        y: cy,
+        vx: Math.cos(angle)*speed*(0.6 + Math.random()*1.6),
+        vy: Math.sin(angle)*speed*(0.6 + Math.random()*1.6),
+        life: 60 + Math.floor(Math.random()*40),
+        hue,
+        size: 1 + Math.random()*2
+      });
+    }
   }
+  // sound (chirp burst)
+  try{
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const now = ac.currentTime;
+    for(let i=0;i<6;i++){
+      const o = ac.createOscillator(); const g = ac.createGain();
+      o.type = 'sine'; o.frequency.value = 300 + i*120 + (Math.random()*80);
+      g.gain.value = 0.0001;
+      o.connect(g); g.connect(ac.destination);
+      o.start(now + i*0.02);
+      g.gain.linearRampToValueAtTime(0.18, now + i*0.02 + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + i*0.02 + 0.26);
+      o.stop(now + i*0.02 + 0.28);
+    }
+  }catch(e){ /* audio may be disabled */ }
 }
-function celebrate(){
-  const cx = innerWidth/2, cy = innerHeight/3;
-  for(let i=0;i<5;i++) setTimeout(()=> spawnFirework(cx + (Math.random()-0.5)*200, cy + (Math.random()-0.5)*120, 80), i*280);
-  spawnConfetti();
-}
+// animation loop for fireworks
 function fxLoop(){
   fxCtx.clearRect(0,0,fxCanvas.width, fxCanvas.height);
-  for(let i=particles.length-1;i>=0;i--){
-    const p = particles[i];
+  for(let i=fxParticles.length-1;i>=0;i--){
+    const p = fxParticles[i];
     p.x += p.vx; p.y += p.vy; p.vy += 0.06; p.life--;
-    fxCtx.fillStyle = `hsl(${p.h} 80% 60% / ${Math.max(0, p.life/120)})`;
-    if(p.size > 6) fxCtx.fillRect(p.x,p.y,p.size,p.size); else { fxCtx.beginPath(); fxCtx.arc(p.x,p.y,p.size,0,Math.PI*2); fxCtx.fill(); }
-    if(p.life <= 0) particles.splice(i,1);
+    fxCtx.beginPath();
+    fxCtx.fillStyle = `hsl(${p.hue} 80% 60% / ${Math.max(0, p.life/100)})`;
+    fxCtx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+    fxCtx.fill();
+    if(p.life <= 0){ fxParticles.splice(i,1); }
   }
   requestAnimationFrame(fxLoop);
 }
 fxLoop();
 
-/* floating points popup like Gimkit */
-function showFloatingPoints(n){
-  const popup = document.createElement('div'); popup.textContent = (n>0? '+'+n : String(n)); popup.style.position='fixed';
-  const startX = window.innerWidth/2; const startY = window.innerHeight/3;
-  popup.style.left = startX + 'px'; popup.style.top = startY + 'px';
-  popup.style.padding = '6px 10px'; popup.style.borderRadius='999px'; popup.style.background = '#ffd27a'; popup.style.fontWeight = '800';
-  popup.style.transform = 'translate(-50%,-50%)'; popup.style.transition = 'transform 900ms cubic-bezier(.2,.9,.2,1), opacity 900ms';
-  popup.style.zIndex = 2000;
-  document.body.appendChild(popup);
-  requestAnimationFrame(()=> popup.style.transform = 'translate(-50%,-120%) scale(1.05)');
-  setTimeout(()=> {
-    const target = document.querySelector('.points').getBoundingClientRect();
-    const dx = (target.left + target.width/2) - startX;
-    const dy = (target.top + target.height/2) - startY;
-    popup.style.transform = `translate(${dx}px, ${dy}px) scale(.4)`;
-    popup.style.opacity = '0';
-    setTimeout(()=> popup.remove(), 950);
-  }, 600);
+/* call when player wins a round */
+function celebrateWin(pointsAwarded, x, y){
+  addPoints(pointsAwarded);
+  recordHistory('win', pointsAwarded);
+  playFireworks(x, y);
 }
 
-/* Tiles spec */
-const tilesSpec = [
-  {id:'trivia', title:'Trivia (50 levels)', desc:'10-question rounds. Pass 7/10.'},
-  {id:'rapid', title:'Rapid Fire', desc:'Timed speed rounds.'},
-  {id:'maze', title:'Math Maze', desc:'Gates require a math answer.'},
-  {id:'pattern', title:'Pattern Builder', desc:'Continue number sequences.'},
-  {id:'prob', title:'Probability Cups', desc:'Choose highest EV.'},
-  {id:'casino', title:'Casino', desc:'Slots, Secret Cups, Jackpot.'},
-  {id:'cups', title:'Secret Cups', desc:'Red cups shuffle challenge.'},
-  {id:'air', title:'Air Hockey', desc:'Simple air hockey with treasure Qs.'}
+/* ---------------------------
+   TRIVIA: math generator and question handling
+   --------------------------- */
+
+/* Fill levels 1..100 for math. Generator scales with level:
+   - low levels: small ints, operations add/sub
+   - mid: multiplication, division, exponents small
+   - high: multi-step, fractions, modular reasoning
+*/
+function randInt(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
+
+function generateMathQuestion(level){
+  // clamp level 1..100
+  level = Math.max(1, Math.min(100, Math.round(level)));
+  // define difficulty buckets
+  if(level <= 10){
+    // simple add/sub
+    const a = randInt(1,10), b = randInt(1,10);
+    return {q:`${a} + ${b} = ?`, choices:shuffle([String(a+b), String(a+b+1), String(Math.abs(a-b)), String(a*b)]), answer:String(a+b)};
+  } else if(level <= 25){
+    const a = randInt(2,15), b=randInt(2,12);
+    return {q:`${a} × ${b} = ?`, choices:shuffle([String(a*b), String(a*b+randInt(1,5)), String(a*b-randInt(1,5)), String(a+b)]), answer:String(a*b)};
+  } else if(level <= 40){
+    const a = randInt(10,50); const b = randInt(2,10);
+    return {q:`${a} ÷ ${b} = ? (nearest integer)`, choices:shuffle([String(Math.round(a/b)), String(Math.floor(a/b)), String(Math.ceil(a/b)), String(Math.round((a+b)/b))]), answer:String(Math.round(a/b))};
+  } else if(level <= 55){
+    const a = randInt(2,8), b = randInt(2,6);
+    return {q:`What is ${a}^${b}?`, choices:shuffle([String(Math.pow(a,b)), String(Math.pow(a,b)+randInt(1,20)), String(Math.pow(a,b)-randInt(1,20)), String(Math.pow(a+1,b))]), answer:String(Math.pow(a,b))};
+  } else if(level <= 70){
+    // combined operations
+    const a = randInt(5,30), b = randInt(2,10), c = randInt(1,10);
+    const val = a + b*c;
+    return {q:`${a} + ${b} × ${c} = ?`, choices:shuffle([String(val), String(val+1), String(val-1), String(a*b+c)]), answer:String(val)};
+  } else if(level <= 85){
+    // fractions simple
+    const a = randInt(1,9), b = randInt(1,9), c = randInt(1,9);
+    const val = (a/b) + (c/b);
+    const ans = Number((val).toFixed(2));
+    const choices = shuffle([String(ans), String(Number((val+0.5).toFixed(2))), String(Number((val-0.25).toFixed(2))), String(Number((val+0.1).toFixed(2)))]);
+    return {q:`${a}/${b} + ${c}/${b} = ? (rounded to 2 dp)`, choices, answer:String(ans)};
+  } else {
+    // multi-step algebra or primes
+    const a = randInt(2,12), b = randInt(2,12), c = randInt(1,10);
+    const val = (a*b) - c;
+    return {q:`Solve for x: ${a}x - ${c} = ${a*b}. What is x?`, choices:shuffle([String((a*b + c)/a), String(a*b), String(b), String(Math.floor((a*b + c)/a))]), answer:String((a*b + c)/a)};
+  }
+}
+
+/* small shuffle util */
+function shuffle(arr){ const r = arr.slice(); for(let i=r.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [r[i], r[j]]=[r[j], r[i]]; } return r; }
+
+/* History of math - curated sample Qs (we'll rotate) */
+const HISTORY_QS = [
+  {q:'Who is known as the father of geometry?', choices:['Euclid','Pythagoras','Archimedes','Newton'], answer:'Euclid'},
+  {q:'Which civilization contributed the number zero as a positional digit?', choices:['Maya','Greeks','Romans','Persians'], answer:'Maya'},
+  {q:'Who formulated the laws of planetary motion?', choices:['Kepler','Galileo','Copernicus','Pythagoras'], answer:'Kepler'},
+  {q:'Which mathematician created calculus (independently with Newton)?', choices:['Leibniz','Euler','Gauss','Fermat'], answer:'Leibniz'},
+  {q:'What ancient mathematician approximated π using polygons?', choices:['Archimedes','Euclid','Hypatia','Thales'], answer:'Archimedes'}
+];
+/* Geometry Qs sample */
+const GEOMETRY_QS = [
+  {q:'Sum of interior angles of a triangle?', choices:['180°','90°','360°','270°'], answer:'180°'},
+  {q:'A right triangle with legs 3 and 4 has hypotenuse?', choices:['5','6','7','4'], answer:'5'},
+  {q:'Area of circle radius r?', choices:['πr²','2πr','πr','πr³'], answer:'πr²'},
+  {q:'If two lines are parallel they never meet: True/False?', choices:['True','False','Sometimes','Only in Euclid'], answer:'True'},
+  {q:'Number of faces on a cube?', choices:['6','8','4','12'], answer:'6'}
 ];
 
-/* Create tiles and basic UI placeholders */
-const grid = document.getElementById('tilesGrid');
-tilesSpec.forEach(spec => {
-  const tile = document.createElement('div'); tile.className = 'tile'; tile.id = 'tile-' + spec.id;
-  tile.innerHTML = `
-    <h3>${spec.title}</h3>
-    <div class="small">${spec.desc}</div>
-    <div class="playRow">
-      <button class="btn" data-action="play" data-game="${spec.id}">Play</button>
-      <button class="btn secondary" data-action="close" data-game="${spec.id}">Close</button>
-      <div style="flex:1"></div>
-      <div class="small" id="status-${spec.id}">Ready</div>
-    </div>
-    <div class="gameArea" id="area-${spec.id}"></div>
-  `;
-  grid.appendChild(tile);
+/* populate level select for math 1..100 */
+const levelSelect = document.getElementById('triviaLevel');
+function populateLevels(){
+  levelSelect.innerHTML = '';
+  for(let i=1;i<=100;i++){
+    const o = document.createElement('option'); o.value = i; o.textContent = `Level ${i}`;
+    levelSelect.appendChild(o);
+  }
+}
+populateLevels();
+
+/* trivia state */
+let triviaState = null;
+
+document.getElementById('startTrivia').addEventListener('click', ()=> {
+  const cat = document.getElementById('triviaCategory').value;
+  const level = Number(levelSelect.value || 1);
+  startTriviaRound(cat, level);
 });
 
-/* Delegated click listeners for Play/Close */
-grid.addEventListener('click', (e)=>{
-  const btn = e.target.closest('button');
-  if(!btn) return;
-  const action = btn.dataset.action, game = btn.dataset.game;
-  if(action === 'play') openGameInline(game);
-  if(action === 'close') closeGameInline(game);
+function startTriviaRound(category, level){
+  // prepare 10 questions
+  const questions = [];
+  if(category === 'math'){
+    for(let i=0;i<10;i++) questions.push(generateMathQuestion(level + Math.floor(i/3))); // slight variance
+  } else if(category === 'history'){
+    // sample rotate or fill with math generators if not enough
+    for(let i=0;i<10;i++) questions.push(HISTORY_QS[i % HISTORY_QS.length]);
+  } else if(category === 'geometry'){
+    for(let i=0;i<10;i++) questions.push(GEOMETRY_QS[i % GEOMETRY_QS.length]);
+  }
+  triviaState = {category,level, questions, i:0, score:0};
+  renderTriviaQuestion();
+}
+
+function renderTriviaQuestion(){
+  const area = document.getElementById('triviaArea');
+  area.innerHTML = '';
+  if(!triviaState) return;
+  const q = triviaState.questions[triviaState.i];
+  const qdiv = document.createElement('div');
+  qdiv.innerHTML = `<div class="question">Q${triviaState.i+1}: ${q.q}</div>`;
+  const answrap = document.createElement('div'); answrap.className='answers';
+  (q.choices || q.a || q.A || []).forEach?.();
+  // ensure we have choices array
+  const choices = q.choices || q.a || q.options || ['?'];
+  choices.forEach((txt)=>{
+    const b = document.createElement('button'); b.className='ans-btn'; b.textContent = txt;
+    b.addEventListener('click', ()=>{
+      // reveal correct
+      const correct = String(q.answer);
+      Array.from(answrap.children).forEach(ch=>{
+        ch.disabled = true;
+        if(ch.textContent === correct) ch.classList.add('correct');
+      });
+      if(b.textContent === correct){
+        triviaState.score++;
+        b.classList.add('correct');
+      } else {
+        b.classList.add('wrong');
+      }
+      // next after slight delay
+      setTimeout(()=> {
+        triviaState.i++;
+        if(triviaState.i < triviaState.questions.length) renderTriviaQuestion();
+        else renderTriviaResults();
+      }, 700);
+    });
+    answrap.appendChild(b);
+  });
+  qdiv.appendChild(answrap);
+  area.appendChild(qdiv);
+}
+
+function renderTriviaResults(){
+  const area = document.getElementById('triviaArea'); area.innerHTML = '';
+  const s = triviaState.score;
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `<div style="font-weight:800;font-size:18px">Round complete</div><div class="small">Score: ${s} / ${triviaState.questions.length}</div>`;
+  if(s >= 7){
+    const adv = document.createElement('button'); adv.className='btn'; adv.textContent = 'Advance to next level';
+    adv.addEventListener('click', ()=>{
+      if(triviaState.category === 'math'){
+        const next = Math.min(100, triviaState.level+1);
+        levelSelect.value = next;
+        startTriviaRound('math', next);
+      } else {
+        // just restart same category
+        startTriviaRound(triviaState.category, triviaState.level);
+      }
+    });
+    wrap.appendChild(adv);
+    // award points scaled by level
+    const pts = Math.max(20, Math.round(30 + triviaState.level * 1.2));
+    const pnote = document.createElement('div'); pnote.className='small'; pnote.textContent = `Awarded ${pts} points for passing this round`;
+    wrap.appendChild(pnote);
+    // celebrate
+    celebrateWin(pts, window.innerWidth/2, window.innerHeight/3);
+  } else {
+    const retry = document.createElement('button'); retry.className='btn'; retry.textContent = 'Retry Level';
+    retry.addEventListener('click', ()=> startTriviaRound(triviaState.category, triviaState.level));
+    wrap.appendChild(retry);
+    const note = document.createElement('div'); note.className='small'; note.textContent = 'Score 7/10 or more to advance.';
+    wrap.appendChild(note);
+  }
+  const back = document.createElement('button'); back.className='btn secondary'; back.textContent='Back to Hub';
+  back.addEventListener('click', ()=> showPage('hub'));
+  wrap.appendChild(document.createElement('div'));
+  wrap.appendChild(back);
+  area.appendChild(wrap);
+}
+
+/* ---------------------------
+   Rapid Fire (timed per question)
+   --------------------------- */
+let rapidState = null;
+document.getElementById('startRapid').addEventListener('click', ()=> {
+  const diff = document.getElementById('rapidDifficulty').value;
+  startRapid(diff);
 });
 
-/* Open/close in-place and initialize once */
-function openGameInline(id){
-  const area = document.getElementById('area-' + id); if(!area) return;
-  area.classList.add('show');
-  if(area.dataset.inited) return;
-  area.dataset.inited = '1';
-  initializeGame(id, area);
-  document.getElementById('status-' + id).textContent = 'Playing';
-}
-function closeGameInline(id){
-  const area = document.getElementById('area-' + id); if(!area) return;
-  area.classList.remove('show');
-  document.getElementById('status-' + id).textContent = 'Ready';
+function generateRapidQuestion(){
+  // reuse math generator but lower complexity
+  const q = generateMathQuestion(randInt(1,60));
+  // ensure numeric choices string array
+  return q;
 }
 
-/* Basic game initializers (robust, minimal) */
-function initializeGame(id, area){
-  if(id === 'trivia') initTrivia(area);
-  else if(id === 'rapid') initRapid(area);
-  else if(id === 'maze') initMaze(area);
-  else if(id === 'pattern') initPattern(area);
-  else if(id === 'prob') initProb(area);
-  else if(id === 'casino') initCasino(area);
-  else if(id === 'cups') initCups(area);
-  else if(id === 'air') initAir(area);
+function startRapid(mode){
+  const timePer = mode==='easy'?6: mode==='medium'?4 : 2.5;
+  const questions = [];
+  for(let i=0;i<15;i++) questions.push(generateRapidQuestion());
+  rapidState = {questions, i:0, score:0, timePer, timerId:null};
+  renderRapidQuestion();
 }
 
-/* Trivia: small embedded UI */
-function initTrivia(area){
-  area.innerHTML = `
-    <div style="display:flex;gap:8px;align-items:center">
-      <label>Level: <select id="trivia-level"></select></label>
-      <button id="trivia-start" class="btn">Start</button>
-      <div style="flex:1"></div>
-      <div class="small">Pass 7/10 to advance (auto points).</div>
-    </div>
-    <div id="trivia-ui" style="margin-top:10px"></div>
-  `;
-  const sel = area.querySelector('#trivia-level');
-  for(let i=1;i<=50;i++){ const o=document.createElement('option'); o.value=i; o.text='Level '+i; sel.appendChild(o); }
-  area.querySelector('#trivia-start').addEventListener('click', ()=> {
-    const level = Number(sel.value);
-    runTriviaRound(level, area.querySelector('#trivia-ui'));
-  });
-}
-function runTriviaRound(level, container){
-  const questions = []; for(let i=0;i<10;i++) questions.push(generateMathQuestion(level + Math.floor(i/4)));
-  let idx=0, score=0;
-  function render(){
-    container.innerHTML = '';
-    if(idx >= questions.length){
-      container.innerHTML = `<div style="font-weight:800">Round complete</div><div class="small">Score: ${score}/10</div>`;
-      if(score >= 7){ const pts = Math.max(25, Math.round(30 + level*1.5)); addPoints(pts); celebrate(); container.innerHTML += `<div class="small">Passed +${pts} pts</div>`; }
-      else { container.innerHTML += `<div class="small">Failed — try again</div>`; }
-      return;
-    }
-    const q = questions[idx];
-    const qdiv = document.createElement('div'); qdiv.innerHTML = `<div class="question">Q${idx+1}: ${q.q}</div>`;
-    const answers = document.createElement('div'); answers.className='answers';
-    q.choices.forEach(choice=>{
-      const b = document.createElement('button'); b.className='ans-btn'; b.textContent = choice;
-      b.onclick = ()=>{
-        Array.from(answers.children).forEach(ch=> ch.disabled=true);
-        if(choice === q.answer){ b.style.background = '#bff6d9'; const r=b.getBoundingClientRect(); addPoints(10); score++; spawnConfetti(); }
-        else b.style.background = '#ffd6d6';
-        Array.from(answers.children).forEach(ch=> { if(ch.textContent === q.answer) ch.style.border='2px solid #08c27b'; });
-        setTimeout(()=> { idx++; render(); }, 600);
-      };
-      answers.appendChild(b);
+function renderRapidQuestion(){
+  const area = document.getElementById('rapidArea'); area.innerHTML = '';
+  if(!rapidState) return;
+  const q = rapidState.questions[rapidState.i];
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = `<div class="question">Q${rapidState.i+1}: ${q.q}</div><div class="small">Time: <span id="rapidTime">${rapidState.timePer.toFixed(1)}</span>s</div>`;
+  const answrap = document.createElement('div'); answrap.className='answers';
+  q.choices.forEach((txt)=>{
+    const b = document.createElement('button'); b.className='ans-btn'; b.textContent = txt;
+    b.addEventListener('click', ()=> {
+      clearInterval(rapidState.timerId);
+      if(txt === String(q.answer)) rapidState.score++;
+      rapidState.i++;
+      if(rapidState.i < rapidState.questions.length) renderRapidQuestion();
+      else finishRapid();
     });
-    qdiv.appendChild(answers); container.appendChild(qdiv);
-  }
-  render();
-}
-
-/* Rapid: minimal */
-function initRapid(area){
-  area.innerHTML = `
-    <div style="display:flex;gap:8px;align-items:center">
-      <label>Difficulty:
-        <select id="rapid-diff"><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select>
-      </label>
-      <button id="rapid-start" class="btn">Start</button>
-      <div style="flex:1"></div>
-      <div class="small">Timed quick questions</div>
-    </div>
-    <div id="rapid-ui" style="margin-top:10px"></div>
-  `;
-  area.querySelector('#rapid-start').addEventListener('click', ()=> {
-    const diff = area.querySelector('#rapid-diff').value;
-    runRapid(area.querySelector('#rapid-ui'), diff);
+    answrap.appendChild(b);
   });
-}
-function runRapid(container, diff){
-  const timePer = diff==='easy'?6: diff==='medium'?4:2.5;
-  const questions = Array.from({length:12}, ()=> generateMathQuestion(randInt(1,45)));
-  let idx=0, score=0, timer=null;
-  function render(){
-    container.innerHTML = '';
-    if(idx >= questions.length){
-      const pts = score*8; addPoints(pts); container.innerHTML = `<div class="small">Done ${score}/${questions.length} +${pts} pts</div>`; if(score >= Math.ceil(questions.length*0.6)) celebrate();
-      return;
+  wrapper.appendChild(answrap);
+  area.appendChild(wrapper);
+  // countdown
+  let t = rapidState.timePer;
+  document.getElementById('rapidTime').textContent = t.toFixed(1);
+  rapidState.timerId = setInterval(()=>{
+    t -= 0.1; if(t < -0.1) t = -0.1;
+    document.getElementById('rapidTime').textContent = t.toFixed(1);
+    if(t <= 0){
+      clearInterval(rapidState.timerId);
+      rapidState.i++;
+      if(rapidState.i < rapidState.questions.length) renderRapidQuestion();
+      else finishRapid();
     }
-    const q = questions[idx];
-    const qdiv = document.createElement('div'); qdiv.innerHTML = `<div class="question">Q${idx+1}: ${q.q}</div><div class="small">Time: <span id="rapidTime">${timePer.toFixed(1)}</span>s</div>`;
-    const answers = document.createElement('div'); answers.className='answers';
-    q.choices.forEach(choice=>{
-      const b = document.createElement('button'); b.className='ans-btn'; b.textContent = choice;
-      b.onclick = () => { clearInterval(timer); if(choice === q.answer){ score++; addPoints(10); spawnConfetti(); } idx++; render(); };
-      answers.appendChild(b);
-    });
-    qdiv.appendChild(answers); container.appendChild(qdiv);
-    let t = timePer; const timeEl = container.querySelector('#rapidTime'); timeEl.textContent = t.toFixed(1);
-    timer = setInterval(()=> { t -= 0.1; if(timeEl) timeEl.textContent = t.toFixed(1); if(t <= 0){ clearInterval(timer); idx++; render(); } }, 100);
-  }
-  render();
+  },100);
 }
 
-/* Maze: simple visual with gate prompts */
-function initMaze(area){
-  const w = 320, h = 320;
-  area.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><button id="maze-gen" class="btn">Generate Maze</button><div style="flex:1"></div><div class="small">Use arrow keys to move (gates ask questions)</div></div><canvas id="maze-canvas" width="${w}" height="${h}" style="margin-top:8px"></canvas>`;
-  const canvas = area.querySelector('#maze-canvas'); const ctx = canvas.getContext('2d');
-  let maze = null, cell = 20, player = {x:1,y:1}, keyListener = null;
-  area.querySelector('#maze-gen').addEventListener('click', ()=>{
-    maze = makeMaze(15,15); cell = Math.floor(Math.min(w/maze.w, h/maze.h)); player = {x:1,y:1}; draw();
-    if(keyListener) document.removeEventListener('keydown', keyListener);
-    keyListener = (e)=> {
-      const map = {'ArrowUp':[0,-1],'ArrowDown':[0,1],'ArrowLeft':[-1,0],'ArrowRight':[1,0],'w':[0,-1],'s':[0,1],'a':[-1,0],'d':[1,0]};
-      const d = map[e.key]; if(!d) return;
-      const nx = player.x + d[0], ny = player.y + d[1]; if(nx<0||ny<0||nx>=maze.w||ny>=maze.h) return;
-      const cellVal = maze.grid[ny][nx];
-      if(cellVal === 1) return; // wall
-      if(cellVal === 2){ // gate
-        const q = generateMathQuestion(randInt(1,30));
-        const ans = prompt(`Gate puzzle: ${q.q}\nChoices: ${q.choices.join(' | ')}`);
-        if(ans === null) return;
-        if(String(ans).trim() === String(q.answer)){ maze.grid[ny][nx]=0; addPoints(10); draw(); } else { alert('Wrong'); return; }
-      } else player.x = nx, player.y = ny;
-      draw();
-      if(player.x === maze.exit.x && player.y === maze.exit.y){ addPoints(60); celebrate(); alert('Reached exit! +60 pts'); document.removeEventListener('keydown', keyListener); }
-    };
-    document.addEventListener('keydown', keyListener);
-  });
-  function draw(){
-    ctx.clearRect(0,0,canvas.width, canvas.height);
-    if(!maze) return;
-    for(let y=0;y<maze.h;y++){
-      for(let x=0;x<maze.w;x++){
-        const v = maze.grid[y][x];
-        if(v===1) ctx.fillStyle='#133', ctx.fillRect(x*cell,y*cell,cell,cell);
-        else if(v===2) ctx.fillStyle='#b36', ctx.fillRect(x*cell,y*cell,cell,cell);
-        else ctx.fillStyle='#f7fff7', ctx.fillRect(x*cell,y*cell,cell,cell);
+function finishRapid(){
+  const area = document.getElementById('rapidArea'); area.innerHTML = '';
+  const s = rapidState.score;
+  const pts = s*8;
+  area.innerHTML = `<div style="font-weight:800">Round complete</div><div class="small">Score: ${s} / ${rapidState.questions.length} — Awarded ${pts} pts</div>`;
+  addPoints(pts); recordHistory('win', pts);
+  if(s >= Math.ceil(rapidState.questions.length*0.6)) celebrateWin(pts, window.innerWidth/2, window.innerHeight/3);
+  document.getElementById('rapidScore').textContent = `Score: ${s}`;
+}
+
+/* ---------------------------
+   Math Maze (top-down grid with gate puzzles)
+   --------------------------- */
+let mazeState = null;
+function makeMaze(cols=11, rows=11){
+  // simple randomized DFS
+  if(cols%2===0) cols++; if(rows%2===0) rows++;
+  const grid = Array.from({length:rows}, ()=>Array(cols).fill(1));
+  for(let y=1;y<rows;y+=2) for(let x=1;x<cols;x+=2) grid[y][x] = 0;
+  function neigh(x,y){
+    const n = [];
+    if(y-2>0) n.push([x,y-2]);
+    if(y+2<rows-1) n.push([x,y+2]);
+    if(x-2>0) n.push([x-2,y]);
+    if(x+2<cols-1) n.push([x+2,y]);
+    return n;
+  }
+  const stack = [[1,1]]; const visited = new Set(['1,1']);
+  while(stack.length){
+    const [cx,cy] = stack[stack.length-1];
+    const opts = neigh(cx,cy).filter(n=>!visited.has(n.join(',')));
+    if(opts.length){
+      const n = opts[Math.floor(Math.random()*opts.length)];
+      const wx = (cx+n[0])/2, wy = (cy+n[1])/2;
+      grid[wy][wx] = 0; visited.add(n.join(',')); stack.push(n);
+    } else stack.pop();
+  }
+  return {grid, w:cols, h:rows};
+}
+
+document.getElementById('startMaze').addEventListener('click', ()=> startMathMaze());
+function startMathMaze(){
+  const area = document.getElementById('mazeArea');
+  area.innerHTML = '';
+  const size = 420;
+  const canvas = document.createElement('canvas'); canvas.width = size; canvas.height = size; area.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  const m = makeMaze(15,15);
+  mazeState = {m, cell: size / m.w, px:1, py:1, solvedGates:0, gates:[]};
+  // place gates (some wall cells will be gates requiring a math Q to open)
+  for(let g=0; g<8; g++){
+    // pick a wall cell adjacent to a path
+    let placed=false;
+    for(let attempts=0; attempts<200 && !placed; attempts++){
+      const gx = randInt(1,m.w-2), gy = randInt(1,m.h-2);
+      if(m.grid[gy][gx] === 1){
+        // check neighbors for path
+        const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+        let hasPath=false;
+        for(const d of dirs) { const nx=gx+d[0], ny=gy+d[1]; if(m.grid[ny][nx]===0) hasPath=true; }
+        if(hasPath){
+          m.grid[gy][gx]=2; // gate
+          mazeState.gates.push({x:gx,y:gy,locked:true});
+          placed=true;
+        }
       }
     }
-    ctx.fillStyle='#1a73e8'; ctx.beginPath(); ctx.arc((player.x+0.5)*cell,(player.y+0.5)*cell,cell*0.35,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle='#ff9'; ctx.fillRect(maze.exit.x*cell+cell*0.15, maze.exit.y*cell+cell*0.15, cell*0.7, cell*0.7);
   }
-  function makeMaze(cols, rows){
-    if(cols%2===0) cols++; if(rows%2===0) rows++;
-    const g = Array.from({length:rows}, ()=> Array(cols).fill(1));
-    for(let y=1;y<rows;y+=2) for(let x=1;x<cols;x+=2) g[y][x]=0;
-    function neigh(x,y){ const n=[]; if(y-2>0) n.push([x,y-2]); if(y+2<rows-1) n.push([x,y+2]); if(x-2>0) n.push([x-2,y]); if(x+2<cols-1) n.push([x+2,y]); return n; }
-    const stack=[[1,1]], visited=new Set(['1,1']);
-    while(stack.length){
-      const [cx,cy] = stack[stack.length-1]; const opts = neigh(cx,cy).filter(n=> !visited.has(n.join(',')));
-      if(opts.length){ const n = opts[Math.floor(Math.random()*opts.length)]; const wx=(cx+n[0])/2, wy=(cy+n[1])/2; g[wy][wx]=0; visited.add(n.join(',')); stack.push(n); } else stack.pop();
+  // exit at center
+  const ex = Math.floor(m.w/2), ey = Math.floor(m.h/2);
+  m.grid[ey][ex] = 3; mazeState.exit = {x:ex,y:ey};
+  drawMaze();
+  // controls: arrow keys to move on grid
+  function move(dx,dy){
+    const nx = mazeState.px + dx, ny = mazeState.py + dy;
+    if(nx<0||ny<0||nx>=m.w||ny>=m.h) return;
+    const cell = m.grid[ny][nx];
+    if(cell === 1) return; // wall
+    if(cell === 2){
+      // locked gate => pose math question
+      const q = generateMathQuestion(randInt(1,30));
+      const ans = prompt(`Gate math puzzle: ${q.q}\nChoices: ${q.choices.join(' | ')}`);
+      if(ans === null) return;
+      if(String(ans).trim() === String(q.answer)){
+        // unlock gate
+        m.grid[ny][nx] = 0; mazeState.solvedGates++;
+        recordHistory('points', 5);
+        drawMaze();
+        celebrateWin(5, canvas.getBoundingClientRect().left + (nx+0.5)*mazeState.cell, canvas.getBoundingClientRect().top + (ny+0.5)*mazeState.cell);
+      } else {
+        alert('Incorrect. Try again later.');
+        return;
+      }
+    } else {
+      mazeState.px = nx; mazeState.py = ny;
     }
-    // place some gates
-    for(let i=0;i<6;i++){ let placed=false; for(let t=0;t<300 && !placed;t++){ const gx=randInt(1,cols-2), gy=randInt(1,rows-2); if(g[gy][gx]===1){ const dirs=[[1,0],[-1,0],[0,1],[0,-1]]; if(dirs.some(d=> g[gy+d[1]][gx+d[0]]===0)){ g[gy][gx]=2; placed=true; } } } }
-    let ex=cols-2, ey=rows-2; while(g[ey][ex]!==0){ ex--; if(ex<1){ ex=cols-2; ey--; if(ey<1) break; } }
-    return {grid:g,w:cols,h:rows, exit:{x:ex,y:ey}};
+    drawMaze();
+    if(nx===mazeState.exit.x && ny===mazeState.exit.y){
+      // win
+      const pts = 80 + mazeState.solvedGates*10;
+      celebrateWin(pts, canvas.width/2, canvas.height/3);
+      alert(`You reached the center! +${pts} points`);
+      document.removeEventListener('keydown', keyMove);
+      // update top stats
+    }
+  }
+  function keyMove(e){
+    if(e.key === 'ArrowUp' || e.key === 'w') move(0,-1);
+    if(e.key === 'ArrowDown' || e.key === 's') move(0,1);
+    if(e.key === 'ArrowLeft' || e.key === 'a') move(-1,0);
+    if(e.key === 'ArrowRight' || e.key === 'd') move(1,0);
+  }
+  document.addEventListener('keydown', keyMove);
+  function drawMaze(){
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    // nice background
+    ctx.fillStyle = '#eef6ff'; ctx.fillRect(0,0,canvas.width, canvas.height);
+    // draw cells
+    for(let y=0;y<m.h;y++){
+      for(let x=0;x<m.w;x++){
+        const val = m.grid[y][x];
+        const px = x*mazeState.cell, py = y*mazeState.cell;
+        if(val === 1){ // wall
+          ctx.fillStyle = '#1b5c3a';
+          ctx.fillRect(px,py,mazeState.cell,mazeState.cell);
+          // plant overlay
+          ctx.fillStyle = 'rgba(255,255,255,0.02)';
+          ctx.fillRect(px+2,py+2,mazeState.cell-4,mazeState.cell-4);
+        } else if(val === 2){ // gate
+          ctx.fillStyle = '#ffecb3';
+          ctx.fillRect(px,py,mazeState.cell,mazeState.cell);
+          ctx.fillStyle = '#6a3bdb';
+          ctx.fillRect(px+mazeState.cell*0.2,py+mazeState.cell*0.2,mazeState.cell*0.6,mazeState.cell*0.6);
+        } else if(val === 3){
+          // exit tapestry rock
+          ctx.fillStyle = '#ffe0f0';
+          ctx.fillRect(px,py,mazeState.cell,mazeState.cell);
+          ctx.fillStyle = '#ef476f';
+          ctx.beginPath(); ctx.arc(px + mazeState.cell/2, py + mazeState.cell/2, mazeState.cell*0.24, 0, Math.PI*2); ctx.fill();
+        } else {
+          // path
+          ctx.fillStyle = '#f8fff7'; ctx.fillRect(px,py,mazeState.cell,mazeState.cell);
+        }
+      }
+    }
+    // draw player
+    ctx.fillStyle = '#1b2bff';
+    ctx.beginPath(); ctx.arc((mazeState.px+0.5)*mazeState.cell, (mazeState.py+0.5)*mazeState.cell, mazeState.cell*0.28, 0, Math.PI*2); ctx.fill();
   }
 }
 
-/* Pattern */
-function initPattern(area){
-  area.innerHTML = `
-    <div style="display:flex;gap:8px;align-items:center">
-      <label>Level: <select id="pattern-level"></select></label>
-      <button id="pattern-start" class="btn">Start</button>
-      <div style="flex:1"></div>
-      <div class="small">Finish 5 sequences.</div>
-    </div>
-    <div id="pattern-ui" style="margin-top:10px"></div>
-  `;
-  const sel = area.querySelector('#pattern-level'); for(let i=1;i<=30;i++){ const o=document.createElement('option'); o.value=i; o.text='Level '+i; sel.appendChild(o); }
-  area.querySelector('#pattern-start').addEventListener('click', ()=> startPattern(Number(sel.value), area.querySelector('#pattern-ui')));
-}
-function startPattern(level, ui){
-  let i=0, score=0;
-  function next(){
-    if(i>=5){ ui.innerHTML = `<div class="small">Completed: ${score}/5</div>`; addPoints(score*15); if(score>=3) celebrate(); return; }
-    const p = generatePattern(level + i);
-    ui.innerHTML = `<div class="small">Type: ${p.type}</div><div class="question">${p.seq.join(', ')}, ...</div><input id="pat-answer" style="padding:8px;border-radius:6px;border:1px solid #ddd"><button id="pat-submit" class="btn" style="margin-left:6px">Submit</button>`;
-    ui.querySelector('#pat-submit').onclick = ()=> {
-      const v = ui.querySelector('#pat-answer').value;
-      if(String(v) === String(p.next)){ score++; addPoints(15); celebrateConfetti(); } else alert('Wrong — '+p.next);
-      i++; next();
-    };
-  }
-  next();
-}
+/* ---------------------------
+   Pattern Builder
+   --------------------------- */
 function generatePattern(level){
-  level = Math.max(1, Math.min(30, level));
-  const types = ['arithmetic','geometric','fib-like','alternating','squares'];
+  // returns {seq:[], next: value}
+  // level controls complexity; use common sequences
+  level = Math.max(1, Math.min(50, level));
+  const types = ['arithmetic','geometric','fib-like','alternating','square'];
   const t = types[level % types.length];
-  if(t==='arithmetic'){ const a=randInt(1,6), d=randInt(1,8); return {seq:[a,a+d,a+2*d,a+3*d,a+4*d], next: a+5*d, type:'Arithmetic +'+d}; }
-  if(t==='geometric'){ const a=randInt(1,4), r=randInt(2,4); return {seq:[a,a*r,a*r*r,a*r*r*r,a*r*r*r*r], next: a*Math.pow(r,5), type:'Geometric ×'+r}; }
-  if(t==='fib-like'){ const a=randInt(1,5), b=randInt(1,6); const seq=[a,b,a+b,b+(a+b),(a+b)+(b+(a+b))]; return {seq, next: seq[3]+seq[4], type:'Fib-like'}; }
-  if(t==='alternating'){ const a=randInt(1,6), b=randInt(7,12); const seq=[a,b,a+b,a+2*b,a+3*b]; return {seq, next: a+4*b, type:'Alternating'}; }
-  const s=randInt(1,6); return {seq:[s,s+1,s+4,s+9,s+16], next: s+25, type:'Squares offset'};
+  if(t==='arithmetic'){
+    const a = randInt(1,6), d = randInt(1,10) + Math.floor(level/8);
+    const seq = [a, a+d, a+2*d, a+3*d, a+4*d];
+    return {seq, next: a+5*d, type:'Arithmetic (+'+d+')'};
+  } else if(t==='geometric'){
+    const a = randInt(1,4), r = randInt(2,4);
+    const seq = [a, a*r, a*r*r, a*r*r*r, a*r*r*r*r];
+    return {seq, next: a*Math.pow(r,5), type:'Geometric (×'+r+')'};
+  } else if(t==='fib-like'){
+    const a = randInt(1,5), b = randInt(1,6);
+    const seq = [a,b,a+b,b+(a+b),(a+b)+(b+(a+b))];
+    return {seq, next: seq[3] + seq[4], type:'Fibonacci-like'};
+  } else if(t==='alternating'){
+    const a = randInt(1,6), b = randInt(7,12);
+    const seq = [a,b,a+b,a+2*b,a+3*b];
+    return {seq, next: a+4*b, type:'Alternating'};
+  } else {
+    const start = randInt(1,6);
+    const seq = [start, start+1, start+4, start+9, start+16]; // squares pattern
+    return {seq, next: start+25, type:'Squares offset'};
+  }
+}
+document.getElementById('startPattern').addEventListener('click', ()=> {
+  const sel = document.getElementById('patternLevel'); if(!sel.options.length){ for(let i=1;i<=30;i++){ const o = document.createElement('option'); o.value=i; o.text=`Level ${i}`; sel.appendChild(o);} }
+  startPatternRound(Number(sel.value||1));
+});
+let patternState = null;
+function startPatternRound(level){
+  const area = document.getElementById('patternArea'); area.innerHTML = '';
+  patternState = {level, i:0, score:0};
+  renderPatternQuestion();
+}
+function renderPatternQuestion(){
+  const area = document.getElementById('patternArea'); area.innerHTML = '';
+  const p = generatePattern(patternState.level + patternState.i);
+  const div = document.createElement('div');
+  div.innerHTML = `<div class="small">Type: ${p.type}</div><div class="question">Complete the sequence: ${p.seq.join(', ')}, ...</div>`;
+  const input = document.createElement('input'); input.type='number'; input.style.padding='8px'; input.style.borderRadius='8px'; input.style.border='1px solid rgba(11,27,43,0.06)';
+  const ok = document.createElement('button'); ok.className='btn'; ok.textContent='Submit';
+  ok.style.marginLeft='8px';
+  ok.onclick = ()=>{
+    const val = Number(input.value);
+    if(String(val) === String(p.next)){
+      patternState.score++; addPoints(15); recordHistory('win', 15); celebrateWin(15);
+      alert('Correct! +15 pts');
+    } else alert('Incorrect. The correct answer was '+p.next);
+    patternState.i++;
+    if(patternState.i < 5) renderPatternQuestion();
+    else { area.innerHTML = `<div class="small">Round complete — Score ${patternState.score} / 5</div>`; document.getElementById('patternScore').textContent = `Score: ${patternState.score}`; }
+  };
+  div.appendChild(input); div.appendChild(ok); area.appendChild(div);
 }
 
-/* Probability */
-function initProb(area){
-  area.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><button id="prob-start" class="btn">Start</button><div style="flex:1"></div><div class="small">Pick the best EV</div></div><div id="prob-ui" style="margin-top:10px"></div>`;
-  area.querySelector('#prob-start').addEventListener('click', ()=> renderProb(area.querySelector('#prob-ui'), generateProbQuestion()));
+/* ---------------------------
+   Probability Cups
+   --------------------------- */
+document.getElementById('startProb').addEventListener('click', ()=> startProbRound());
+let probState = null;
+function startProbRound(){
+  const area = document.getElementById('probArea'); area.innerHTML = '';
+  const q = generateProbQuestion();
+  probState = {q, score:0};
+  renderProb(q);
 }
 function generateProbQuestion(){
-  const base = randInt(5,30); const p1=Math.random()*0.6+0.1, p2=Math.random()*0.6+0.05, p3=Math.random()*0.6+0.02;
-  const a1=base+randInt(0,base), a2=base+randInt(0,base+10), a3=base+randInt(0,base+20);
-  return {cups:[{label:'A',p:+p1.toFixed(2),payout:a1,ev: +(p1*a1).toFixed(2)},{label:'B',p:+p2.toFixed(2),payout:a2,ev: +(p2*a2).toFixed(2)},{label:'C',p:+p3.toFixed(2),payout:a3,ev: +(p3*a3).toFixed(2)}]};
+  // generate a simple expected value question with three cups offering different payouts/odds
+  const base = randInt(5,30);
+  // cup A: prob p1 payout a1, B p2, etc.
+  const p1 = Math.random()*0.6 + 0.1;
+  const p2 = Math.random()*0.6 + 0.05;
+  const p3 = Math.random()*0.6 + 0.02;
+  const a1 = base + randInt(0, base);
+  const a2 = base + randInt(0, base+10);
+  const a3 = base + randInt(0, base+20);
+  return {
+    prompt: `Choose the best expected value.`,
+    cups: [
+      {label:'A', p: Number(p1.toFixed(2)), payout:a1, ev: Number((p1*a1).toFixed(2))},
+      {label:'B', p: Number(p2.toFixed(2)), payout:a2, ev: Number((p2*a2).toFixed(2))},
+      {label:'C', p: Number(p3.toFixed(2)), payout:a3, ev: Number((p3*a3).toFixed(2))}
+    ]
+  };
 }
-function renderProb(container, q){
-  container.innerHTML = `<div class="question">Choose highest expected value</div>`; const row=document.createElement('div'); row.style.display='flex'; row.style.gap='8px';
-  q.cups.forEach(c=>{ const el=document.createElement('div'); el.style.flex='1'; el.style.padding='10px'; el.style.border='1px solid #eee'; el.style.borderRadius='8px'; el.style.textAlign='center'; el.innerHTML = `<div style="font-weight:800">${c.label}</div><div class="small">Payout: ${c.payout}</div><div class="small">Chance: ${Math.round(c.p*100)}%</div>`; el.onclick=()=>{ const best=q.cups.reduce((a,b)=> a.ev > b.ev ? a : b); if(c.label === best.label){ addPoints(20); celebrateConfetti(); alert('Correct +20 pts'); } else alert(`Incorrect — best was ${best.label} (EV ${best.ev})`); renderProb(container, generateProbQuestion()); }; row.appendChild(el); });
-  container.appendChild(row);
-}
-
-/* Casino: simplified embedded UI */
-function initCasino(area){
-  area.innerHTML = `
-    <div style="display:flex;gap:8px;align-items:center">
-      <div style="flex:1">
-        <div style="font-weight:800">Machine 1 — Slots</div>
-        <div style="margin-top:6px">
-          <span class="reel" id="m1r1">🔔</span>
-          <span class="reel" id="m1r2">7</span>
-          <span class="reel" id="m1r3">❤️</span>
-        </div>
-        <div style="margin-top:8px">
-          <label>Bet: <input id="m1bet" type="number" value="10" min="1" style="width:80px"></label>
-          <button id="m1spin" class="btn">Spin</button>
-          <span id="m1msg" class="small" style="margin-left:8px"></span>
-        </div>
-      </div>
-      <div style="flex:1">
-        <div style="font-weight:800">Machine 2 — Secret Cups</div>
-        <div class="small" style="margin-top:6px">Open the red-cups shuffle here.</div>
-        <div style="margin-top:8px"><button id="m2open" class="btn">Open Cups</button><span id="m2msg" class="small" style="margin-left:8px"></span></div>
-      </div>
-      <div style="flex:1">
-        <div style="font-weight:800">Machine 3 — Jackpot</div>
-        <div style="margin-top:6px">
-          <span class="reel" id="m3r1">💎</span>
-          <span class="reel" id="m3r2">🔔</span>
-          <span class="reel" id="m3r3">7</span>
-        </div>
-        <div style="margin-top:8px"><label>Bet: <input id="m3bet" type="number" value="25" min="5" style="width:80px"></label><button id="m3spin" class="btn">Spin</button><span id="m3msg" class="small" style="margin-left:8px"></span></div>
-      </div>
-    </div>
-    <div id="casino-cups" style="margin-top:10px"></div>
-  `;
-  const sy1 = ['🔔','7','❤️','♦','⭐'];
-  area.querySelector('#m1spin').addEventListener('click', ()=>{
-    const bet = Math.max(1, Number(area.querySelector('#m1bet').value || 10));
-    if(getPoints() < bet){ area.querySelector('#m1msg').textContent = 'Not enough points'; return; }
-    addPoints(-bet); area.querySelector('#m1msg').textContent = 'Spinning...';
-    const final = [sy1[randInt(0,sy1.length-1)], sy1[randInt(0,sy1.length-1)], sy1[randInt(0,sy1.length-1)]];
-    const els = [area.querySelector('#m1r1'), area.querySelector('#m1r2'), area.querySelector('#m1r3')];
-    els.forEach((el, idx)=>{
-      let ticks = 18 + idx*6;
-      const iv = setInterval(()=> el.textContent = sy1[randInt(0,sy1.length-1)], 50);
-      setTimeout(()=>{ clearInterval(iv); el.textContent = final[idx]; }, ticks*50);
-    });
-    setTimeout(()=> {
-      const [a,b,c] = final; let payout = 0;
-      if(a===b && b===c) payout = bet*10; else if(a===b || b===c || a===c) payout = bet*2;
-      if(payout>0){ addPoints(payout); area.querySelector('#m1msg').textContent = `Won ${payout}!`; celebrate(); } else area.querySelector('#m1msg').textContent = `Lost ${bet}.`;
-    }, 1400);
+function renderProb(q){
+  const area = document.getElementById('probArea'); area.innerHTML = '';
+  const header = document.createElement('div'); header.innerHTML = `<div class="question">${q.prompt}</div><div class="small">Click a cup to choose the best EV.</div>`;
+  area.appendChild(header);
+  const row = document.createElement('div'); row.style.display='flex'; row.style.gap='12px'; row.style.marginTop='12px';
+  q.cups.forEach((c, idx)=>{
+    const cup = document.createElement('div'); cup.style.flex='1'; cup.style.padding='12px'; cup.style.border='1px solid rgba(11,27,43,0.06)'; cup.style.borderRadius='10px'; cup.style.textAlign='center'; cup.style.background='#fff';
+    cup.innerHTML = `<div style="font-weight:800;font-size:18px">${c.label}</div><div class="small">Payout: ${c.payout}</div><div class="small">Chance: ${Math.round(c.p*100)}%</div>`;
+    cup.onclick = ()=>{
+      // determine correct cup by comparing ev
+      const best = q.cups.reduce((a,b)=> a.ev > b.ev ? a : b);
+      if(c.label === best.label){
+        addPoints(20); recordHistory('win',20); celebrateWin(20);
+        alert(`Correct — cup ${c.label} has the highest EV (${c.ev}). +20 pts`);
+      } else {
+        alert(`Incorrect. Best was ${best.label} (EV ${best.ev}).`);
+      }
+      renderProb(generateProbQuestion());
+    };
+    row.appendChild(cup);
   });
-
-  area.querySelector('#m2open').addEventListener('click', ()=> {
-    openCupsEmbedded(area.querySelector('#casino-cups'));
-  });
-
-  area.querySelector('#m3spin').addEventListener('click', ()=>{
-    const bet = Math.max(5, Number(area.querySelector('#m3bet').value || 25));
-    if(getPoints() < bet){ area.querySelector('#m3msg').textContent = 'Not enough points'; return; }
-    addPoints(-bet); area.querySelector('#m3msg').textContent = 'Spinning...';
-    const sy3 = ['💎','🔔','7','⭐','♦'];
-    const final = [sy3[randInt(0,sy3.length-1)], sy3[randInt(0,sy3.length-1)], sy3[randInt(0,sy3.length-1)]];
-    const els = [area.querySelector('#m3r1'), area.querySelector('#m3r2'), area.querySelector('#m3r3')];
-    els.forEach((el, idx)=>{
-      let ticks = 20 + idx*6;
-      const iv = setInterval(()=> el.textContent = sy3[randInt(0,sy3.length-1)], 50);
-      setTimeout(()=>{ clearInterval(iv); el.textContent = final[idx]; }, ticks*50);
-    });
-    setTimeout(()=> {
-      const [a,b,c] = final; const jackpot = (a==='💎' && a===b && b===c && Math.random() < 0.08); // small extra rarity
-      if(jackpot){ const reward = Math.max(200, bet*12); addPoints(reward); area.querySelector('#m3msg').textContent = `JACKPOT ${reward}!`; celebrate(); alert('JACKPOT! +'+reward+' pts'); }
-      else { let payout = 0; if(a===b && b===c) payout = bet*8; else if(a===b || b===c || a===c) payout = bet*2; if(payout>0){ addPoints(payout); area.querySelector('#m3msg').textContent = `Won ${payout}`; celebrate(); } else area.querySelector('#m3msg').textContent = `Lost ${bet}`; }
-    }, 1600);
-  });
+  area.appendChild(row);
 }
 
-/* Secret cups embedded */
-function initCups(area){
-  area.innerHTML = `<div class="small">Secret Cups: open via Casino or Play here.</div><div style="margin-top:10px"><button id="cups-start" class="btn">Start Secret Cups</button></div><div id="cups-ui" style="margin-top:8px"></div>`;
-  area.querySelector('#cups-start').addEventListener('click', ()=> openCupsEmbedded(area.querySelector('#cups-ui')));
-}
-function openCupsEmbedded(container){
-  container.innerHTML = '';
-  const status = document.createElement('div'); status.className='small'; status.textContent = 'Secret Cups — beat 3 levels for 250 pts'; container.appendChild(status);
-  startCupsLevel(container,1);
-}
-function startCupsLevel(container, level){
-  // clear previous level area
-  let lvlArea = container.querySelector('.level-area');
-  if(lvlArea) lvlArea.remove();
-  lvlArea = document.createElement('div'); lvlArea.className='level-area'; lvlArea.style.marginTop = '8px'; container.appendChild(lvlArea);
-  // create 3 cups
-  const cupEls = [];
-  let ballIndex = randInt(0,2);
-  for(let i=0;i<3;i++){
-    const cup = document.createElement('div'); cup.style.display='inline-block'; cup.style.width='90px'; cup.style.height='90px'; cup.style.background='#d33'; cup.style.marginRight='8px'; cup.style.borderRadius='8px'; cup.style.position='relative'; cup.style.cursor='pointer';
-    const ball = document.createElement('div'); ball.style.position='absolute'; ball.style.left='50%'; ball.style.bottom='14px'; ball.style.transform='translateX(-50%)'; ball.style.width='22px'; ball.style.height='22px'; ball.style.borderRadius='50%'; ball.style.background='#ffd'; ball.style.opacity=(i===ballIndex)?'1':'0';
-    cup.appendChild(ball); lvlArea.appendChild(cup); cupEls.push(cup);
+/* ---------------------------
+   Misc UI & export/reset
+   --------------------------- */
+document.getElementById('backFromTrivia').addEventListener('click', ()=> showPage('hub'));
+document.getElementById('backRapid').addEventListener('click', ()=> showPage('hub'));
+document.getElementById('backMaze').addEventListener('click', ()=> showPage('hub'));
+document.getElementById('backPattern').addEventListener('click', ()=> showPage('hub'));
+document.getElementById('backProb').addEventListener('click', ()=> showPage('hub'));
+
+document.getElementById('exportPoints').addEventListener('click', ()=>{
+  const data = {points:getPoints(), history: JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]')};
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'btl_points.json'; a.click();
+});
+document.getElementById('resetPoints').addEventListener('click', ()=> {
+  if(confirm('Reset points and history?')){
+    localStorage.removeItem(POINTS_KEY); localStorage.removeItem(HISTORY_KEY);
+    renderPoints(); renderTopList();
+    alert('Reset done.');
   }
-  // hide ball shortly
-  setTimeout(()=> cupEls.forEach(c=> c.querySelector('div').style.opacity='0'), 700);
-  // shuffle visibly (simple swapping)
-  const cfg = level===1?{sh:6,spd:200}: level===2?{sh:12,spd:150}:{sh:20,spd:100};
-  (async ()=>{
-    await new Promise(r=>setTimeout(r, 600));
-    for(let s=0;s<cfg.sh;s++){
-      const a = randInt(0,2), b = (a + randInt(1,2))%3;
-      // swap elements in DOM for visible effect
-      const ca = cupEls[a], cb = cupEls[b];
-      const cloneA = ca.cloneNode(true), cloneB = cb.cloneNode(true);
-      ca.replaceWith(cloneB); cb.replaceWith(cloneA);
-      cupEls[a] = cloneB; cupEls[b] = cloneA;
-      await new Promise(r=>setTimeout(r, cfg.spd));
-    }
-    // allow picks
-    const info = document.createElement('div'); info.className='small'; info.textContent = 'Pick a cup!';
-    lvlArea.appendChild(info);
-    cupEls.forEach((cup, idx)=>{
-      cup.onclick = ()=>{
-        cupEls.forEach(c=> c.querySelector('div').style.opacity='0');
-        cup.querySelector('div').style.opacity='1';
-        const revealedIndex = cupEls.findIndex(c=> c.querySelector('div').style.opacity === '1');
-        if(revealedIndex === idx){
-          if(level < 3){ addPoints(15); spawnConfetti(); setTimeout(()=> startCupsLevel(container, level+1), 800); }
-          else { addPoints(250); celebrate(); alert('You beat level 3! +250 pts'); container.innerHTML = '<div class="small">Completed — well done!</div>'; }
-        } else alert('Wrong — try again from the casino');
-      };
-    });
-  })();
-}
+});
 
-/* Air (simple) */
-function initAir(area){
-  area.innerHTML = `<div class="small">Air (mini) — simple play</div><canvas id="air-canvas" width="360" height="200" style="margin-top:8px"></canvas><div style="margin-top:8px"><button id="air-start" class="btn">Start</button><button id="air-stop" class="btn secondary">Stop</button></div>`;
-  const canvas = area.querySelector('#air-canvas'); const ctx = canvas.getContext('2d');
-  let state = null;
-  area.querySelector('#air-start').addEventListener('click', ()=> {
-    if(!state) initMatch(); state.running = true;
-  });
-  area.querySelector('#air-stop').addEventListener('click', ()=> { if(state) state.running = false; });
-  function initMatch(){
-    state = {paddleY:canvas.height/2, aiY:canvas.height/2, puck:{x:canvas.width/2,y:canvas.height/2,vx:3,vy:2,r:6}, scoreP:0, scoreAI:0, running:false, sonar:[]};
-    canvas.onmousemove = (e)=>{ const r=canvas.getBoundingClientRect(); state.paddleY = Math.max(12, Math.min(canvas.height-12, e.clientY - r.top)); };
-    function loop(){ requestAnimationFrame(loop); if(!state) return; if(state.running){ state.puck.x += state.puck.vx; state.puck.y += state.puck.vy; if(state.puck.y <= state.puck.r || state.puck.y >= canvas.height - state.puck.r) state.puck.vy *= -1; const dx = state.puck.x - 20, dy = state.puck.y - state.paddleY; if(Math.hypot(dx,dy) < state.puck.r + 12 && state.puck.vx < 0){ state.puck.vx = Math.abs(state.puck.vx) + 0.8; state.puck.vy += dy*0.05; } const dx2 = state.puck.x - (canvas.width-20), dy2 = state.puck.y - state.aiY; if(Math.hypot(dx2,dy2) < state.puck.r + 12 && state.puck.vx > 0){ state.puck.vx = -Math.abs(state.puck.vx) - 0.8; state.puck.vy += dy2*0.05; } state.aiY += (state.puck.y - state.aiY)*0.05; if(state.puck.x < 0){ state.scoreAI++; resetP(); } if(state.puck.x > canvas.width){ state.scoreP++; resetP(); } } draw(); }
-    function resetP(){ state.puck.x = canvas.width/2; state.puck.y = canvas.height/2; state.puck.vx = (Math.random()>0.5?3:-3); state.puck.vy = (Math.random()-0.5)*3; }
-    function draw(){ ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#e6fbff'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#1a73e8'; ctx.fillRect(12, state.paddleY-18, 8, 36); ctx.fillStyle='#ff6b6b'; ctx.fillRect(canvas.width-20, state.aiY-18, 8, 36); ctx.beginPath(); ctx.fillStyle='#06263a'; ctx.arc(state.puck.x,state.puck.y,state.puck.r,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#072033'; ctx.font='14px Inter'; ctx.fillText(state.scoreP+' - '+state.scoreAI, canvas.width/2 - 12, 16); } loop();
-  }
-}
-
-/* --------------------------
-   Helpers used above
-   -------------------------- */
+/* helper random */
 function randInt(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
-function generateMathQuestion(level){
-  level = Math.max(1, Math.min(50, Math.round(level)));
-  if(level <= 8){ const a=randInt(1,12), b=randInt(1,12); return {q:`${a} + ${b} = ?`, choices: shuffle([String(a+b), String(a+b+1), String(Math.abs(a-b)), String(a*b)]), answer:String(a+b)}; }
-  if(level <= 16){ const a=randInt(2,15), b=randInt(2,12); return {q:`${a} × ${b} = ?`, choices: shuffle([String(a*b), String(a*b+randInt(1,6)), String(a*b-randInt(1,6)), String(a+b)]), answer:String(a*b)}; }
-  if(level <= 24){ const a=randInt(10,80), b=randInt(2,9); return {q:`${a} ÷ ${b} = ? (nearest int)`, choices: shuffle([String(Math.round(a/b)), String(Math.floor(a/b)), String(Math.ceil(a/b)), String(Math.round((a+b)/b))]), answer:String(Math.round(a/b))}; }
-  if(level <= 32){ const a=randInt(2,12), b=randInt(2,6); return {q:`What is ${a}^${b}?`, choices: shuffle([String(Math.pow(a,b)), String(Math.pow(a,b)+randInt(1,20)), String(Math.pow(a+1,b)), String(Math.pow(a,b)-randInt(1,20))]), answer:String(Math.pow(a,b))}; }
-  if(level <= 40){ const a=randInt(10,60), b=randInt(2,12), c=randInt(1,10); const val = a + b*c; return {q:`${a} + ${b} × ${c} = ?`, choices: shuffle([String(val), String(val+1), String(val-1), String(a*b+c)]), answer:String(val)}; }
-  if(level <= 46){ const a=randInt(1,9), b=randInt(1,9), c=randInt(1,9); const val = Number(((a/b)+(c/b)).toFixed(2)); return {q:`${a}/${b} + ${c}/${b} = ? (2 dp)`, choices: shuffle([String(val), String(Number((val+0.5).toFixed(2))), String(Number((val-0.25).toFixed(2))), String(Number((val+0.1).toFixed(2)))]), answer:String(val)}; }
-  const a=randInt(2,12), b=randInt(2,12), c=randInt(1,10); const val = (a*b + c)/a; return {q:`Solve: ${a}x - ${c} = ${a*b}. x = ?`, choices: shuffle([String(val), String(Math.floor(val)), String(Math.ceil(val)), String(b)]), answer:String(val)};
-}
-function shuffle(arr){ const r = arr.slice(); for(let i=r.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [r[i], r[j]]=[r[j], r[i]] } return r; }
-function celebrateConfetti(){ spawnConfetti(); }
-function spawnConfetti(){ spawnConfettiAt(); }
-function spawnConfettiAt(x=window.innerWidth/2, y=window.innerHeight/3){ for(let i=0;i<60;i++) particles.push({x,y,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.8)*6,life:80+Math.random()*40,size:3+Math.random()*7,h:Math.random()*360}); }
 
-/* initial state: points shown */
-renderPoints();
+/* initial setup: populate pattern levels select */
+(function init(){
+  const sel = document.getElementById('patternLevel');
+  for(let i=1;i<=30;i++){ const o=document.createElement('option'); o.value=i; o.text=`Level ${i}`; sel.appendChild(o); }
+  // default points if none
+  if(!localStorage.getItem(POINTS_KEY)) setPoints(0);
+  renderPoints(); renderTopList();
+})();
 
 </script>
 </body>
