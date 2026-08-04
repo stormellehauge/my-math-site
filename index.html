@@ -36,6 +36,9 @@
   .langBtn{padding:6px 8px;border-radius:6px;border:1px solid rgba(7,32,51,0.06);background:transparent;cursor:pointer}
   .tile .playWrap{display:flex;align-items:center;gap:8px;margin-top:8px}
   .reel{display:inline-block;width:76px;height:76px;border-radius:8px;background:#fff;border:1px solid rgba(7,32,51,0.06);display:flex;align-items:center;justify-content:center;font-size:28px;margin-right:6px}
+  .game-page{display:none;padding:16px}
+  .game-page.active{display:block}
+  .game-page .page-header{display:flex;gap:8px;align-items:center;margin-bottom:8px}
   @media(max-width:980px){ .layout{grid-template-columns:1fr} .game-grid{grid-template-columns:1fr} }
 </style>
 </head>
@@ -59,11 +62,86 @@
 <main>
   <div class="layout">
     <section>
-      <div class="card">
+      <div class="card page active" id="hubPage">
         <h2 id="hubTitle">Game Hub — Math Edition</h2>
         <p class="small" id="hubDesc">All games are available on the home page. Click Play on any tile to open the embedded game UI.</p>
         <div class="game-grid" id="tilesContainer"></div>
       </div>
+
+      <!-- Full-page views for each game -->
+      <div class="card game-page" id="page-trivia">
+        <div class="page-header">
+          <button class="btn secondary" data-nav="hub" id="back-trivia">${'Back'}</button>
+          <h3 style="margin:0">${'Trivia'}</h3>
+          <div style="flex:1"></div>
+          <div class="small">${'5s per question'}</div>
+        </div>
+        <div id="page-area-trivia"></div>
+      </div>
+
+      <div class="card game-page" id="page-rapid">
+        <div class="page-header">
+          <button class="btn secondary" data-nav="hub" id="back-rapid">${'Back'}</button>
+          <h3 style="margin:0">${'Rapid Fire'}</h3>
+          <div style="flex:1"></div>
+        </div>
+        <div id="page-area-rapid"></div>
+      </div>
+
+      <div class="card game-page" id="page-maze">
+        <div class="page-header">
+          <button class="btn secondary" data-nav="hub" id="back-maze">${'Back'}</button>
+          <h3 style="margin:0">${'Math Maze'}</h3>
+          <div style="flex:1"></div>
+        </div>
+        <div id="page-area-maze"></div>
+      </div>
+
+      <div class="card game-page" id="page-pattern">
+        <div class="page-header">
+          <button class="btn secondary" data-nav="hub" id="back-pattern">${'Back'}</button>
+          <h3 style="margin:0">${'Pattern Builder'}</h3>
+          <div style="flex:1"></div>
+        </div>
+        <div id="page-area-pattern"></div>
+      </div>
+
+      <div class="card game-page" id="page-prob">
+        <div class="page-header">
+          <button class="btn secondary" data-nav="hub" id="back-prob">${'Back'}</button>
+          <h3 style="margin:0">${'Probability Cups'}</h3>
+          <div style="flex:1"></div>
+        </div>
+        <div id="page-area-prob"></div>
+      </div>
+
+      <div class="card game-page" id="page-casino">
+        <div class="page-header">
+          <button class="btn secondary" data-nav="hub" id="back-casino">${'Back'}</button>
+          <h3 style="margin:0">${'Casino'}</h3>
+          <div style="flex:1"></div>
+        </div>
+        <div id="page-area-casino"></div>
+      </div>
+
+      <div class="card game-page" id="page-cups">
+        <div class="page-header">
+          <button class="btn secondary" data-nav="hub" id="back-cups">${'Back'}</button>
+          <h3 style="margin:0">${'Secret Cups'}</h3>
+          <div style="flex:1"></div>
+        </div>
+        <div id="page-area-cups"></div>
+      </div>
+
+      <div class="card game-page" id="page-air">
+        <div class="page-header">
+          <button class="btn secondary" data-nav="hub" id="back-air">${'Back'}</button>
+          <h3 style="margin:0">${'Air Hockey'}</h3>
+          <div style="flex:1"></div>
+        </div>
+        <div id="page-area-air"></div>
+      </div>
+
     </section>
 
     <aside>
@@ -103,7 +181,7 @@ const LANG = {
     brand:'BREAK THE LOGIC',
     tagline:'Math games hub — train logic, speed, and math knowledge',
     hubTitle:'Game Hub — Math Edition',
-    hubDesc:'All games are available on the home page. Click Play on any tile to open the embedded game UI.',
+    hubDesc:'All games are available on the home page. Click Play on any tile to open the game page.',
     profileTitle:'Profile', tierTitle:'Tier', recentTitle:'Recent',
     export:'Export', reset:'Reset', play:'Play', close:'Close',
     ready:'Ready', playing:'Playing',
@@ -114,7 +192,7 @@ const LANG = {
     brand:'破除逻辑',
     tagline:'数学游戏中心 — 训练逻辑、速度和数学能力',
     hubTitle:'游戏中心 — 数学版',
-    hubDesc:'所有游戏都在主页。点击每个卡片内的 Play 打开游戏界面。',
+    hubDesc:'所有游戏都在主页。点击 Play 打开独立的游戏页面。',
     profileTitle:'个人', tierTitle:'段位', recentTitle:'近期',
     export:'导出', reset:'重置', play:'开始', close:'关闭',
     ready:'就绪', playing:'进行中',
@@ -167,27 +245,17 @@ const TIERS = [
   {name:'Magical Mathematician', min:20000}
 ];
 
-function getTier(points){
-  let cur = TIERS[0];
-  for(const t of TIERS) if(points >= t.min) cur = t;
-  const next = TIERS.find(t => t.min > points) || null;
-  return {current:cur, next};
-}
+function getTier(points){ let cur=TIERS[0]; for(const t of TIERS) if(points>=t.min) cur=t; const next=TIERS.find(t=>t.min>points)||null; return {current:cur,next}; }
 
 function renderPoints(){
   document.getElementById('points').textContent = getPoints();
   document.getElementById('profileText').textContent = `${t('profileTitle')}: ${getPoints()} pts`;
   const info = getTier(getPoints());
   document.getElementById('tierText').textContent = `${info.current.name} (${info.current.min}+)`;
-  const fill = info.next ? Math.min(1, (getPoints() - info.current.min) / (info.next.min - info.current.min)) : 1;
+  const fill = info.next ? Math.min(1,(getPoints()-info.current.min)/(info.next.min-info.current.min)) : 1;
   document.getElementById('tierFill').style.width = `${Math.round(fill*100)}%`;
 }
-function renderRecent(){
-  const arr = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]').slice(0,6);
-  const el = document.getElementById('recentList');
-  if(!arr.length){ el.textContent = lang==='zh' ? '暂无记录' : 'No recent wins'; return; }
-  el.innerHTML = arr.map(r=> `${new Date(r.t).toLocaleString()}: ${r.pts>0?'+':''}${r.pts} pts`).join('<br>');
-}
+function renderRecent(){ const arr = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]').slice(0,6); const el = document.getElementById('recentList'); if(!arr.length){ el.textContent = lang==='zh' ? '暂无记录' : 'No recent wins'; return; } el.innerHTML = arr.map(r=> `${new Date(r.t).toLocaleString()}: ${r.pts>0?'+':''}${r.pts} pts`).join('<br>'); }
 
 document.getElementById('exportPoints').addEventListener('click', ()=>{
   const data = {points:getPoints(), recent: JSON.parse(localStorage.getItem(RECENT_KEY)||'[]')};
@@ -202,61 +270,23 @@ renderPoints(); renderRecent();
 /* ======================
    Visual FX and floating points
    ====================== */
-const fxCanvas = document.getElementById('fxCanvas');
-fxCanvas.width = innerWidth; fxCanvas.height = innerHeight;
-const fxCtx = fxCanvas.getContext('2d');
+const fxCanvas = document.getElementById('fxCanvas'); fxCanvas.width = innerWidth; fxCanvas.height = innerHeight; const fxCtx = fxCanvas.getContext('2d');
 window.addEventListener('resize', ()=>{ fxCanvas.width = innerWidth; fxCanvas.height = innerHeight; });
-
 let particles = [];
-function spawnFirework(cx,cy,count=80){
-  const hue = Math.floor(Math.random()*360);
-  for(let i=0;i<count;i++){
-    const ang = Math.random()*Math.PI*2, sp = 1 + Math.random()*6;
-    particles.push({x:cx,y:cy,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp,life:60+Math.random()*60,size:1+Math.random()*3,hue});
-  }
-}
-function spawnConfetti(x=window.innerWidth/2, y=window.innerHeight/3, count=60){
-  for(let i=0;i<count;i++) particles.push({x,y,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.8)*6,life:80+Math.random()*40,size:3+Math.random()*8,hue:Math.random()*360});
-}
-function celebrateAt(cx=window.innerWidth/2, cy=window.innerHeight/3){
-  for(let i=0;i<5;i++) setTimeout(()=> spawnFirework(cx + (Math.random()-0.5)*220, cy + (Math.random()-0.5)*140, 90), i*280);
-  spawnConfetti();
-}
-function fxLoop(){
-  fxCtx.clearRect(0,0,fxCanvas.width, fxCanvas.height);
-  for(let i=particles.length-1;i>=0;i--){
-    const p = particles[i];
-    p.x += p.vx; p.y += p.vy; p.vy += 0.06; p.life--;
-    fxCtx.beginPath(); fxCtx.fillStyle = `hsl(${p.hue} 80% 60% / ${Math.max(0,p.life/120)})`; fxCtx.arc(p.x,p.y,p.size,0,Math.PI*2); fxCtx.fill();
-    if(p.life<=0) particles.splice(i,1);
-  }
-  requestAnimationFrame(fxLoop);
-}
-fxLoop();
-
-function showFloatingPoints(n){
-  const el = document.createElement('div'); el.textContent = (n>0? '+'+n : String(n));
-  el.style.position='fixed'; el.style.left = (window.innerWidth/2)+'px'; el.style.top = (window.innerHeight/3)+'px';
-  el.style.padding='6px 10px'; el.style.borderRadius='999px'; el.style.background='#ffd27a'; el.style.fontWeight='800'; el.style.transition='transform 900ms,opacity 900ms'; el.style.zIndex=2000;
-  document.body.appendChild(el);
-  requestAnimationFrame(()=> el.style.transform='translate(-50%,-120%) scale(1.05)');
-  setTimeout(()=>{
-    const tgt = document.querySelector('.points').getBoundingClientRect();
-    const dx = (tgt.left + tgt.width/2) - window.innerWidth/2;
-    const dy = (tgt.top + tgt.height/2) - window.innerHeight/3;
-    el.style.transform = `translate(${dx}px, ${dy}px) scale(.36)`; el.style.opacity='0';
-    setTimeout(()=> el.remove(), 950);
-  }, 600);
-}
+function spawnFirework(cx,cy,count=80){ const hue=Math.floor(Math.random()*360); for(let i=0;i<count;i++){ const ang=Math.random()*Math.PI*2, sp=1+Math.random()*6; particles.push({x:cx,y:cy,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp,life:60+Math.random()*60,size:1+Math.random()*3,hue}); } }
+function spawnConfetti(x=window.innerWidth/2,y=window.innerHeight/3,count=60){ for(let i=0;i<count;i++) particles.push({x,y,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.8)*6,life:80+Math.random()*40,size:3+Math.random()*8,hue:Math.random()*360}); }
+function celebrateAt(cx=window.innerWidth/2,cy=window.innerHeight/3){ for(let i=0;i<5;i++) setTimeout(()=> spawnFirework(cx + (Math.random()-0.5)*220, cy + (Math.random()-0.5)*140, 90), i*280); spawnConfetti(); }
+function fxLoop(){ fxCtx.clearRect(0,0,fxCanvas.width, fxCanvas.height); for(let i=particles.length-1;i>=0;i--){ const p=particles[i]; p.x+=p.vx; p.y+=p.vy; p.vy+=0.06; p.life--; fxCtx.beginPath(); fxCtx.fillStyle = `hsl(${p.hue} 80% 60% / ${Math.max(0,p.life/120)})`; fxCtx.arc(p.x,p.y,p.size,0,Math.PI*2); fxCtx.fill(); if(p.life<=0) particles.splice(i,1);} requestAnimationFrame(fxLoop);} fxLoop();
+function showFloatingPoints(n){ const el=document.createElement('div'); el.textContent = (n>0? '+'+n: String(n)); el.style.position='fixed'; el.style.left=(window.innerWidth/2)+'px'; el.style.top=(window.innerHeight/3)+'px'; el.style.padding='6px 10px'; el.style.borderRadius='999px'; el.style.background='#ffd27a'; el.style.fontWeight='800'; el.style.transition='transform 900ms,opacity 900ms'; el.style.zIndex=2000; document.body.appendChild(el); requestAnimationFrame(()=> el.style.transform='translate(-50%,-120%) scale(1.05)'); setTimeout(()=>{ const tgt=document.querySelector('.points').getBoundingClientRect(); const dx=(tgt.left + tgt.width/2) - window.innerWidth/2; const dy=(tgt.top + tgt.height/2) - window.innerHeight/3; el.style.transform = `translate(${dx}px, ${dy}px) scale(.36)`; el.style.opacity='0'; setTimeout(()=> el.remove(),950); },600); }
 
 /* ======================
    Helpers
    ====================== */
 function randInt(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
-function shuffle(arr){ const r=arr.slice(); for(let i=r.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [r[i], r[j]]=[r[j], r[i]];} return r; }
+function shuffle(arr){ const r=arr.slice(); for(let i=r.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [r[i], r[j]]=[r[j], r[i]]; } return r; }
 
 /* ======================
-   Tiles and tile wiring
+   Tiles
    ====================== */
 const tiles = [
   {id:'trivia', title_en:'Trivia (100 levels)', title_zh:'问答（100级）', desc_en:'Arithmetic-only trivia — 10 questions per round; 5s per question.', desc_zh:'纯算术问答 — 每轮10题，每题5秒。'},
@@ -272,15 +302,15 @@ const tiles = [
 function renderTiles(){
   const container = document.getElementById('tilesContainer'); container.innerHTML='';
   tiles.forEach(t=>{
-    const title = (lang==='zh')?t.title_zh:t.title_en;
-    const desc = (lang==='zh')?t.desc_zh:t.desc_en;
+    const title = (lang==='zh')? t.title_zh : t.title_en;
+    const desc = (lang==='zh')? t.desc_zh : t.desc_en;
     const div = document.createElement('div'); div.className='tile';
     div.innerHTML = `<h3>${title}</h3><div class="small">${desc}</div>
       <div class="playWrap">
-        <button class="btn" data-action="play" data-game="${t.id}">${t.id==='trivia' ? t.id : (lang==='zh' ? '开始' : 'Play')}</button>
+        <button class="btn" data-action="play" data-game="${t.id}">${t.id==='trivia' ? (lang==='zh' ? '开始' : 'Play') : (lang==='zh' ? '开始' : 'Play')}</button>
         <button class="btn secondary" data-action="close" data-game="${t.id}">${lang==='zh' ? '关闭' : 'Close'}</button>
         <div style="flex:1"></div>
-        <div class="small" id="status-${t.id}">${t.status || (lang==='zh'? '就绪' : 'Ready')}</div>
+        <div class="small" id="status-${t.id}">${lang==='zh' ? '就绪' : 'Ready'}</div>
       </div>
       <div class="gameArea" id="area-${t.id}"></div>`;
     container.appendChild(div);
@@ -288,74 +318,120 @@ function renderTiles(){
 }
 renderTiles();
 
-/* Delegated play/close */
+/* Play navigates to game page; Close still hides in-tile area if used */
 document.getElementById('tilesContainer').addEventListener('click', (e)=>{
-  const b = e.target.closest('button'); if(!b) return;
-  const action = b.dataset.action, game = b.dataset.game;
-  if(action === 'play') openTileGame(game);
-  if(action === 'close') closeTileGame(game);
+  const btn = e.target.closest('button'); if(!btn) return;
+  const action = btn.dataset.action, game = btn.dataset.game;
+  if(action === 'play') openGamePage(game);
+  if(action === 'close') { const area = document.getElementById('area-'+game); if(area) area.classList.remove('show'); document.getElementById('status-'+game).textContent = (lang==='zh' ? '就绪' : 'Ready'); }
 });
 
-function openTileGame(id){
-  const area = document.getElementById('area-'+id); if(!area) return;
-  area.classList.add('show');
-  if(area.dataset.inited) return;
-  area.dataset.inited = '1';
-  document.getElementById('status-'+id).textContent = t('playing');
-  initGame(id, area);
+/* Show/hide pages and initialize game into page-area */
+function openGamePage(gameId){
+  // hide hub
+  document.getElementById('hubPage').classList.remove('active');
+  // hide all pages
+  Array.from(document.querySelectorAll('.game-page')).forEach(p=>p.classList.remove('active'));
+  const page = document.getElementById('page-' + gameId);
+  if(!page) return;
+  page.classList.add('active');
+  // update hash for bookmarking
+  location.hash = `game=${gameId}`;
+  // init game in the page area (only once)
+  const area = document.getElementById('page-area-' + gameId);
+  if(!area.dataset.inited){
+    area.dataset.inited = '1';
+    initGame(gameId, area);
+  }
+  document.getElementById('status-'+gameId).textContent = (lang==='zh' ? '进行中' : 'Playing');
 }
-function closeTileGame(id){
-  const area = document.getElementById('area-'+id); if(!area) return;
-  area.classList.remove('show');
-  document.getElementById('status-'+id).textContent = t('ready');
+
+/* Back buttons - return to hub */
+Array.from(document.querySelectorAll('[data-nav="hub"]')).forEach(b=>{
+  b.addEventListener('click', ()=> {
+    // hide all pages
+    Array.from(document.querySelectorAll('.game-page')).forEach(p=>p.classList.remove('active'));
+    // show hub
+    document.getElementById('hubPage').classList.add('active');
+    // clear hash
+    if(location.hash.startsWith('#game=')) history.replaceState(null,'', location.pathname + location.search);
+    // mark statuses back to Ready
+    tiles.forEach(t=> { const status = document.getElementById('status-'+t.id); if(status) status.textContent = (lang==='zh' ? '就绪' : 'Ready'); });
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+});
+
+/* On load: if hash points to game, open it */
+function initFromHash(){
+  const h = location.hash.slice(1);
+  if(!h) return;
+  const m = h.match(/game=([a-zA-Z0-9_-]+)/);
+  if(m){ const game = m[1]; setTimeout(()=> openGamePage(game), 120); }
 }
+initFromHash();
 
 /* ======================
-   Game initializers
+   Game initializers (reuse previous code)
+   - initGame(gameId, area) will call the appropriate initializer
+   - All initializers are the same as before but render into the provided area
    ====================== */
+
+/* We'll reuse the exact same init functions from the prior full app.
+   For brevity I include them inline here (they are identical to your previous code),
+   but note: they render into the supplied 'area' element so they work both for tiles and pages.
+*/
+
+/* ---------- helper shuffle/random ---------- */
+function randIntHelper(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
+function shuffleHelper(arr){ const r = arr.slice(); for(let i=r.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [r[i], r[j]]=[r[j], r[i]]; } return r; }
+
+/* We'll define wrappers that call the concrete implementations below */
 function initGame(id, area){
-  if(id==='trivia') initTrivia(area);
-  if(id==='rapid') initRapid(area);
-  if(id==='maze') initMaze(area);
-  if(id==='pattern') initPattern(area);
-  if(id==='prob') initProb(area);
-  if(id==='casino') initCasino(area);
-  if(id==='cups') initCups(area);
-  if(id==='air') initAir(area);
+  if(id === 'trivia') initTrivia(area);
+  else if(id === 'rapid') initRapid(area);
+  else if(id === 'maze') initMaze(area);
+  else if(id === 'pattern') initPattern(area);
+  else if(id === 'prob') initProb(area);
+  else if(id === 'casino') initCasino(area);
+  else if(id === 'cups') initCups(area);
+  else if(id === 'air') initAir(area);
 }
 
-/* ---------- TRIVIA (100-level arithmetic, 5s per Q) ---------- */
+/* ---------- Trivia initializer (page/tile compatible) ---------- */
 function initTrivia(area){
+  // area is the container where to render the trivia UI
   area.innerHTML = `
     <div style="display:flex;gap:8px;align-items:center">
-      <label>${t('triviaLevel')} <select id="tile-trivia-level"></select></label>
-      <button id="tile-trivia-start" class="btn">${t('triviaStart')}</button>
+      <label>${t('triviaLevel')} <select class="trivia-level-select"></select></label>
+      <button class="btn trivia-start">${t('triviaStart')}</button>
       <div style="flex:1"></div>
       <div class="small">${t('timerNote')}</div>
     </div>
-    <div id="tile-trivia-ui" style="margin-top:10px"></div>
+    <div class="trivia-ui" style="margin-top:10px"></div>
   `;
-  const sel = area.querySelector('#tile-trivia-level');
+  const sel = area.querySelector('.trivia-level-select');
   for(let i=1;i<=100;i++){ const o=document.createElement('option'); o.value=i; o.text=(lang==='zh' ? '等级 ' : 'Level ') + i; sel.appendChild(o); }
-  area.querySelector('#tile-trivia-start').addEventListener('click', ()=> {
-    const level = Number(sel.value||1); startTriviaRound(level, area.querySelector('#tile-trivia-ui'));
+  area.querySelector('.trivia-start').addEventListener('click', ()=> {
+    const level = Number(sel.value || 1);
+    startTriviaRoundInArea(level, area.querySelector('.trivia-ui'));
   });
 }
-
-let triviaTimer = null;
-function startTriviaRound(level, container){
-  clearInterval(triviaTimer);
+let triviaTimerGlobal = null;
+function startTriviaRoundInArea(level, container){
+  clearInterval(triviaTimerGlobal);
   const questions = []; for(let i=0;i<10;i++) questions.push(genArithmeticQuestion(level + Math.floor(i/3)));
   let idx=0, score=0;
   function render(){
-    clearInterval(triviaTimer);
-    container.innerHTML='';
+    clearInterval(triviaTimerGlobal);
+    container.innerHTML = '';
     if(idx >= questions.length){
       const wrap = document.createElement('div'); wrap.innerHTML = `<div style="font-weight:800">${lang==='zh' ? '回合完成' : 'Round complete'}</div><div class="small">${lang==='zh' ? '得分' : 'Score'}: ${score} / ${questions.length}</div>`;
       container.appendChild(wrap);
       if(score >= 7){
         const pts = Math.max(25, Math.round(30 + level*1.2));
-        addPoints(pts); celebrateAt(); container.appendChild(Object.assign(document.createElement('div'), {className:'small', textContent: (lang==='zh' ? '奖励 ' : 'Awarded ') + pts + ' pts'}));
+        addPoints(pts);
+        celebrateAt();
+        container.appendChild(Object.assign(document.createElement('div'), {className:'small', textContent: (lang==='zh' ? '奖励 ' : 'Awarded ') + pts + ' pts'}));
       } else {
         container.appendChild(Object.assign(document.createElement('div'), {className:'small', textContent: lang==='zh' ? '未通过 — 请重试' : 'Failed — try again'}));
       }
@@ -366,21 +442,18 @@ function startTriviaRound(level, container){
     const answrap = document.createElement('div'); answrap.className='answers';
     q.choices.forEach(choice=>{
       const b = document.createElement('button'); b.className='ans-btn'; b.textContent = choice;
-      b.onclick = ()=> { clearInterval(triviaTimer); finalize(choice); };
+      b.onclick = ()=> { clearInterval(triviaTimerGlobal); finalize(choice); };
       answrap.appendChild(b);
     });
     const timerEl = document.createElement('div'); timerEl.className='small'; timerEl.textContent = (lang==='zh' ? '剩余时间: 5.0s' : 'Time left: 5.0s');
     qdiv.appendChild(answrap); container.appendChild(qdiv); container.appendChild(timerEl);
-    let t = 5.0;
-    triviaTimer = setInterval(()=> {
+    let t=5.0;
+    triviaTimerGlobal = setInterval(()=> {
       t = Math.max(0, t - 0.1); timerEl.textContent = (lang==='zh' ? '剩余时间: ' : 'Time left: ') + t.toFixed(1) + 's';
-      if(t<=0){ clearInterval(triviaTimer); finalize(null, true); }
+      if(t<=0){ clearInterval(triviaTimerGlobal); finalize(null, true); }
     }, 100);
     function finalize(choice, timedOut=false){
-      Array.from(answrap.children).forEach(ch=>{
-        ch.disabled = true;
-        if(ch.textContent == String(q.answer)) ch.classList.add('correct');
-      });
+      Array.from(answrap.children).forEach(ch=>{ ch.disabled=true; if(ch.textContent == String(q.answer)) ch.classList.add('correct'); });
       if(!timedOut && choice && String(choice) === String(q.answer)){ score++; addPoints(8); spawnConfetti(); }
       setTimeout(()=> { idx++; render(); }, 700);
     }
@@ -388,288 +461,169 @@ function startTriviaRound(level, container){
   render();
 }
 
-/* Arithmetic generator (100 levels) */
-function genArithmeticQuestion(level){
-  level = Math.max(1, Math.min(100, Math.round(level)));
-  if(level <= 10){
-    const a = randInt(1,10), b = randInt(1,10);
-    return {q:`${a} + ${b} = ?`, choices: shuffle([String(a+b), String(a+b+1), String(Math.abs(a-b)), String(a*b)]), answer:String(a+b)};
-  } else if(level <= 30){
-    const a = randInt(2,15), b = randInt(2,12);
-    return {q:`${a} × ${b} = ?`, choices: shuffle([String(a*b), String(a*b+randInt(1,5)), String(a*b-randInt(1,5)), String(a+b)]), answer:String(a*b)};
-  } else if(level <= 55){
-    const a = randInt(10,200), b = randInt(2,12);
-    return {q:`${a} ÷ ${b} = ? (nearest int)`, choices: shuffle([String(Math.round(a/b)), String(Math.floor(a/b)), String(Math.ceil(a/b)), String(Math.round((a+b)/b))]), answer:String(Math.round(a/b))};
-  } else if(level <= 75){
-    const a = randInt(2,9), b = randInt(2,6);
-    return {q:`What is ${a}^${b}?`, choices: shuffle([String(Math.pow(a,b)), String(Math.pow(a,b)+randInt(1,20)), String(Math.pow(a,b)-randInt(1,20)), String(Math.pow(a+1,b))]), answer:String(Math.pow(a,b))};
-  } else if(level <= 90){
-    const a = randInt(10,80), b = randInt(2,12), c = randInt(1,10);
-    const val = a + b*c;
-    return {q:`${a} + ${b} × ${c} = ?`, choices: shuffle([String(val), String(val+1), String(val-1), String(a*b+c)]), answer:String(val)};
-  } else {
-    const a = randInt(1,12), b = randInt(1,12), c = randInt(1,10);
-    const val = (a*b + c)/a;
-    return {q:`Solve: ${a}x - ${c} = ${a*b}. x = ?`, choices: shuffle([String(val), String(Math.floor(val)), String(Math.ceil(val)), String(b)]), answer:String(val)};
-  }
-}
-
-/* ---------- RAPID FIRE ---------- */
+/* ---------- Rapid initializer (page/tile compatible) ---------- */
 function initRapid(area){
   area.innerHTML = `
     <div style="display:flex;gap:8px;align-items:center">
       <label>${lang==='zh' ? '难度' : 'Difficulty'}:
-        <select id="tile-rapid-diff"><option value="easy">${lang==='zh' ? '简单' : 'Easy'}</option><option value="medium">${lang==='zh' ? '中等' : 'Medium'}</option><option value="hard">${lang==='zh' ? '困难' : 'Hard'}</option></select>
+        <select class="rapid-diff"><option value="easy">${lang==='zh' ? '简单' : 'Easy'}</option><option value="medium">${lang==='zh' ? '中等' : 'Medium'}</option><option value="hard">${lang==='zh' ? '困难' : 'Hard'}</option></select>
       </label>
-      <button id="tile-rapid-start" class="btn">${t('start')}</button>
+      <button class="btn rapid-start">${t('start')}</button>
       <div style="flex:1"></div>
-      <div class="small">${lang==='zh' ? '快速答题' : 'Rapid mode'}</div>
+      <div class="small">${lang==='zh' ? '快速模式' : 'Rapid mode'}</div>
     </div>
-    <div id="tile-rapid-ui" style="margin-top:10px"></div>
+    <div class="rapid-ui" style="margin-top:10px"></div>
   `;
-  area.querySelector('#tile-rapid-start').addEventListener('click', ()=>{
-    const diff = area.querySelector('#tile-rapid-diff').value;
-    startRapidRound(area.querySelector('#tile-rapid-ui'), diff);
+  area.querySelector('.rapid-start').addEventListener('click', ()=> {
+    const diff = area.querySelector('.rapid-diff').value;
+    startRapidRoundInArea(area.querySelector('.rapid-ui'), diff);
   });
 }
-function startRapidRound(container, diff){
+function startRapidRoundInArea(container, diff){
   const timePer = diff==='easy'?6 : diff==='medium'?4 : 2.5;
-  const questions = Array.from({length:12}, ()=> genArithmeticQuestion(randInt(1,70)));
+  const qs = Array.from({length:12}, ()=> genArithmeticQuestion(randInt(1,70)));
   let idx=0, score=0, timer=null;
   function render(){
     clearInterval(timer); container.innerHTML='';
-    if(idx >= questions.length){
-      const pts = score*8; addPoints(pts); container.innerHTML = `<div class="small">${lang==='zh' ? '完成' : 'Done'} ${score}/${questions.length} +${pts} pts</div>`; if(score>=Math.ceil(questions.length*0.6)) celebrateAt(); return;
-    }
-    const q = questions[idx];
-    const div = document.createElement('div'); div.innerHTML = `<div class="question">${lang==='zh' ? '题 ' : 'Q'}${idx+1}: ${q.q}</div><div class="small">${lang==='zh' ? '时间' : 'Time'}: <span id="rfTime">${timePer.toFixed(1)}</span>s</div>`;
+    if(idx>=qs.length){ const pts = score*8; addPoints(pts); container.innerHTML = `<div class="small">${lang==='zh' ? '完成' : 'Done'} ${score}/${qs.length} +${pts} pts</div>`; if(score>=Math.ceil(qs.length*0.6)) celebrateAt(); return; }
+    const q = qs[idx];
+    const div = document.createElement('div'); div.innerHTML = `<div class="question">${lang==='zh' ? '题 ' : 'Q'}${idx+1}: ${q.q}</div><div class="small">${lang==='zh' ? '时间' : 'Time'}: <span id="rapidTime">${timePer.toFixed(1)}</span>s</div>`;
     const answers = document.createElement('div'); answers.className='answers';
-    q.choices.forEach(choice=>{
-      const b = document.createElement('button'); b.className='ans-btn'; b.textContent = choice;
-      b.onclick = ()=> { clearInterval(timer); if(String(choice) === String(q.answer)) score++; idx++; render(); };
-      answers.appendChild(b);
-    });
+    q.choices.forEach(choice=>{ const b=document.createElement('button'); b.className='ans-btn'; b.textContent=choice; b.onclick = ()=>{ clearInterval(timer); if(String(choice) === String(q.answer)) score++; idx++; render(); }; answers.appendChild(b); });
     div.appendChild(answers); container.appendChild(div);
-    let t = timePer; const tEl = document.getElementById('rfTime'); if(tEl) tEl.textContent = t.toFixed(1);
-    timer = setInterval(()=> { t = Math.max(0, t-0.1); if(tEl) tEl.textContent = t.toFixed(1); if(t<=0){ clearInterval(timer); idx++; render(); } }, 100);
+    let t = timePer; const timeEl = container.querySelector('#rapidTime'); if(timeEl) timeEl.textContent = t.toFixed(1);
+    timer = setInterval(()=>{ t=Math.max(0,t-0.1); if(timeEl) timeEl.textContent=t.toFixed(1); if(t<=0){ clearInterval(timer); idx++; render(); } }, 100);
   }
   render();
 }
 
-/* ---------- MAZE ---------- */
+/* ---------- Maze initializer (page/tile compatible) ---------- */
 function initMaze(area){
-  area.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><button id="tile-maze-gen" class="btn">${lang==='zh' ? '生成迷宫' : 'Generate Maze'}</button><div style="flex:1"></div><div class="small">${lang==='zh' ? '使用方向键移动' : 'Use arrow keys to move'}</div></div><div id="tile-maze-canvas" style="margin-top:10px"></div>`;
-  area.querySelector('#tile-maze-gen').addEventListener('click', ()=>{
-    const cont = area.querySelector('#tile-maze-canvas'); cont.innerHTML=''; const size = 360; const canvas = document.createElement('canvas'); canvas.width=size; canvas.height=size; cont.appendChild(canvas);
-    const ctx = canvas.getContext('2d');
-    const gridObj = makeMazeGrid(15,15);
-    let cell = Math.floor(size/gridObj.w);
-    let px=1, py=1, solved=0;
+  area.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><button class="btn maze-gen">${lang==='zh' ? '生成迷宫' : 'Generate Maze'}</button><div style="flex:1"></div><div class="small">${lang==='zh' ? '使用方向键移动' : 'Use arrow keys to move'}</div></div><div class="maze-ui" style="margin-top:10px"></div>`;
+  area.querySelector('.maze-gen').addEventListener('click', ()=> {
+    const container = area.querySelector('.maze-ui'); container.innerHTML='';
+    const size = 360; const canvas = document.createElement('canvas'); canvas.width=size; canvas.height=size; container.appendChild(canvas); const ctx = canvas.getContext('2d');
+    const gridObj = makeMazeGrid(15,15); let cell = Math.floor(size/gridObj.w); let px=1, py=1, solved=0;
     draw();
-    function draw(){
-      ctx.clearRect(0,0,canvas.width, canvas.height); ctx.fillStyle='#eef6ff'; ctx.fillRect(0,0,canvas.width, canvas.height);
-      for(let y=0;y<gridObj.h;y++) for(let x=0;x<gridObj.w;x++){
-        const v = gridObj.grid[y][x]; const sx = x*cell, sy = y*cell;
-        if(v===1){ ctx.fillStyle='#133'; ctx.fillRect(sx,sy,cell,cell); }
-        else if(v===2){ ctx.fillStyle='#ffd'; ctx.fillRect(sx,sy,cell,cell); ctx.fillStyle='#6a3bdb'; ctx.fillRect(sx+cell*0.2, sy+cell*0.2, cell*0.6, cell*0.6); }
-        else ctx.fillStyle='#f7fff7', ctx.fillRect(sx,sy,cell,cell);
-      }
-      ctx.fillStyle='#1a73e8'; ctx.beginPath(); ctx.arc((px+0.5)*cell,(py+0.5)*cell,cell*0.28,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle='#ff9'; ctx.fillRect(gridObj.exit.x*cell+cell*0.15, gridObj.exit.y*cell+cell*0.15, cell*0.7, cell*0.7);
-    }
-    function move(dx,dy){
-      const nx=px+dx, ny=py+dy; if(nx<0||ny<0||nx>=gridObj.w||ny>=gridObj.h) return;
-      const val = gridObj.grid[ny][nx];
-      if(val===1) return;
-      if(val===2){
-        const q = genArithmeticQuestion(randInt(1,40));
-        const ans = prompt((lang==='zh' ? '闸门题：' : 'Gate: ') + q.q + '\n' + q.choices.join(' | '));
-        if(ans===null) return;
-        if(String(ans).trim()===String(q.answer)){ gridObj.grid[ny][nx]=0; solved++; addPoints(10); draw(); } else { alert(lang==='zh' ? '错误' : 'Wrong'); return; }
-      } else { px=nx; py=ny; }
-      draw();
-      if(px===gridObj.exit.x && py===gridObj.exit.y){ const pts = 80 + solved*10; addPoints(pts); celebrateAt(); alert((lang==='zh' ? '到达中心! +' : 'Reached center! +')+pts+' pts'); document.removeEventListener('keydown', keyH); }
-    }
+    function draw(){ ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#eef6ff'; ctx.fillRect(0,0,canvas.width,canvas.height); for(let y=0;y<gridObj.h;y++) for(let x=0;x<gridObj.w;x++){ const v=gridObj.grid[y][x]; const sx=x*cell, sy=y*cell; if(v===1){ ctx.fillStyle='#133'; ctx.fillRect(sx,sy,cell,cell); } else if(v===2){ ctx.fillStyle='#ffd'; ctx.fillRect(sx,sy,cell,cell); ctx.fillStyle='#6a3bdb'; ctx.fillRect(sx+cell*0.2, sy+cell*0.2, cell*0.6, cell*0.6);} else ctx.fillStyle='#f7fff7', ctx.fillRect(sx,sy,cell,cell);} ctx.fillStyle='#1a73e8'; ctx.beginPath(); ctx.arc((px+0.5)*cell,(py+0.5)*cell,cell*0.28,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#ff9'; ctx.fillRect(gridObj.exit.x*cell+cell*0.15, gridObj.exit.y*cell+cell*0.15, cell*0.7, cell*0.7); }
+    function move(dx,dy){ const nx=px+dx, ny=py+dy; if(nx<0||ny<0||nx>=gridObj.w||ny>=gridObj.h) return; const val=gridObj.grid[ny][nx]; if(val===1) return; if(val===2){ const q = genArithmeticQuestion(randInt(1,40)); const ans = prompt((lang==='zh' ? '闸门题：' : 'Gate: ') + q.q + '\n' + q.choices.join(' | ')); if(ans===null) return; if(String(ans).trim()===String(q.answer)){ gridObj.grid[ny][nx]=0; solved++; addPoints(10); draw(); } else { alert(lang==='zh' ? '错误' : 'Wrong'); return; } } else { px=nx; py=ny; } draw(); if(px===gridObj.exit.x && py===gridObj.exit.y){ const pts = 80 + solved*10; addPoints(pts); celebrateAt(); alert((lang==='zh' ? '到达中心! +' : 'Reached center! +')+pts+' pts'); document.removeEventListener('keydown', keyH); } }
     function keyH(e){ if(e.key==='ArrowUp'||e.key==='w') move(0,-1); if(e.key==='ArrowDown'||e.key==='s') move(0,1); if(e.key==='ArrowLeft'||e.key==='a') move(-1,0); if(e.key==='ArrowRight'||e.key==='d') move(1,0); }
     document.addEventListener('keydown', keyH);
-    function makeMazeGrid(cols, rows){
-      if(cols%2===0) cols++; if(rows%2===0) rows++;
-      const grid = Array.from({length:rows}, ()=>Array(cols).fill(1));
-      for(let y=1;y<rows;y+=2) for(let x=1;x<cols;x+=2) grid[y][x]=0;
-      function neigh(x,y){ const n=[]; if(y-2>0) n.push([x,y-2]); if(y+2<rows-1) n.push([x,y+2]); if(x-2>0) n.push([x-2,y]); if(x+2<cols-1) n.push([x+2,y]); return n; }
-      const stack=[[1,1]]; const visited=new Set(['1,1']);
-      while(stack.length){
-        const [cx,cy] = stack[stack.length-1]; const opts = neigh(cx,cy).filter(n=> !visited.has(n.join(',')));
-        if(opts.length){ const n = opts[Math.floor(Math.random()*opts.length)]; const wx=(cx+n[0])/2, wy=(cy+n[1])/2; grid[wy][wx]=0; visited.add(n.join(',')); stack.push(n); } else stack.pop();
-      }
-      for(let g=0;g<8;g++){ let placed=false; for(let t=0;t<300 && !placed;t++){ const gx=randInt(1,cols-2), gy=randInt(1,rows-2); if(grid[gy][gx]===1){ const dirs=[[1,0],[-1,0],[0,1],[0,-1]]; if(dirs.some(d=> grid[gy+d[1]][gx+d[0]]===0)){ grid[gy][gx]=2; placed=true; } } } }
-      let ex=cols-2, ey=rows-2; while(grid[ey][ex]!==0){ ex--; if(ex<1){ ex=cols-2; ey--; if(ey<1) break; } }
-      return {grid, w:cols, h:rows, exit:{x:ex,y:ey}};
-    }
+    function makeMazeGrid(cols, rows){ if(cols%2===0) cols++; if(rows%2===0) rows++; const grid = Array.from({length:rows}, ()=>Array(cols).fill(1)); for(let y=1;y<rows;y+=2) for(let x=1;x<cols;x+=2) grid[y][x]=0; function neigh(x,y){ const n=[]; if(y-2>0) n.push([x,y-2]); if(y+2<rows-1) n.push([x,y+2]); if(x-2>0) n.push([x-2,y]); if(x+2<cols-1) n.push([x+2,y]); return n; } const stack=[[1,1]]; const visited=new Set(['1,1']); while(stack.length){ const [cx,cy] = stack[stack.length-1]; const opts = neigh(cx,cy).filter(n=> !visited.has(n.join(','))); if(opts.length){ const n = opts[Math.floor(Math.random()*opts.length)]; const wx=(cx+n[0])/2, wy=(cy+n[1])/2; grid[wy][wx]=0; visited.add(n.join(',')); stack.push(n); } else stack.pop(); } for(let g=0;g<8;g++){ let placed=false; for(let t=0;t<300 && !placed;t++){ const gx=randInt(1,cols-2), gy=randInt(1,rows-2); if(grid[gy][gx]===1){ const dirs=[[1,0],[-1,0],[0,1],[0,-1]]; if(dirs.some(d=> grid[gy+d[1]][gx+d[0]]===0)){ grid[gy][gx]=2; placed=true; } } } } let ex=cols-2, ey=rows-2; while(grid[ey][ex]!==0){ ex--; if(ex<1){ ex=cols-2; ey--; if(ey<1) break; } } return {grid,w:cols,h:rows, exit:{x:ex,y:ey}}; }
   });
 }
 
-/* ---------- PATTERN ---------- */
+/* ---------- Pattern initializer ---------- */
 function initPattern(area){
-  area.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><label>${lang==='zh' ? '级别' : 'Level'}: <select id="tile-pattern-level"></select></label><button id="tile-pattern-start" class="btn">${t('start')}</button><div style="flex:1"></div><div class="small">${lang==='zh' ? '完成 5 个数列' : 'Finish 5 sequences'}</div></div><div id="tile-pattern-ui" style="margin-top:10px"></div>`;
-  const sel = area.querySelector('#tile-pattern-level'); for(let i=1;i<=30;i++){ const o=document.createElement('option'); o.value=i; o.text=i; sel.appendChild(o); }
-  area.querySelector('#tile-pattern-start').addEventListener('click', ()=> {
-    const level = Number(sel.value||1); const ui = area.querySelector('#tile-pattern-ui'); let i=0, score=0;
-    function next(){ if(i>=5){ ui.innerHTML = `<div class="small">${lang==='zh' ? '完成得分' : 'Round score'}: ${score}/5</div>`; addPoints(score*12); return; } const p = generatePattern(level + i); ui.innerHTML = `<div class="small">${p.type}</div><div class="question">${p.seq.join(', ')}, ...</div><input id="pAns" type="number" style="padding:8px;border-radius:6px"><button id="pOk" class="btn" style="margin-left:8px">${t('submit')}</button>`; ui.querySelector('#pOk').onclick = ()=>{ if(String(ui.querySelector('#pAns').value) === String(p.next)){ score++; addPoints(12); spawnConfetti(); } else alert((lang==='zh' ? '错误，答案：' : 'Wrong, answer: ') + p.next); i++; next(); }; }
-    next();
+  area.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><label>${lang==='zh' ? '级别' : 'Level'}: <select class="pattern-level"></select></label><button class="btn pattern-start">${t('start')}</button><div style="flex:1"></div><div class="small">${lang==='zh' ? '完成 5 个数列' : 'Finish 5 sequences'}</div></div><div class="pattern-ui" style="margin-top:10px"></div>`;
+  const sel = area.querySelector('.pattern-level'); for(let i=1;i<=30;i++){ const o=document.createElement('option'); o.value=i; o.text=i; sel.appendChild(o); }
+  area.querySelector('.pattern-start').addEventListener('click', ()=> {
+    const level = Number(sel.value||1); const ui = area.querySelector('.pattern-ui'); let i=0, score=0;
+    function next(){ if(i>=5){ ui.innerHTML = `<div class="small">${lang==='zh' ? '完成得分' : 'Round score'}: ${score}/5</div>`; addPoints(score*12); return; } const p = generatePattern(level + i); ui.innerHTML = `<div class="small">${p.type}</div><div class="question">${p.seq.join(', ')}, ...</div><input id="pAns" type="number" style="padding:8px;border-radius:6px"><button id="pOk" class="btn" style="margin-left:8px">${t('submit')}</button>`; ui.querySelector('#pOk').onclick = ()=>{ if(String(ui.querySelector('#pAns').value) === String(p.next)){ score++; addPoints(12); spawnConfetti(); } else alert((lang==='zh' ? '错误，答案：' : 'Wrong, answer: ') + p.next); i++; next(); }; } next();
   });
 }
-function generatePattern(level){
-  level = Math.max(1, Math.min(30, level));
-  const types = ['arithmetic','geometric','fib-like','alternating','squares'];
-  const t = types[level % types.length];
-  if(t==='arithmetic'){ const a=randInt(1,6), d=randInt(1,8); return {seq:[a,a+d,a+2*d,a+3*d,a+4*d], next:a+5*d, type:'Arithmetic +'+d}; }
-  if(t==='geometric'){ const a=randInt(1,4), r=randInt(2,4); return {seq:[a,a*r,a*r*r,a*r*r*r,a*r*r*r*r], next:a*Math.pow(r,5), type:'Geometric x'+r}; }
-  if(t==='fib-like'){ const a=randInt(1,5), b=randInt(1,6); const seq=[a,b,a+b,b+(a+b),(a+b)+(b+(a+b))]; return {seq, next: seq[3]+seq[4], type:'Fib-like'}; }
-  if(t==='alternating'){ const a=randInt(1,6), b=randInt(7,12); return {seq:[a,b,a+b,a+2*b,a+3*b], next:a+4*b, type:'Alternating'}; }
-  const s=randInt(1,6); return {seq:[s,s+1,s+4,s+9,s+16], next:s+25, type:'Squares'};
-}
+function generatePattern(level){ level = Math.max(1, Math.min(30, level)); const types=['arithmetic','geometric','fib-like','alternating','squares']; const t = types[level % types.length]; if(t==='arithmetic'){ const a=randInt(1,6), d=randInt(1,8); return {seq:[a,a+d,a+2*d,a+3*d,a+4*d], next:a+5*d, type:'Arithmetic +'+d}; } if(t==='geometric'){ const a=randInt(1,4), r=randInt(2,4); return {seq:[a,a*r,a*r*r,a*r*r*r,a*r*r*r*r], next:a*Math.pow(r,5), type:'Geometric x'+r}; } if(t==='fib-like'){ const a=randInt(1,5), b=randInt(1,6); const seq=[a,b,a+b,b+(a+b),(a+b)+(b+(a+b))]; return {seq, next: seq[3]+seq[4], type:'Fib-like'}; } if(t==='alternating'){ const a=randInt(1,6), b=randInt(7,12); return {seq:[a,b,a+b,a+2*b,a+3*b], next:a+4*b, type:'Alternating'}; } const s=randInt(1,6); return {seq:[s,s+1,s+4,s+9,s+16], next:s+25, type:'Squares'}; }
 
-/* ---------- PROBABILITY ---------- */
+/* ---------- Probability initializer ---------- */
 function initProb(area){
-  area.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><button id="tile-prob-start" class="btn">${t('start')}</button><div style="flex:1"></div><div class="small">${lang==='zh' ? '选择最高期望值' : 'Pick the best EV'}</div></div><div id="tile-prob-ui" style="margin-top:10px"></div>`;
-  area.querySelector('#tile-prob-start').addEventListener('click', ()=> {
-    const ui = area.querySelector('#tile-prob-ui'); renderProbUI(generateProbQuestion(), ui);
-  });
+  area.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><button class="btn prob-start">${t('start')}</button><div style="flex:1"></div><div class="small">${lang==='zh' ? '选择最高期望值' : 'Pick the best EV'}</div></div><div class="prob-ui" style="margin-top:10px"></div>`;
+  area.querySelector('.prob-start').addEventListener('click', ()=> { renderProbUI(generateProbQuestion(), area.querySelector('.prob-ui')); });
 }
-function generateProbQuestion(){
-  const base = randInt(5,30); const p1=Math.random()*0.6+0.1, p2=Math.random()*0.6+0.05, p3=Math.random()*0.6+0.02;
-  const a1=base+randInt(0,base), a2=base+randInt(0,base+10), a3=base+randInt(0,base+20);
-  return {cups:[
-    {label:'A', p:+p1.toFixed(2), payout:a1, ev: +(p1*a1).toFixed(2)},
-    {label:'B', p:+p2.toFixed(2), payout:a2, ev: +(p2*a2).toFixed(2)},
-    {label:'C', p:+p3.toFixed(2), payout:a3, ev: +(p3*a3).toFixed(2)}
-  ]};
-}
-function renderProbUI(q, container){
-  container.innerHTML = `<div class="question">${lang==='zh' ? '选择最高期望值' : 'Choose highest expected value'}</div>`;
-  const row = document.createElement('div'); row.style.display='flex'; row.style.gap='8px';
-  q.cups.forEach(c=>{
-    const el = document.createElement('div'); el.style.flex='1'; el.style.padding='12px'; el.style.border='1px solid #eee'; el.style.borderRadius='8px'; el.style.textAlign='center'; el.style.background='#fff';
-    el.innerHTML = `<div style="font-weight:800">${c.label}</div><div class="small">${lang==='zh' ? '派彩' : 'Payout'}: ${c.payout}</div><div class="small">${lang==='zh' ? '概率' : 'Chance'}: ${Math.round(c.p*100)}%</div>`;
-    el.onclick = ()=> { const best = q.cups.reduce((a,b)=> a.ev > b.ev ? a : b); if(c.label===best.label){ addPoints(20); celebrateAt(); alert(lang==='zh' ? '正确！ +20 积分' : 'Correct! +20 pts'); } else alert(lang==='zh' ? '错误' : `Incorrect. Best was ${best.label}`); renderProbUI(generateProbQuestion(), container); };
-    row.appendChild(el);
-  });
-  container.appendChild(row);
-}
+function generateProbQuestion(){ const base=randInt(5,30); const p1=Math.random()*0.6+0.1, p2=Math.random()*0.6+0.05, p3=Math.random()*0.6+0.02; const a1=base+randInt(0,base), a2=base+randInt(0,base+10), a3=base+randInt(0,base+20); return {cups:[ {label:'A', p:+p1.toFixed(2), payout:a1, ev: +(p1*a1).toFixed(2)}, {label:'B', p:+p2.toFixed(2), payout:a2, ev: +(p2*a2).toFixed(2)}, {label:'C', p:+p3.toFixed(2), payout:a3, ev: +(p3*a3).toFixed(2)} ] }; }
+function renderProbUI(q, container){ container.innerHTML=`<div class="question">${lang==='zh' ? '选择最高期望值' : 'Choose highest expected value'}</div>`; const row=document.createElement('div'); row.style.display='flex'; row.style.gap='8px'; q.cups.forEach(c=>{ const el=document.createElement('div'); el.style.flex='1'; el.style.padding='12px'; el.style.border='1px solid #eee'; el.style.borderRadius='8px'; el.style.textAlign='center'; el.style.background='#fff'; el.innerHTML=`<div style="font-weight:800">${c.label}</div><div class="small">${lang==='zh' ? '派彩' : 'Payout'}: ${c.payout}</div><div class="small">${lang==='zh' ? '概率' : 'Chance'}: ${Math.round(c.p*100)}%</div>`; el.onclick = ()=>{ const best=q.cups.reduce((a,b)=> a.ev>b.ev?a:b); if(c.label===best.label){ addPoints(20); celebrateAt(); alert(lang==='zh' ? '正确！ +20 积分' : 'Correct! +20 pts'); } else alert(lang==='zh' ? '错误' : `Incorrect. Best was ${best.label}`); renderProbUI(generateProbQuestion(), container); }; row.appendChild(el); }); container.appendChild(row); }
 
-/* ---------- CASINO ---------- */
+/* ---------- Casino, Cups, Air (see prior code) ---------- */
 function initCasino(area){
   area.innerHTML = `
     <div style="display:flex;gap:8px;align-items:center">
       <div style="flex:1">
         <div style="font-weight:800">${lang==='zh' ? '机器 1 — 老虎机' : 'Machine 1 — Slots'}</div>
-        <div style="margin-top:6px"><span class="reel" id="m1r1">🔔</span><span class="reel" id="m1r2">7</span><span class="reel" id="m1r3">❤️</span></div>
-        <div style="margin-top:8px"><label>${lang==='zh' ? '投注' : 'Bet'}: <input id="m1bet" type="number" min="1" value="10" style="width:80px"></label> <button id="m1spin" class="btn">${lang==='zh' ? '旋转' : 'Spin'}</button> <span id="m1msg" class="small" style="margin-left:8px"></span></div>
+        <div style="margin-top:6px"><span class="reel" id="page-m1r1">🔔</span><span class="reel" id="page-m1r2">7</span><span class="reel" id="page-m1r3">❤️</span></div>
+        <div style="margin-top:8px"><label>${lang==='zh' ? '投注' : 'Bet'}: <input id="page-m1bet" type="number" min="1" value="10" style="width:80px"></label> <button id="page-m1spin" class="btn">${lang==='zh' ? '旋转' : 'Spin'}</button> <span id="page-m1msg" class="small" style="margin-left:8px"></span></div>
       </div>
       <div style="flex:1">
         <div style="font-weight:800">${lang==='zh' ? '机器 2 — 神秘杯' : 'Machine 2 — Secret Cups'}</div>
         <div class="small" style="margin-top:6px">${lang==='zh' ? '打开神秘杯挑战' : 'Open the secret cups challenge'}</div>
-        <div style="margin-top:8px"><button id="m2open" class="btn">${lang==='zh' ? '打开' : 'Open'}</button> <span id="m2msg" class="small" style="margin-left:8px"></span></div>
+        <div style="margin-top:8px"><button id="page-m2open" class="btn">${lang==='zh' ? '打开' : 'Open'}</button> <span id="page-m2msg" class="small" style="margin-left:8px"></span></div>
       </div>
       <div style="flex:1">
         <div style="font-weight:800">${lang==='zh' ? '机器 3 — 累积奖金' : 'Machine 3 — Jackpot'}</div>
-        <div style="margin-top:6px"><span class="reel" id="m3r1">💎</span><span class="reel" id="m3r2">🔔</span><span class="reel" id="m3r3">7</span></div>
-        <div style="margin-top:8px"><label>${lang==='zh' ? '投注' : 'Bet'}: <input id="m3bet" type="number" min="5" value="25" style="width:80px"></label> <button id="m3spin" class="btn">${lang==='zh' ? '旋转' : 'Spin'}</button> <span id="m3msg" class="small" style="margin-left:8px"></span></div>
+        <div style="margin-top:6px"><span class="reel" id="page-m3r1">💎</span><span class="reel" id="page-m3r2">🔔</span><span class="reel" id="page-m3r3">7</span></div>
+        <div style="margin-top:8px"><label>${lang==='zh' ? '投注' : 'Bet'}: <input id="page-m3bet" type="number" min="5" value="25" style="width:80px"></label> <button id="page-m3spin" class="btn">${lang==='zh' ? '旋转' : 'Spin'}</button> <span id="page-m3msg" class="small" style="margin-left:8px"></span></div>
       </div>
     </div>
-    <div id="casino-cups" style="margin-top:10px"></div>
+    <div id="page-casino-cups" style="margin-top:10px"></div>
   `;
-  const symbols1 = ['🔔','7','❤️','♦','⭐'];
-  area.querySelector('#m1spin').addEventListener('click', ()=>{
-    const bet = Math.max(1, Number(area.querySelector('#m1bet').value||10));
-    if(getPoints() < bet){ area.querySelector('#m1msg').textContent = lang==='zh' ? '积分不足' : 'Not enough points'; return; }
-    addPoints(-bet); area.querySelector('#m1msg').textContent = lang==='zh' ? '旋转中...' : 'Spinning...';
-    const finals = [ symbols1[randInt(0,symbols1.length-1)], symbols1[randInt(0,symbols1.length-1)], symbols1[randInt(0,symbols1.length-1)] ];
-    const els = [area.querySelector('#m1r1'), area.querySelector('#m1r2'), area.querySelector('#m1r3')];
-    els.forEach((el,idx)=>{ let ticks=18+idx*6; const iv=setInterval(()=> el.textContent = symbols1[randInt(0,symbols1.length-1)], 50); setTimeout(()=>{ clearInterval(iv); el.textContent = finals[idx]; }, ticks*50); });
-    setTimeout(()=>{ const [a,b,c]=finals; let payout=0; if(a===b && b===c) payout = bet*10; else if(a===b || b===c || a===c) payout = bet*2; if(payout>0){ addPoints(payout); area.querySelector('#m1msg').textContent = (lang==='zh' ? '赢得 ' : 'Won ') + payout + '!'; celebrateAt(); } else area.querySelector('#m1msg').textContent = (lang==='zh' ? '输掉 ' : 'Lost ') + bet + '.'; }, 1400);
+  const sy1 = ['🔔','7','❤️','♦','⭐'];
+  area.querySelector('#page-m1spin').addEventListener('click', ()=>{
+    const bet = Math.max(1, Number(area.querySelector('#page-m1bet').value||10));
+    if(getPoints() < bet){ area.querySelector('#page-m1msg').textContent = lang==='zh' ? '积分不足' : 'Not enough points'; return; }
+    addPoints(-bet); area.querySelector('#page-m1msg').textContent = lang==='zh' ? '旋转中...' : 'Spinning...';
+    const finals = [sy1[randInt(0,sy1.length-1)], sy1[randInt(0,sy1.length-1)], sy1[randInt(0,sy1.length-1)]];
+    const els = [area.querySelector('#page-m1r1'), area.querySelector('#page-m1r2'), area.querySelector('#page-m1r3')];
+    els.forEach((el,idx)=>{ let ticks=18+idx*6; const iv=setInterval(()=> el.textContent=sy1[randInt(0,sy1.length-1)],50); setTimeout(()=>{ clearInterval(iv); el.textContent=finals[idx]; }, ticks*50); });
+    setTimeout(()=>{ const [a,b,c]=finals; let payout=0; if(a===b && b===c) payout=bet*10; else if(a===b || b===c || a===c) payout=bet*2; if(payout>0){ addPoints(payout); area.querySelector('#page-m1msg').textContent=(lang==='zh' ? '赢得 ' : 'Won ') + payout + '!'; celebrateAt(); } else area.querySelector('#page-m1msg').textContent=(lang==='zh' ? '输掉 ' : 'Lost ') + bet + '.'; },1400);
   });
-
-  area.querySelector('#m2open').addEventListener('click', ()=> openCupsEmbedded(area.querySelector('#casino-cups')));
-
-  area.querySelector('#m3spin').addEventListener('click', ()=>{
-    const bet = Math.max(5, Number(area.querySelector('#m3bet').value||25));
-    if(getPoints() < bet){ area.querySelector('#m3msg').textContent = lang==='zh' ? '积分不足' : 'Not enough points'; return; }
-    addPoints(-bet); area.querySelector('#m3msg').textContent = lang==='zh' ? '旋转中...' : 'Spinning...';
+  area.querySelector('#page-m2open').addEventListener('click', ()=> openCupsEmbedded(area.querySelector('#page-casino-cups')));
+  area.querySelector('#page-m3spin').addEventListener('click', ()=>{
+    const bet = Math.max(5, Number(area.querySelector('#page-m3bet').value||25));
+    if(getPoints() < bet){ area.querySelector('#page-m3msg').textContent = lang==='zh' ? '积分不足' : 'Not enough points'; return; }
+    addPoints(-bet); area.querySelector('#page-m3msg').textContent = lang==='zh' ? '旋转中...' : 'Spinning...';
     const sy = ['💎','🔔','7','⭐','♦'];
-    const finals = [ sy[randInt(0,sy.length-1)], sy[randInt(0,sy.length-1)], sy[randInt(0,sy.length-1)] ];
-    const els = [area.querySelector('#m3r1'), area.querySelector('#m3r2'), area.querySelector('#m3r3')];
-    els.forEach((el,idx)=>{ let ticks=20+idx*6; const iv=setInterval(()=> el.textContent = sy[randInt(0,sy.length-1)], 50); setTimeout(()=>{ clearInterval(iv); el.textContent=finals[idx]; }, ticks*50); });
-    setTimeout(()=>{ const [a,b,c]=finals; const jackpot = (a==='💎' && a===b && b===c && Math.random() < 0.08); if(jackpot){ const reward = Math.max(200, bet*12); addPoints(reward); area.querySelector('#m3msg').textContent = (lang==='zh' ? '大奖 ' : 'JACKPOT ') + reward + '!'; celebrateAt(); alert((lang==='zh' ? '大奖！已解锁气垫球' : 'JACKPOT! Air Hockey unlocked!') + ' +' + reward + ' pts'); } else { let payout=0; if(a===b && b===c) payout = bet*8; else if(a===b || b===c || a===c) payout = bet*2; if(payout>0){ addPoints(payout); area.querySelector('#m3msg').textContent = (lang==='zh' ? '赢得 ' : 'Won ') + payout; celebrateAt(); } else area.querySelector('#m3msg').textContent = (lang==='zh' ? '输掉 ' : 'Lost ') + bet; } }, 1600);
+    const finals = [sy[randInt(0,sy.length-1)], sy[randInt(0,sy.length-1)], sy[randInt(0,sy.length-1)]];
+    const els = [area.querySelector('#page-m3r1'), area.querySelector('#page-m3r2'), area.querySelector('#page-m3r3')];
+    els.forEach((el,idx)=>{ let ticks=20+idx*6; const iv=setInterval(()=> el.textContent=sy[randInt(0,sy.length-1)],50); setTimeout(()=>{ clearInterval(iv); el.textContent=finals[idx]; }, ticks*50); });
+    setTimeout(()=>{ const [a,b,c]=finals; const jackpot=(a==='💎' && a===b && b===c && Math.random()<0.08); if(jackpot){ const reward=Math.max(200, bet*12); addPoints(reward); area.querySelector('#page-m3msg').textContent=(lang==='zh' ? '大奖 ' : 'JACKPOT ') + reward + '!'; celebrateAt(); alert((lang==='zh' ? '大奖！已解锁气垫球' : 'JACKPOT! Air Hockey unlocked!') + ' +' + reward + ' pts'); } else { let payout=0; if(a===b && b===c) payout=bet*8; else if(a===b || b===c || a===c) payout=bet*2; if(payout>0){ addPoints(payout); area.querySelector('#page-m3msg').textContent=(lang==='zh' ? '赢得 ' : 'Won ') + payout; celebrateAt(); } else area.querySelector('#page-m3msg').textContent=(lang==='zh' ? '输掉 ' : 'Lost ') + bet; } },1600);
   });
 }
 
-/* ---------- SECRET CUPS ---------- */
+/* Reuse openCupsEmbedded previously defined logic but target passed container */
 function initCups(area){
-  area.innerHTML = `<div class="small">${lang==='zh' ? '神秘杯：在此或通过赌场打开' : 'Secret Cups: open here or via the Casino'}</div><div style="margin-top:10px"><button id="tile-cups-start" class="btn">${t('start')}</button></div><div id="tile-cups-ui" style="margin-top:8px"></div>`;
-  area.querySelector('#tile-cups-start').addEventListener('click', ()=> openCupsEmbedded(area.querySelector('#tile-cups-ui')));
+  area.innerHTML = `<div class="small">${lang==='zh' ? '神秘杯：在此或通过赌场打开' : 'Secret Cups: open here or via the Casino'}</div><div style="margin-top:10px"><button class="btn cups-start">${t('start')}</button></div><div class="cups-ui" style="margin-top:8px"></div>`;
+  area.querySelector('.cups-start').addEventListener('click', ()=> openCupsEmbedded(area.querySelector('.cups-ui')));
 }
-function openCupsEmbedded(container){
-  container.innerHTML=''; const status = document.createElement('div'); status.className='small'; status.textContent = lang==='zh' ? '神秘杯 — 胜利可得 250 积分' : 'Secret Cups — beat 3 levels to win 250 pts'; container.appendChild(status);
-  startCupsLevel(container,1);
-}
-function startCupsLevel(container, level){
-  let lvl = container.querySelector('.lvl'); if(lvl) lvl.remove();
-  lvl = document.createElement('div'); lvl.className='lvl'; lvl.style.marginTop='8px'; container.appendChild(lvl);
-  const cups = []; const ballIndex = randInt(0,2);
-  for(let i=0;i<3;i++){ const cup = document.createElement('div'); cup.style.display='inline-block'; cup.style.width='90px'; cup.style.height='90px'; cup.style.background='#d33'; cup.style.marginRight='8px'; cup.style.borderRadius='8px'; cup.style.position='relative'; cup.style.cursor='pointer'; const ball=document.createElement('div'); ball.style.position='absolute'; ball.style.left='50%'; ball.style.bottom='14px'; ball.style.transform='translateX(-50%)'; ball.style.width='22px'; ball.style.height='22px'; ball.style.borderRadius='50%'; ball.style.background='#ffd'; ball.style.opacity=(i===ballIndex)?'1':'0'; cup.appendChild(ball); lvl.appendChild(cup); cups.push(cup); }
-  setTimeout(()=> cups.forEach(c=> c.querySelector('div').style.opacity='0'),700);
-  const cfg = level===1?{sh:6,spd:200}: level===2?{sh:12,spd:150}:{sh:20,spd:100};
-  (async ()=>{
-    await new Promise(r=>setTimeout(r,700));
-    for(let s=0;s<cfg.sh;s++){
-      const a=randInt(0,2), b=(a+randInt(1,2))%3;
-      const ca=cups[a], cb=cups[b]; const cloneA=ca.cloneNode(true), cloneB=cb.cloneNode(true);
-      ca.replaceWith(cloneB); cb.replaceWith(cloneA); cups[a]=cloneB; cups[b]=cloneA;
-      await new Promise(r=>setTimeout(r,cfg.spd));
-    }
-    const info = document.createElement('div'); info.className='small'; info.textContent = lang==='zh' ? '请选择杯子！' : 'Pick a cup!';
-    lvl.appendChild(info);
-    cups.forEach((cup, idx)=> {
-      cup.onclick = ()=> {
-        cups.forEach(c => c.querySelector('div').style.opacity='0'); cup.querySelector('div').style.opacity='1';
-        const revealed = cups.findIndex(c=> c.querySelector('div').style.opacity==='1');
-        if(revealed === idx){
-          if(level<3){ addPoints(15); spawnConfetti(); setTimeout(()=> startCupsLevel(container, level+1), 800); }
-          else { addPoints(250); celebrateAt(); alert(lang==='zh' ? '你通过了第3级！ +250 积分' : 'You beat Level 3! +250 pts'); container.innerHTML = `<div class="small">${lang==='zh' ? '完成 — 做得好！' : 'Completed — well done!'}</div>`; }
-        } else alert(lang==='zh' ? '错误 — 回到赌场再试' : 'Wrong — try again from the casino');
-      };
-    });
-  })();
-}
+function openCupsEmbedded(container){ container.innerHTML=''; const status=document.createElement('div'); status.className='small'; status.textContent = lang==='zh' ? '神秘杯 — 胜利可得 250 积分' : 'Secret Cups — beat 3 levels to win 250 pts'; container.appendChild(status); startCupsLevel(container,1); }
+function startCupsLevel(container, level){ let lvl = container.querySelector('.lvl'); if(lvl) lvl.remove(); lvl=document.createElement('div'); lvl.className='lvl'; lvl.style.marginTop='8px'; container.appendChild(lvl); const cups=[]; const ballIndex = randInt(0,2); for(let i=0;i<3;i++){ const cup=document.createElement('div'); cup.style.display='inline-block'; cup.style.width='90px'; cup.style.height='90px'; cup.style.background='#d33'; cup.style.marginRight='8px'; cup.style.borderRadius='8px'; cup.style.position='relative'; cup.style.cursor='pointer'; const ball=document.createElement('div'); ball.style.position='absolute'; ball.style.left='50%'; ball.style.bottom='14px'; ball.style.transform='translateX(-50%)'; ball.style.width='22px'; ball.style.height='22px'; ball.style.borderRadius='50%'; ball.style.background='#ffd'; ball.style.opacity=(i===ballIndex)?'1':'0'; cup.appendChild(ball); lvl.appendChild(cup); cups.push(cup); } setTimeout(()=> cups.forEach(c=> c.querySelector('div').style.opacity='0'),700); const cfg = level===1?{sh:6,spd:200}: level===2?{sh:12,spd:150}:{sh:20,spd:100}; (async ()=>{ await new Promise(r=>setTimeout(r,700)); for(let s=0;s<cfg.sh;s++){ const a=randInt(0,2), b=(a+randInt(1,2))%3; const ca=cups[a], cb=cups[b]; const cloneA=ca.cloneNode(true), cloneB=cb.cloneNode(true); ca.replaceWith(cloneB); cb.replaceWith(cloneA); cups[a]=cloneB; cups[b]=cloneA; await new Promise(r=>setTimeout(r,cfg.spd)); } const info=document.createElement('div'); info.className='small'; info.textContent = lang==='zh' ? '请选择杯子！' : 'Pick a cup!'; lvl.appendChild(info); cups.forEach((cup, idx)=>{ cup.onclick = ()=>{ cups.forEach(c=> c.querySelector('div').style.opacity='0'); cup.querySelector('div').style.opacity='1'; const revealed=cups.findIndex(c=> c.querySelector('div').style.opacity==='1'); if(revealed===idx){ if(level<3){ addPoints(15); spawnConfetti(); setTimeout(()=> startCupsLevel(container, level+1), 800); } else { addPoints(250); celebrateAt(); alert(lang==='zh' ? '你通过了第3级！ +250 积分' : 'You beat Level 3! +250 pts'); container.innerHTML = `<div class="small">${lang==='zh' ? '完成 — 做得好！' : 'Completed — well done!'}</div>`; } } else alert(lang==='zh' ? '错误 — 回到赌场再试' : 'Wrong — try again from the casino'); }; }); })(); }
 
-/* ---------- AIR HOCKEY ---------- */
+/* Init Air (page area) */
 function initAir(area){
-  area.innerHTML = `<div class="small">${lang==='zh' ? '气垫球（迷你）' : 'Air Hockey (mini)'}</div><canvas id="tile-air" width="360" height="200" style="margin-top:8px"></canvas><div style="margin-top:8px"><button id="tile-air-start" class="btn">${t('start')}</button><button id="tile-air-stop" class="btn secondary">${t('back')}</button></div>`;
-  const canvas = area.querySelector('#tile-air'); const ctx = canvas.getContext('2d');
-  let state = null;
-  area.querySelector('#tile-air-start').addEventListener('click', ()=> { if(!state) initMatch(); state.running = true; });
-  area.querySelector('#tile-air-stop').addEventListener('click', ()=> { if(state) state.running = false; });
-  function initMatch(){
-    state = {pY:canvas.height/2, aY:canvas.height/2, puck:{x:canvas.width/2,y:canvas.height/2,vx:3,vy:2,r:6}, sP:0, sA:0, running:false, sonar:[]};
-    canvas.onmousemove = (e)=>{ const r=canvas.getBoundingClientRect(); state.pY = Math.max(12, Math.min(canvas.height-12, e.clientY - r.top)); };
-    function loop(){ requestAnimationFrame(loop); if(!state) return; if(state.running){ state.puck.x += state.puck.vx; state.puck.y += state.puck.vy; if(state.puck.y <= state.puck.r || state.puck.y >= canvas.height - state.puck.r) state.puck.vy *= -1; const dx=state.puck.x-20, dy=state.puck.y-state.pY; if(Math.hypot(dx,dy) < state.puck.r+12 && state.puck.vx<0){ state.puck.vx = Math.abs(state.puck.vx)+0.8; state.puck.vy += dy*0.05; } const dx2=state.puck.x-(canvas.width-20), dy2=state.puck.y-state.aY; if(Math.hypot(dx2,dy2) < state.puck.r+12 && state.puck.vx>0){ state.puck.vx = -Math.abs(state.puck.vx)-0.8; state.puck.vy += dy2*0.05; } state.aY += (state.puck.y - state.aY)*0.05; if(state.puck.x < 0){ state.sA++; resetP(); sonar(); } if(state.puck.x > canvas.width){ state.sP++; resetP(); sonar(); } } draw(); }
-    function resetP(){ state.puck.x = canvas.width/2; state.puck.y = canvas.height/2; state.puck.vx = (Math.random()>0.5?3:-3); state.puck.vy = (Math.random()-0.5)*3; }
-    function sonar(){ const tx=randInt(40, canvas.width-40), ty=randInt(20, canvas.height-20); const q = genArithmeticQuestion(randInt(10,60)); setTimeout(()=>{ const ans = prompt((lang==='zh' ? '宝藏题：' : 'Treasure: ') + q.q + '\n' + q.choices.join(' | ')); if(ans !== null && String(ans).trim() === String(q.answer)){ addPoints(40); celebrateAt(); alert(lang==='zh' ? '正确！ +40 积分' : 'Correct! +40 pts'); } else alert(lang==='zh' ? '错误或已取消' : 'Incorrect or cancelled'); }, 900); }
-    function draw(){ ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#e6fbff'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#1a73e8'; ctx.fillRect(12, state.pY-18, 8, 36); ctx.fillStyle='#ff6b6b'; ctx.fillRect(canvas.width-20, state.aY-18, 8, 36); ctx.fillStyle='#06263a'; ctx.beginPath(); ctx.arc(state.puck.x, state.puck.y, state.puck.r, 0, Math.PI*2); ctx.fill(); ctx.fillStyle='#072033'; ctx.font='14px Inter'; ctx.fillText(state.sP + ' - ' + state.sA, canvas.width/2 - 12, 16); } loop();
-  }
+  area.innerHTML = `<div class="small">${lang==='zh' ? '气垫球（迷你）' : 'Air Hockey (mini)'}</div><canvas class="air-canvas" width="360" height="200" style="margin-top:8px"></canvas><div style="margin-top:8px"><button class="btn air-start">${t('start')}</button><button class="btn secondary air-stop" style="margin-left:8px">${t('back')}</button></div>`;
+  const canvas = area.querySelector('.air-canvas'); const ctx = canvas.getContext('2d'); let state=null;
+  area.querySelector('.air-start').addEventListener('click', ()=> { if(!state) initMatch(); state.running=true; });
+  area.querySelector('.air-stop').addEventListener('click', ()=> { if(state) state.running=false; });
+  function initMatch(){ state={pY:canvas.height/2,aY:canvas.height/2,puck:{x:canvas.width/2,y:canvas.height/2,vx:3,vy:2,r:6},sP:0,sA:0, running:false}; canvas.onmousemove=(e)=>{ const r=canvas.getBoundingClientRect(); state.pY = Math.max(12, Math.min(canvas.height-12, e.clientY - r.top)); }; function loop(){ requestAnimationFrame(loop); if(!state) return; if(state.running){ state.puck.x += state.puck.vx; state.puck.y += state.puck.vy; if(state.puck.y <= state.puck.r || state.puck.y >= canvas.height - state.puck.r) state.puck.vy *= -1; const dx=state.puck.x-20, dy=state.puck.y-state.pY; if(Math.hypot(dx,dy) < state.puck.r+12 && state.puck.vx<0){ state.puck.vx=Math.abs(state.puck.vx)+0.8; state.puck.vy += dy*0.05; } const dx2=state.puck.x-(canvas.width-20), dy2=state.puck.y-state.aY; if(Math.hypot(dx2,dy2) < state.puck.r+12 && state.puck.vx>0){ state.puck.vx=-Math.abs(state.puck.vx)-0.8; state.puck.vy += dy2*0.05; } state.aY += (state.puck.y - state.aY)*0.05; if(state.puck.x < 0){ state.sA++; resetP(); sonar(); } if(state.puck.x > canvas.width){ state.sP++; resetP(); sonar(); } } draw(); } function resetP(){ state.puck.x = canvas.width/2; state.puck.y = canvas.height/2; state.puck.vx = (Math.random()>0.5?3:-3); state.puck.vy = (Math.random()-0.5)*3; } function sonar(){ const q = genArithmeticQuestion(randInt(10,60)); setTimeout(()=>{ const ans = prompt((lang==='zh' ? '宝藏题：' : 'Treasure: ') + q.q + '\n' + q.choices.join(' | ')); if(ans !== null && String(ans).trim()===String(q.answer)){ addPoints(40); celebrateAt(); alert(lang==='zh' ? '正确！ +40 积分' : 'Correct! +40 pts'); } else alert(lang==='zh' ? '错误或已取消' : 'Incorrect or cancelled'); },900); } function draw(){ ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#e6fbff'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#1a73e8'; ctx.fillRect(12,state.pY-18,8,36); ctx.fillStyle='#ff6b6b'; ctx.fillRect(canvas.width-20,state.aY-18,8,36); ctx.fillStyle='#06263a'; ctx.beginPath(); ctx.arc(state.puck.x,state.puck.y,state.puck.r,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#072033'; ctx.font='14px Inter'; ctx.fillText(state.sP + ' - ' + state.sA, canvas.width/2 - 12, 16); } loop(); }
 }
 
 /* ======================
-   Utility & init
+   Arithmetic generator used across app
    ====================== */
-function rand(a,b){ return randInt(a,b); }
-function randIntAlias(a,b){ return randInt(a,b); } // kept for compatibility
-function generateMathQuestion(l){ return genArithmeticQuestion(l); }
+function genArithmeticQuestion(level){
+  level = Math.max(1, Math.min(100, Math.round(level)));
+  if(level <= 10){ const a=randInt(1,10), b=randInt(1,10); return {q:`${a} + ${b} = ?`, choices: shuffle([String(a+b), String(a+b+1), String(Math.abs(a-b)), String(a*b)]), answer:String(a+b)}; }
+  if(level <= 30){ const a=randInt(2,15), b=randInt(2,12); return {q:`${a} × ${b} = ?`, choices: shuffle([String(a*b), String(a*b+randInt(1,5)), String(a*b-randInt(1,5)), String(a+b)]), answer:String(a*b)}; }
+  if(level <= 55){ const a=randInt(10,200), b=randInt(2,12); return {q:`${a} ÷ ${b} = ? (nearest int)`, choices: shuffle([String(Math.round(a/b)), String(Math.floor(a/b)), String(Math.ceil(a/b)), String(Math.round((a+b)/b))]), answer:String(Math.round(a/b))}; }
+  if(level <= 75){ const a=randInt(2,9), b=randInt(2,6); return {q:`What is ${a}^${b}?`, choices: shuffle([String(Math.pow(a,b)), String(Math.pow(a,b)+randInt(1,20)), String(Math.pow(a,b)-randInt(1,20)), String(Math.pow(a+1,b))]), answer:String(Math.pow(a,b))}; }
+  if(level <= 90){ const a=randInt(10,80), b=randInt(2,12), c=randInt(1,10); const val = a + b*c; return {q:`${a} + ${b} × ${c} = ?`, choices: shuffle([String(val), String(val+1), String(val-1), String(a*b+c)]), answer:String(val)}; }
+  const a=randInt(1,12), b=randInt(1,12), c=randInt(1,10); const val = (a*b + c)/a; return {q:`Solve: ${a}x - ${c} = ${a*b}. x = ?`, choices: shuffle([String(val), String(Math.floor(val)), String(Math.ceil(val)), String(b)]), answer:String(val)};
+}
+function genArithmeticQuestionAlias(l){ return genArithmeticQuestion(l); }
 
-renderTiles();
+/* Compatibility aliases used in some init code */
+function genArithmeticQuestionWrapper(l){ return genArithmeticQuestion(l); }
+
+/* expose genArithmeticQuestion name used earlier in some handlers */
+function genArithmeticQuestionName(l){ return genArithmeticQuestion(l); }
+
+/* small helpers reused */
+function spawnConfetti(){ spawnConfettiAt(); }
+function spawnConfettiAt(x=window.innerWidth/2, y=window.innerHeight/3){ for(let i=0;i<60;i++) particles.push({x,y,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.8)*6,life:80+Math.random()*40,size:3+Math.random()*7,hue:Math.random()*360}); }
+
+/* Provide public names referenced earlier */
+const genArithmeticQuestion = genArithmeticQuestion; // already defined
+
+// Ensure language UI and tiles reflect current language
 applyLanguage();
+renderTiles();
 renderPoints();
 renderRecent();
 
