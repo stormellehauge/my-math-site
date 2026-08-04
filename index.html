@@ -3,828 +3,564 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>BREAK THE LOGIC — Math Hub (Gimkit-like Animations)</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600;800;900&display=swap" rel="stylesheet">
+<title>BREAK THE LOGIC — Math Hub (Fixed Home)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#f6fbff; --card:#ffffff; --accent:#1a73e8; --accent2:#0b5fff; --muted:#5b6b86;
+    --bg:#f6fbff; --card:#ffffff; --accent:#1a73e8; --muted:#5b6b86;
   }
-  html,body{height:100%;margin:0;background:var(--bg);font-family:Inter,system-ui,Arial,sans-serif;color:#072033;overflow-x:hidden}
-  body::before{content:"π 3.141592653589793...";position:fixed;inset:0;z-index:-1;opacity:0.05;font-size:36px;transform:rotate(-6deg);padding:20px}
-  header{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;background:var(--card);border-bottom:1px solid rgba(7,32,51,0.04)}
-  .brand{font-weight:900;font-size:28px}
-  .controls{display:flex;gap:12px;align-items:center}
-  .points{background:linear-gradient(90deg,#fff,#f3fbff);padding:8px 12px;border-radius:10px;border:1px solid rgba(7,32,51,0.04);font-weight:800;position:relative}
-  .btn{background:var(--accent);color:#fff;padding:10px 12px;border-radius:10px;border:0;cursor:pointer;font-weight:700}
-  .btn.secondary{background:transparent;border:1px solid rgba(7,32,51,0.06);color:#072033}
-  main{padding:18px 22px}
-  .layout{display:grid;grid-template-columns:1fr 360px;gap:18px}
-  .card{background:var(--card);padding:14px;border-radius:12px;box-shadow:0 6px 18px rgba(7,32,51,0.03)}
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:#072033}
+  header{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:var(--card);border-bottom:1px solid rgba(7,32,51,0.06)}
+  .brand{font-weight:800;font-size:20px}
+  .controls{display:flex;gap:10px;align-items:center}
+  .points{background:linear-gradient(90deg,#fff,#f3fbff);padding:8px 12px;border-radius:10px;border:1px solid rgba(7,32,51,0.04);font-weight:700}
+  main{padding:16px 20px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .tile{background:var(--card);border-radius:10px;padding:12px;border:1px solid rgba(7,32,51,0.06);min-height:120px;position:relative}
+  .tile h3{margin:0 0 6px 0;font-size:16px}
   .small{font-size:13px;color:var(--muted)}
-  .tile-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
-  .tile{padding:14px;border-radius:10px;border:1px solid rgba(7,32,51,0.04);cursor:pointer;background:linear-gradient(180deg,#fff,#f7fbff);transition:transform .18s, box-shadow .18s}
-  .tile:hover{transform:translateY(-6px); box-shadow:0 14px 30px rgba(11,95,255,0.08)}
-  .tile.locked{opacity:0.45;cursor:default;filter:grayscale(0.15)}
-  .page{display:none}
-  .page.active{display:block}
-  .question{font-size:20px;margin:12px 0}
-  .answers{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-  .ans-btn{padding:12px;border-radius:10px;border:1px solid rgba(7,32,51,0.06);background:#fff;cursor:pointer;font-weight:700;transition:transform .12s, box-shadow .12s}
-  .ans-btn:hover{transform:translateY(-4px); box-shadow:0 10px 20px rgba(11,95,255,0.06)}
-  .ans-btn.correct{background:linear-gradient(90deg,#e6fff1,#bff6d9);border-color:rgba(8,194,123,0.9)}
-  .ans-btn.wrong{background:linear-gradient(90deg,#ffecec,#ffd6d6);border-color:rgba(239,68,68,0.9)}
-  .tier{display:flex;gap:8px;align-items:center}
-  .tier-pill{padding:8px 10px;border-radius:999px;background:linear-gradient(90deg,#fff,#f3fbff);font-weight:700;border:1px solid rgba(7,32,51,0.03)}
-  .tier-progress{height:12px;background:rgba(7,32,51,0.06);border-radius:999px;overflow:hidden}
-  .tier-progress .fill{height:100%;width:0%;transition:width 700ms cubic-bezier(.2,.9,.2,1), background 700ms}
-  .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(2,12,20,0.45);z-index:1000}
-  .modal-box{width:760px;background:#fff;padding:16px;border-radius:12px;box-shadow:0 18px 60px rgba(2,12,20,0.15)}
-  .reel{width:120px;height:120px;border-radius:12px;background:#fff;overflow:hidden;border:1px solid rgba(7,32,51,0.06);position:relative}
-  .reel-inner{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center}
-  .reel-item{width:100%;height:120px;display:flex;align-items:center;justify-content:center;font-size:46px}
-  .cups{display:flex;gap:24px;align-items:flex-end;justify-content:center;margin-top:20px}
-  .cup{width:110px;height:110px;background:#d33;border-radius:10px;position:relative;cursor:pointer;display:flex;align-items:flex-end;justify-content:center;color:#fff;font-weight:800;transition:transform .28s}
-  .ball{width:28px;height:28px;background:#ffd;border-radius:50%;position:absolute;bottom:14px;left:50%;transform:translateX(-50%);transition:opacity .18s}
-  #airCanvas{background:linear-gradient(180deg,#dff8ff,#ffffff);width:100%;height:360px;border-radius:10px}
-  #fxCanvas{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:2000}
-  .points-popup{position:fixed;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,#ffd27a,#ff8c6b);color:#061226;font-weight:800;box-shadow:0 12px 28px rgba(11,95,255,0.12);pointer-events:none;transform:translate(-50%, -50%) scale(1);transition:transform 800ms cubic-bezier(.2,.9,.2,1), opacity 800ms}
-  @media(max-width:980px){ .layout{grid-template-columns:1fr} .modal-box{width:92%} }
+  .playRow{display:flex;gap:8px;align-items:center;margin-top:10px}
+  .btn{background:var(--accent);color:white;padding:8px 10px;border-radius:8px;border:0;cursor:pointer;font-weight:700}
+  .btn.secondary{background:transparent;border:1px solid rgba(7,32,51,0.08);color:#072033}
+  .gameArea{margin-top:10px;border-top:1px dashed rgba(7,32,51,0.04);padding-top:10px;display:none}
+  .gameArea.show{display:block}
+  .answers{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px}
+  .ans-btn{padding:10px;border-radius:8px;border:1px solid rgba(7,32,51,0.06);background:#fff;cursor:pointer;font-weight:700}
+  canvas{width:100%;height:auto;border-radius:8px;background:#f7fbff;border:1px solid rgba(7,32,51,0.04)}
+  /* fireworks canvas behind but still pointer-events none */
+  #fxCanvas{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:999}
+  @media(max-width:900px){ .grid{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
 <header>
-  <div>
-    <div class="brand">BREAK THE LOGIC</div>
-    <div class="small">Math hub — all games on the homepage with Gimkit-like animations</div>
-  </div>
+  <div class="brand">BREAK THE LOGIC — Math Hub</div>
   <div class="controls">
-    <div class="points" id="pointsBox">Points: <span id="points">0</span></div>
-    <div style="min-width:220px">
-      <div class="tier" style="gap:8px;align-items:center">
-        <div class="tier-pill" id="tierLabel">Tier: Chill</div>
-        <div style="flex:1" class="tier-progress"><div class="fill" id="tierFill"></div></div>
-        <div class="small" id="nextTierText">0 / 1000</div>
-      </div>
-    </div>
-    <button class="btn" id="btnHome">Home</button>
-    <button class="btn secondary" id="btnCasino">Casino</button>
+    <div class="points">Points: <span id="points">0</span></div>
+    <button class="btn secondary" id="resetBtn">Reset</button>
   </div>
 </header>
 
 <main>
-  <div class="layout">
-    <section>
-      <div class="card page active" id="homePage">
-        <h2 style="margin:0 0 6px 0">Game Hub — All Math Games</h2>
-        <div class="small">Everything math-focused. Click a tile to open any game. Animations are Gimkit-inspired: floating points, confetti, fast feedback.</div>
-
-        <div class="tile-grid" id="tilesContainer">
-          <!-- tiles injected -->
-        </div>
-      </div>
-
-      <!-- Trivia page -->
-      <div class="card page" id="triviaPage">
-        <h2 style="margin:0">Math Trivia (50 levels)</h2>
-        <div class="small">Pass (≥7/10) to advance. Correct answers show animated points popups.</div>
-        <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
-          <label>Level: <select id="triviaLevel"></select></label>
-          <button class="btn" id="startTrivia">Start Round</button>
-          <div style="flex:1"></div>
-          <div class="small">Passing triggers 5 fireworks + confetti</div>
-        </div>
-        <div id="triviaArea" style="margin-top:12px"></div>
-        <div style="margin-top:12px"><button class="btn secondary" id="backHomeFromTrivia">Back</button></div>
-      </div>
-
-      <!-- Rapid page -->
-      <div class="card page" id="rapidPage">
-        <h2 style="margin:0">Rapid Fire</h2>
-        <div class="small">Answer quickly. Correct answers show animated point popups.</div>
-        <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
-          <label>Difficulty:
-            <select id="rapidDifficulty">
-              <option value="easy">Easy (6s)</option>
-              <option value="medium">Medium (4s)</option>
-              <option value="hard">Hard (2.5s)</option>
-            </select>
-          </label>
-          <button class="btn" id="startRapid">Start</button>
-          <div style="flex:1"></div>
-          <div class="small" id="rapidScore">Score: 0</div>
-        </div>
-        <div id="rapidArea" style="margin-top:12px"></div>
-        <div style="margin-top:10px"><button class="btn secondary" id="backHomeFromRapid">Back</button></div>
-      </div>
-
-      <!-- Maze page -->
-      <div class="card page" id="mazePage">
-        <h2 style="margin:0">Math Maze</h2>
-        <div class="small">Solve math gates to open paths. Gate unlocks animate with points popups.</div>
-        <div style="margin-top:10px"><button class="btn" id="startMaze">Start Maze</button><button class="btn secondary" id="backHomeFromMaze">Back</button></div>
-        <div id="mazeArea" style="margin-top:12px"></div>
-      </div>
-
-      <!-- Pattern -->
-      <div class="card page" id="patternPage">
-        <h2 style="margin:0">Pattern Builder</h2>
-        <div class="small">Complete sequences; correct answers animate points towards counter.</div>
-        <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
-          <label>Level: <select id="patternLevel"></select></label>
-          <button class="btn" id="startPattern">Start</button>
-          <div style="flex:1"></div>
-          <div class="small" id="patternScore">Score: 0</div>
-        </div>
-        <div id="patternArea" style="margin-top:12px"></div>
-        <div style="margin-top:10px"><button class="btn secondary" id="backHomeFromPattern">Back</button></div>
-      </div>
-
-      <!-- Probability -->
-      <div class="card page" id="probPage">
-        <h2 style="margin:0">Probability Cups</h2>
-        <div class="small">Choose the highest expected value. Correct picks animate points popups.</div>
-        <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
-          <button class="btn" id="startProb">Start</button>
-          <div style="flex:1"></div>
-          <div class="small" id="probScore">Score: 0</div>
-        </div>
-        <div id="probArea" style="margin-top:12px"></div>
-        <div style="margin-top:10px"><button class="btn secondary" id="backHomeFromProb">Back</button></div>
-      </div>
-
-      <!-- Cups secret -->
-      <div class="card page" id="cupsPage">
-        <h2 style="margin:0">Secret Cups Challenge</h2>
-        <div class="small">Unlock via Casino machine 2. Visible red-cup shuffle. Beat 3 levels to win 250 pts.</div>
-        <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
-          <div>Level: <strong id="cupsLevel">1</strong></div>
-          <button class="btn" id="startCups">Start</button>
-          <div style="flex:1"></div>
-          <div class="small" id="cupsMsg">Locked</div>
-        </div>
-        <div id="cupsArea" style="margin-top:12px;min-height:200px"></div>
-        <div style="margin-top:10px"><button class="btn secondary" id="backHomeFromCups">Back</button></div>
-      </div>
-
-      <!-- Air Hockey -->
-      <div class="card page" id="airPage">
-        <h2 style="margin:0">Air Hockey (Sonar Treasure)</h2>
-        <div class="small">Unlock via Machine 3 jackpot. Score to trigger sonar treasure math questions.</div>
-        <canvas id="airCanvas" width="900" height="360"></canvas>
-        <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
-          <button class="btn" id="startAir">Start Match</button>
-          <div style="flex:1"></div>
-          <div class="small" id="airScore">Score: 0</div>
-        </div>
-        <div style="margin-top:10px"><button class="btn secondary" id="backHomeFromAir">Back</button></div>
-      </div>
-
-    </section>
-
-    <aside>
-      <div class="card">
-        <h3 style="margin:0">Profile</h3>
-        <div class="small" style="margin-top:8px" id="profileText">Earn points to climb tiers and unlock games.</div>
-        <div style="margin-top:10px;display:flex;gap:8px">
-          <button class="btn secondary" id="exportBtn">Export</button>
-          <button class="btn secondary" id="resetBtn">Reset</button>
-        </div>
-      </div>
-
-      <div class="card" style="margin-top:12px">
-        <h4 style="margin:0">Unlocked</h4>
-        <div class="small" id="unlockedList" style="margin-top:8px">None</div>
-      </div>
-    </aside>
+  <div class="grid" id="tilesGrid">
+    <!-- Tiles will be created by script -->
   </div>
 </main>
 
 <canvas id="fxCanvas"></canvas>
 
-<!-- Points popup container -->
-<div id="popupLayer"></div>
-
-<footer style="text-align:center;padding:12px">Gimkit-inspired visuals: floating point popups, confetti, and smooth animations.</footer>
-
 <script>
-/* -----------------------
-   Storage & tiers
-   ----------------------- */
-const POINTS_KEY = 'btl_points_math_v4';
-const UNLOCK_KEY = 'btl_unlocks_v3';
-const ACTIVITY_KEY = 'btl_activity_v2';
-const DEFAULT_UNLOCKS = {rapid:true, maze:false, pattern:false, prob:false, casino:false, secretGame:false, airHockey:false};
+/*
+  Simplified, robust single-file app.
+  All games are embedded in tiles on the home page.
+  Play/Close buttons work in-place.
+*/
 
+/* Storage & points */
+const POINTS_KEY = 'btl_points_fixed_home_v1';
+if(!localStorage.getItem(POINTS_KEY)) localStorage.setItem(POINTS_KEY,'0');
 function getPoints(){ return Number(localStorage.getItem(POINTS_KEY) || 0); }
-function setPoints(n){ localStorage.setItem(POINTS_KEY, String(n)); renderPoints(); logActivity('Points set: '+n); }
-function addPoints(n, opts={x:null,y:null}){
-  const before = getPoints();
-  const after = Math.max(0, before + n);
-  setPoints(after);
-  // show point popup at opts.x/y if provided, otherwise show default popup near correct element
-  if(n > 0){
-    const txt = `+${n}`;
-    showPointsPopup(opts.x, opts.y, txt);
-  } else if(n < 0){
-    showPointsPopup(opts.x, opts.y, `${n}`);
-  }
-}
-function getUnlocks(){ return JSON.parse(localStorage.getItem(UNLOCK_KEY) || JSON.stringify(DEFAULT_UNLOCKS)); }
-function setUnlocks(u){ localStorage.setItem(UNLOCK_KEY, JSON.stringify(u)); renderTiles(); renderUnlockedList(); }
-function recordActivity(msg){ const a = JSON.parse(localStorage.getItem(ACTIVITY_KEY)||'[]'); a.unshift({t:Date.now(), msg}); localStorage.setItem(ACTIVITY_KEY, JSON.stringify(a.slice(0,200))); renderActivity(); }
-function logActivity(msg){ recordActivity(msg); }
-
-/* Tier colors (array of gradients) */
-const TIER_COLORS = [
-  {from:'#d6f5ff', to:'#e6fbff'}, // Chill
-  {from:'#fbe7c6', to:'#ffd6a5'}, // Bronze
-  {from:'#e6eafc', to:'#d7e2ff'}, // Silver
-  {from:'#fff4cc', to:'#ffe08a'}, // Gold
-  {from:'#e9e6ff', to:'#cfc3ff'}, // Diamond
-  {from:'#ffe6f0', to:'#ffd6e8'}, // Legendary
-  {from:'#e9f9ff', to:'#bfefff'}  // Wizard
-];
-
-const TIERS = [
-  {name:'Chill', min:0},
-  {name:'Bronze', min:1000},
-  {name:'Silver', min:1500},
-  {name:'Gold', min:2000},
-  {name:'Diamond', min:2500},
-  {name:'Legendary', min:3000},
-  {name:'Wizard', min:3500}
-];
-
-function getTier(points){
-  let cur = TIERS[0]; for(const t of TIERS) if(points >= t.min) cur = t;
-  const next = TIERS.find(t=>t.min > points) || null; const idx = TIERS.indexOf(cur);
-  return {current:cur, next, index:idx};
-}
-
-function renderPoints(){
-  document.getElementById('points').textContent = getPoints();
-  const tinfo = getTier(getPoints());
-  document.getElementById('tierLabel').textContent = `Tier: ${tinfo.current.name}`;
-  const nextText = tinfo.next ? `${getPoints()} / ${tinfo.next.min}` : `${getPoints()} / max`;
-  document.getElementById('nextTierText').textContent = nextText;
-  const fill = tinfo.next ? Math.min(1, (getPoints() - tinfo.current.min)/(tinfo.next.min - tinfo.current.min)) : 1;
-  const fillEl = document.getElementById('tierFill');
-  fillEl.style.width = `${Math.round(fill*100)}%`;
-  const c = TIER_COLORS[tinfo.index] || TIER_COLORS[0];
-  fillEl.style.background = `linear-gradient(90deg, ${c.from}, ${c.to})`;
-  // auto-unlock thresholds
-  const u = getUnlocks();
-  if(getPoints() >= 1000) u.pattern = true;
-  if(getPoints() >= 1500) u.maze = true;
-  if(getPoints() >= 2000) u.prob = true;
-  if(getPoints() >= 2500) u.casino = true;
-  if(getPoints() >= 3000) u.secretGame = u.secretGame || false;
-  if(getPoints() >= 3500) u.airHockey = u.airHockey || false;
-  setUnlocks(u);
-}
-
-/* Activity & unlocked list */
-function renderActivity(){ const a = JSON.parse(localStorage.getItem(ACTIVITY_KEY)||'[]'); const el = document.getElementById('activityList') || document.createElement('div'); el.innerHTML = a.slice(0,6).map(x=>`${new Date(x.t).toLocaleTimeString()}: ${x.msg}`).join('<br>') || 'No activity yet'; if(document.getElementById('activityList')) document.getElementById('activityList').innerHTML = el.innerHTML; }
-function renderUnlockedList(){ const u = getUnlocks(); document.getElementById('unlockedList').textContent = Object.keys(u).filter(k=>u[k]).join(', ') || 'None'; }
-renderUnlockedList(); renderActivity();
-
-/* Initialize storage defaults */
-if(!localStorage.getItem(UNLOCK_KEY)) localStorage.setItem(UNLOCK_KEY, JSON.stringify(DEFAULT_UNLOCKS));
-if(!localStorage.getItem(POINTS_KEY)) localStorage.setItem(POINTS_KEY, '0');
+function setPoints(v){ localStorage.setItem(POINTS_KEY, String(v)); renderPoints(); }
+function addPoints(n){ setPoints(Math.max(0, getPoints() + n)); showFloatingPoints(n); }
+function renderPoints(){ document.getElementById('points').textContent = getPoints(); }
 renderPoints();
 
-/* -----------------------
-   Gimkit-like point popup + fly-to-counter
-   ----------------------- */
-const popupLayer = document.getElementById('popupLayer');
-function showPointsPopup(x, y, text){
-  // if x/y not provided, create near center
-  const startX = (x !== null && x !== undefined) ? x : window.innerWidth/2;
-  const startY = (y !== null && y !== undefined) ? y : window.innerHeight/3;
-  const p = document.createElement('div'); p.className = 'points-popup'; p.style.left = startX + 'px'; p.style.top = startY + 'px'; p.style.opacity = '1'; p.textContent = text;
-  popupLayer.appendChild(p);
-  // float up animation
-  requestAnimationFrame(()=> p.style.transform = 'translate(-50%, -120%) scale(1.15)');
-  setTimeout(()=> {
-    // fly to pointsBox
-    const target = document.getElementById('pointsBox').getBoundingClientRect();
-    const destX = target.left + target.width/2;
-    const destY = target.top + target.height/2;
-    // compute translation delta
-    const dx = destX - startX, dy = destY - startY;
-    p.style.transition = 'transform 900ms cubic-bezier(.2,.9,.2,1), opacity 900ms';
-    p.style.transform = `translate(${dx}px, ${dy}px) scale(.4)`;
-    p.style.opacity = '0';
-    setTimeout(()=>{ p.remove(); }, 1000);
-  }, 600);
-}
-
-/* -----------------------
-   Tiles on Home page (all games)
-   ----------------------- */
-const tiles = [
-  {id:'trivia', title:'Trivia (50 levels)', desc:'Math-only trivia. Pass 7/10 to advance.'},
-  {id:'rapid', title:'Rapid Fire', desc:'Timed arithmetic rounds.'},
-  {id:'maze', title:'Math Maze', desc:'Solve math gates to open paths.'},
-  {id:'pattern', title:'Pattern Builder', desc:'Continue number sequences.'},
-  {id:'prob', title:'Probability Cups', desc:'Expected value puzzles.'},
-  {id:'casino', title:'Casino', desc:'Three gambling machines with improved animations.'},
-  {id:'cups', title:'Secret Cups', desc:'Unlock via casino (Machine 2). Visible shuffle.'},
-  {id:'air', title:'Air Hockey', desc:'Unlock via jackpot in Machine 3; sonar treasure quests.'}
-];
-function renderTiles(){
-  const c = document.getElementById('tilesContainer'); c.innerHTML = '';
-  const u = getUnlocks();
-  tiles.forEach(t=>{
-    const locked = t.id === 'casino' ? !u.casino : (t.id === 'cups' && !u.secretGame) ? true : (t.id === 'air' && !u.airHockey) ? true : false;
-    const div = document.createElement('div'); div.className = 'tile' + (locked ? ' locked' : '');
-    div.innerHTML = `<div style="font-weight:800">${t.title}</div><div class="small">${t.desc}</div>`;
-    if(!locked) div.onclick = ()=> openPage(t.id); else div.onclick = ()=> { alert('Locked or unlocked via tier/casino.'); };
-    c.appendChild(div);
-  });
-}
-renderTiles();
-
-/* -----------------------
-   Page routing
-   ----------------------- */
-function hideAllPages(){ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); }
-function openPage(id){
-  hideAllPages();
-  if(id === 'trivia') { document.getElementById('triviaPage').classList.add('active'); prepareTriviaLevels(); }
-  else if(id === 'rapid') document.getElementById('rapidPage').classList.add('active');
-  else if(id === 'maze') document.getElementById('mazePage').classList.add('active');
-  else if(id === 'pattern') { document.getElementById('patternPage').classList.add('active'); preparePattern(); }
-  else if(id === 'prob') document.getElementById('probPage').classList.add('active');
-  else if(id === 'casino') openCasinoModal();
-  else if(id === 'cups') { document.getElementById('cupsPage').classList.add('active'); showCupsStatus(); }
-  else if(id === 'air') { document.getElementById('airPage').classList.add('active'); initAirCanvas(); }
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-document.getElementById('btnHome').addEventListener('click', ()=> { hideAllPages(); document.getElementById('homePage').classList.add('active'); });
-document.getElementById('btnCasino').addEventListener('click', ()=> openCasinoModal());
-
-/* Back buttons */
-document.getElementById('backHomeFromTrivia').addEventListener('click', ()=> { hideAllPages(); document.getElementById('homePage').classList.add('active'); });
-document.getElementById('backHomeFromRapid').addEventListener('click', ()=> { hideAllPages(); document.getElementById('homePage').classList.add('active'); });
-document.getElementById('backHomeFromMaze').addEventListener('click', ()=> { hideAllPages(); document.getElementById('homePage').classList.add('active'); });
-document.getElementById('backHomeFromPattern').addEventListener('click', ()=> { hideAllPages(); document.getElementById('homePage').classList.add('active'); });
-document.getElementById('backHomeFromProb').addEventListener('click', ()=> { hideAllPages(); document.getElementById('homePage').classList.add('active'); });
-document.getElementById('backHomeFromCups').addEventListener('click', ()=> { hideAllPages(); document.getElementById('homePage').classList.add('active'); });
-document.getElementById('backHomeFromAir').addEventListener('click', ()=> { hideAllPages(); document.getElementById('homePage').classList.add('active'); });
-
-/* -----------------------
-   SIMPLE Trivia implementation (50 math levels) with Gimkit-like feedback
-   ----------------------- */
-const triviaLevelSelect = document.getElementById('triviaLevel');
-function prepareTriviaLevels(){ if(triviaLevelSelect.options.length) return; for(let i=1;i<=50;i++){ const o=document.createElement('option'); o.value=i; o.text=`Level ${i}`; triviaLevelSelect.appendChild(o); } }
-let triviaState = null;
-function shuffle(arr){ const r = arr.slice(); for(let i=r.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [r[i], r[j]]=[r[j], r[i]]; } return r; }
-function randInt(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
-
-function generateMathQuestion(level){
-  level = Math.max(1, Math.min(50, level));
-  if(level <= 8){
-    const a=randInt(1,12), b=randInt(1,12); return {q:`${a} + ${b} = ?`, choices:shuffle([String(a+b), String(a+b+1), String(Math.abs(a-b)), String(a*b)]), answer:String(a+b)};
-  } else if(level <= 16){
-    const a=randInt(2,15), b=randInt(2,12); return {q:`${a} × ${b} = ?`, choices:shuffle([String(a*b), String(a*b+randInt(1,6)), String(a*b-randInt(1,6)), String(a+b)]), answer:String(a*b)};
-  } else if(level <= 24){
-    const a=randInt(10,80), b=randInt(2,9); return {q:`${a} ÷ ${b} = ? (nearest int)`, choices:shuffle([String(Math.round(a/b)), String(Math.floor(a/b)), String(Math.ceil(a/b)), String(Math.round((a+b)/b))]), answer:String(Math.round(a/b))};
-  } else if(level <= 32){
-    const a=randInt(2,12), b=randInt(2,6); return {q:`What is ${a}^${b}?`, choices:shuffle([String(Math.pow(a,b)), String(Math.pow(a,b)+randInt(1,20)), String(Math.pow(a+1,b)), String(Math.pow(a,b)-randInt(1,20))]), answer:String(Math.pow(a,b))};
-  } else if(level <= 40){
-    const a=randInt(10,60), b=randInt(2,12), c=randInt(1,10); const val = a + b*c; return {q:`${a} + ${b} × ${c} = ?`, choices:shuffle([String(val), String(val+1), String(val-1), String(a*b+c)]), answer:String(val)};
-  } else if(level <= 46){
-    const a=randInt(1,9), b=randInt(1,9), c=randInt(1,9); const val = Number(((a/b)+(c/b)).toFixed(2)); return {q:`${a}/${b} + ${c}/${b} = ? (2 dp)`, choices:shuffle([String(val), String(Number((val+0.5).toFixed(2))), String(Number((val-0.25).toFixed(2))), String(Number((val+0.1).toFixed(2)))]), answer:String(val)};
-  } else {
-    const a=randInt(2,12), b=randInt(2,12), c=randInt(1,10); const val = (a*b + c)/a; return {q:`Solve: ${a}x - ${c} = ${a*b}. x = ?`, choices:shuffle([String(val), String(Math.floor(val)), String(Math.ceil(val)), String(b)]), answer:String(val)};
-  }
-}
-
-document.getElementById('startTrivia').addEventListener('click', ()=> {
-  const level = Number(triviaLevelSelect.value || 1);
-  startTriviaRound(level);
+document.getElementById('resetBtn').addEventListener('click', ()=> {
+  if(confirm('Reset points?')){ localStorage.removeItem(POINTS_KEY); localStorage.setItem(POINTS_KEY,'0'); renderPoints(); alert('Reset done'); }
 });
 
-function startTriviaRound(level){
-  const questions = [];
-  for(let i=0;i<10;i++) questions.push(generateMathQuestion(level + Math.floor(i/4)));
-  triviaState = {level, questions, i:0, score:0};
-  renderTriviaQuestion();
-}
-
-function renderTriviaQuestion(){
-  const area = document.getElementById('triviaArea'); area.innerHTML = '';
-  if(!triviaState) return;
-  const q = triviaState.questions[triviaState.i];
-  const qdiv = document.createElement('div'); qdiv.innerHTML = `<div class="question">Q${triviaState.i+1}: ${q.q}</div>`;
-  const answrap = document.createElement('div'); answrap.className='answers';
-  q.choices.forEach(choice=>{
-    const b = document.createElement('button'); b.className='ans-btn'; b.textContent = choice;
-    b.onclick = (ev)=>{
-      // disable choices
-      Array.from(answrap.children).forEach(ch=>ch.disabled=true);
-      // check
-      const correct = choice === q.answer;
-      if(correct){
-        b.classList.add('correct');
-        // show points popup near button then fly to points
-        const rect = b.getBoundingClientRect();
-        addPoints(Math.max(10, Math.round(30 + triviaState.level * 1.2)), {x:rect.left + rect.width/2, y:rect.top + rect.height/2});
-        // give per-answer quick confetti
-        celebrateConfettiSmall(rect.left + rect.width/2, rect.top + rect.height/2);
-        triviaState.score++;
-      } else {
-        b.classList.add('wrong');
-      }
-      // highlight correct
-      Array.from(answrap.children).forEach(ch=>{ if(ch.textContent === q.answer) ch.classList.add('correct'); });
-      setTimeout(()=> { triviaState.i++; if(triviaState.i < triviaState.questions.length) renderTriviaQuestion(); else renderTriviaResults(); }, 650);
-    };
-    answrap.appendChild(b);
-  });
-  qdiv.appendChild(answrap); area.appendChild(qdiv);
-}
-
-function renderTriviaResults(){
-  const area = document.getElementById('triviaArea'); area.innerHTML = '';
-  const s = triviaState.score; const wrap = document.createElement('div'); wrap.innerHTML = `<div style="font-weight:800">Round Complete</div><div class="small">Score: ${s}/10</div>`;
-  if(s >= 7){
-    const pts = Math.max(25, Math.round(30 + triviaState.level * 1.5));
-    wrap.innerHTML += `<div class="small">Passed! Awarded ${pts} points.</div>`;
-    const adv = document.createElement('button'); adv.className='btn'; adv.textContent='Advance Level';
-    adv.onclick = ()=>{ const next = Math.min(50, triviaState.level+1); triviaLevelSelect.value = next; startTriviaRound(next); };
-    wrap.appendChild(adv);
-    setTimeout(()=> { celebrateFiveFireworks(); celebrateConfetti(); addPoints(pts); logActivity(`Passed trivia L${triviaState.level} +${pts}`); }, 120);
-  } else {
-    const retry = document.createElement('button'); retry.className='btn'; retry.textContent='Retry'; retry.onclick = ()=> startTriviaRound(triviaState.level);
-    wrap.appendChild(retry);
-    wrap.innerHTML += '<div class="small">Score at least 7/10 to pass and advance.</div>';
-  }
-  const back = document.createElement('button'); back.className='btn secondary'; back.textContent='Back'; back.style.marginLeft='8px'; back.onclick = ()=> { hideAllPages(); document.getElementById('homePage').classList.add('active'); };
-  wrap.appendChild(back); area.appendChild(wrap);
-}
-
-/* -----------------------
-   Rapid, Pattern, Probability, Cups, Air Hockey
-   (Implementations kept similar to previous responses but with point popups)
-   For brevity, I include their crucial wiring and animated point feedback.
-   ----------------------- */
-
-/* Rapid Fire (same logic as earlier) */
-let rapidState = null;
-document.getElementById('startRapid').addEventListener('click', ()=> {
-  const diff = document.getElementById('rapidDifficulty').value;
-  startRapid(diff);
-});
-function generateRapidQuestion(){ return generateMathQuestion(randInt(1,45)); }
-function startRapid(mode){
-  const timePer = mode==='easy'?6: mode==='medium'?4 : 2.5;
-  const questions = []; for(let i=0;i<15;i++) questions.push(generateRapidQuestion());
-  rapidState = {questions, i:0, score:0, timePer, timerId:null};
-  renderRapidQuestion();
-}
-function renderRapidQuestion(){
-  const area = document.getElementById('rapidArea'); area.innerHTML = '';
-  if(!rapidState) return;
-  const q = rapidState.questions[rapidState.i];
-  const wrapper = document.createElement('div'); wrapper.innerHTML = `<div class="question">Q${rapidState.i+1}: ${q.q}</div><div class="small">Time: <span id="rapidTime">${rapidState.timePer.toFixed(1)}</span>s</div>`;
-  const answrap = document.createElement('div'); answrap.className='answers';
-  q.choices.forEach(txt=>{
-    const b = document.createElement('button'); b.className='ans-btn'; b.textContent = txt;
-    b.onclick = (ev)=> {
-      clearInterval(rapidState.timerId);
-      if(txt === String(q.answer)){ rapidState.score++; const rect = b.getBoundingClientRect(); addPoints(10, {x:rect.left+rect.width/2, y:rect.top+rect.height/2}); celebrateConfettiSmall(rect.left+rect.width/2, rect.top+rect.height/2); }
-      rapidState.i++; if(rapidState.i < rapidState.questions.length) renderRapidQuestion(); else finishRapid();
-    };
-    answrap.appendChild(b);
-  });
-  wrapper.appendChild(answrap); area.appendChild(wrapper);
-  let t = rapidState.timePer; document.getElementById('rapidTime').textContent = t.toFixed(1);
-  rapidState.timerId = setInterval(()=>{ t -= 0.1; document.getElementById('rapidTime').textContent = t.toFixed(1); if(t <= 0){ clearInterval(rapidState.timerId); rapidState.i++; if(rapidState.i < rapidState.questions.length) renderRapidQuestion(); else finishRapid(); } }, 100);
-}
-function finishRapid(){
-  const s = rapidState.score; const pts = s*8; addPoints(pts); logActivity(`Rapid: ${s}/15 +${pts}`);
-  if(s >= Math.ceil(rapidState.questions.length*0.6)) { celebrateFiveFireworks(); celebrateConfetti(); }
-  document.getElementById('rapidArea').innerHTML = `<div class="small">Round done. Score ${s}. Awarded ${pts} pts.</div>`;
-  document.getElementById('rapidScore').textContent = `Score: ${s}`;
-}
-
-/* Pattern builder wiring */
-document.getElementById('startPattern').addEventListener('click', ()=> startPatternRound(Number(document.getElementById('patternLevel').value||1)));
-function preparePattern(){ const sel = document.getElementById('patternLevel'); if(sel.options.length) return; for(let i=1;i<=30;i++){ const o=document.createElement('option'); o.value=i; o.text=`Level ${i}`; sel.appendChild(o);} }
-let patternState=null;
-function generatePattern(level){ level=Math.max(1,Math.min(30,level)); const types=['arithmetic','geometric','fib-like','alternating','square']; const t=types[level%types.length]; if(t==='arithmetic'){const a=randInt(1,6),d=randInt(1,10)+Math.floor(level/8);const seq=[a,a+d,a+2*d,a+3*d,a+4*d];return{seq,next:a+5*d,type:`Arithmetic +${d}`};} if(t==='geometric'){const a=randInt(1,4),r=randInt(2,4);const seq=[a,a*r,a*r*r,a*r*r*r,a*r*r*r*r];return{seq,next:a*Math.pow(r,5),type:`Geometric x${r}`};} if(t==='fib-like'){const a=randInt(1,5),b=randInt(1,6);const seq=[a,b,a+b,b+(a+b),(a+b)+(b+(a+b))];return{seq,next:seq[3]+seq[4],type:'Fib-like'};} if(t==='alternating'){const a=randInt(1,6),b=randInt(7,12);const seq=[a,b,a+b,a+2*b,a+3*b];return{seq,next:a+4*b,type:'Alternating'};} const start=randInt(1,6);const seq=[start,start+1,start+4,start+9,start+16];return{seq,next:start+25,type:'Squares offset'}; }
-function startPatternRound(level){ patternState={level,i:0,score:0}; renderPatternQuestion(); }
-function renderPatternQuestion(){ const area=document.getElementById('patternArea'); area.innerHTML=''; const p=generatePattern(patternState.level+patternState.i); const div=document.createElement('div'); div.innerHTML=`<div class="small">Type: ${p.type}</div><div class="question">Complete: ${p.seq.join(', ')}, ...</div>`; const input=document.createElement('input'); input.type='number'; input.style.padding='8px'; input.style.borderRadius='8px'; input.style.border='1px solid rgba(7,32,51,0.06)'; const ok=document.createElement('button'); ok.className='btn'; ok.textContent='Submit'; ok.onclick=()=>{ const val=Number(input.value); if(String(val)===String(p.next)){ patternState.score++; addPoints(15,{x:window.innerWidth/2,y:window.innerHeight/2}); celebrateConfettiSmall(); alert('Correct +15'); } else alert('Wrong — '+p.next); patternState.i++; if(patternState.i<5) renderPatternQuestion(); else { area.innerHTML=`<div class="small">Round complete — Score ${patternState.score}/5</div>`; document.getElementById('patternScore').textContent=`Score: ${patternState.score}`; } }; div.appendChild(input); div.appendChild(ok); area.appendChild(div); }
-
-/* Probability game wiring */
-document.getElementById('startProb').addEventListener('click', ()=> startProbRound());
-function generateProbQuestion(){ const base=randInt(5,30); const p1=Math.random()*0.6+0.1, p2=Math.random()*0.6+0.05, p3=Math.random()*0.6+0.02; const a1=base+randInt(0,base), a2=base+randInt(0,base+10), a3=base+randInt(0,base+20); return {prompt:'Choose highest EV', cups:[{label:'A',p:Number(p1.toFixed(2)),payout:a1,ev:Number((p1*a1).toFixed(2))},{label:'B',p:Number(p2.toFixed(2)),payout:a2,ev:Number((p2*a2).toFixed(2))},{label:'C',p:Number(p3.toFixed(2)),payout:a3,ev:Number((p3*a3).toFixed(2))}]}; }
-function startProbRound(){ const q=generateProbQuestion(); renderProb(q); }
-function renderProb(q){ const area=document.getElementById('probArea'); area.innerHTML=''; const header=document.createElement('div'); header.innerHTML=`<div class="question">${q.prompt}</div><div class="small">Click a cup</div>`; area.appendChild(header); const row=document.createElement('div'); row.style.display='flex'; row.style.gap='12px'; row.style.marginTop='12px'; q.cups.forEach(c=>{ const el=document.createElement('div'); el.style.flex='1'; el.style.padding='12px'; el.style.border='1px solid rgba(7,32,51,0.06)'; el.style.borderRadius='10px'; el.style.textAlign='center'; el.style.background='#fff'; el.innerHTML=`<div style="font-weight:800">${c.label}</div><div class="small">Payout: ${c.payout}</div><div class="small">Chance: ${Math.round(c.p*100)}%</div>`; el.onclick=()=>{ const best=q.cups.reduce((a,b)=> a.ev>b.ev? a:b); if(c.label===best.label){ addPoints(20,{x:el.getBoundingClientRect().left+el.offsetWidth/2,y:el.getBoundingClientRect().top}); celebrateConfettiSmall(el.getBoundingClientRect().left+el.offsetWidth/2,el.getBoundingClientRect().top); alert('Correct! +20 pts'); } else alert(`Wrong. Best: ${best.label} (${best.ev})`); renderProb(generateProbQuestion()); }; row.appendChild(el); }); area.appendChild(row); }
-
-/* -----------------------
-   Casino animations: improved reels (CSS transform) and confetti
-   ----------------------- */
-
-function createReel(symbols, repeat=24){
-  const reel = document.createElement('div'); reel.className='reel';
-  const inner = document.createElement('div'); inner.className='reel-inner';
-  inner.style.transform = 'translateY(0px)';
-  for(let r=0;r<repeat;r++){ for(const s of symbols){ const it=document.createElement('div'); it.className='reel-item'; it.textContent=s; inner.appendChild(it); } }
-  reel.appendChild(inner); reel._inner = inner; reel._symbols=symbols; reel._itemH = 120; reel._count = inner.children.length;
-  return reel;
-}
-
-function spinReelToSymbol(reel, targetSymbol, cycles=4, dur=1200){
-  return new Promise(resolve=>{
-    const inner = reel._inner;
-    // find occurrences of target in inner
-    let targetIdx = -1;
-    for(let i=0;i<inner.children.length;i++){
-      if(inner.children[i].textContent === targetSymbol){ targetIdx = i; break; }
-    }
-    if(targetIdx === -1) targetIdx = Math.floor(Math.random()*reel._symbols.length);
-    // compute final index adding cycles*symbols
-    const finalIndex = targetIdx + cycles * reel._symbols.length;
-    const finalY = - finalIndex * reel._itemH;
-    inner.style.transition = `transform ${dur}ms cubic-bezier(.2,.9,.2,1)`;
-    inner.style.transform = `translateY(${finalY}px)`;
-    const onEnd = ()=>{
-      inner.removeEventListener('transitionend', onEnd);
-      // quick normalize: set transform to - (finalIndex % symbols)*itemH (so subsequent spins are not huge)
-      const normIdx = finalIndex % reel._symbols.length;
-      inner.style.transition = '';
-      inner.style.transform = `translateY(${ - normIdx * reel._itemH }px)`;
-      resolve(reel._symbols[normIdx]);
-    };
-    inner.addEventListener('transitionend', onEnd);
-  });
-}
-
-function openCasinoModal(){
-  const u = getUnlocks();
-  if(!u.casino){ alert('Casino unlocks at Diamond (2500 pts).'); return; }
-  const modal = document.createElement('div'); modal.className='modal';
-  const box = document.createElement('div'); box.className='modal-box';
-  box.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0">Casino</h3><div><button id="closeCasino" class="btn secondary">Close</button></div></div>
-    <div style="display:flex;gap:12px;margin-top:12px">
-      <div style="flex:1">
-        <div style="font-weight:800">Machine 1 — Classic Slots</div><div class="small">Symbols: 🔔 7 ❤️ ♦ ⭐</div>
-        <div id="m1area" style="display:flex;gap:8px;margin-top:8px"></div>
-        <div style="margin-top:8px;display:flex;gap:8px;align-items:center"><label>Bet: <input id="m1bet" type="number" min="1" value="10" style="width:90px"></label><button id="m1spin" class="btn">Spin</button><div id="m1msg" class="small"></div></div>
-      </div>
-      <div style="flex:1">
-        <div style="font-weight:800">Machine 2 — Secret Cups</div><div class="small">Open the secret cups challenge (visible shuffle). Beat 3 levels to get 250 pts.</div>
-        <div style="margin-top:8px"><button id="m2play" class="btn">Open</button><div id="m2msg" class="small" style="margin-top:6px"></div></div>
-      </div>
-      <div style="flex:1">
-        <div style="font-weight:800">Machine 3 — Jackpot</div><div class="small">Hit a rare jackpot to unlock Air Hockey.</div>
-        <div id="m3area" style="display:flex;gap:8px;margin-top:8px"></div>
-        <div style="margin-top:8px;display:flex;gap:8px;align-items:center"><label>Bet: <input id="m3bet" type="number" min="5" value="25" style="width:90px"></label><button id="m3spin" class="btn">Spin</button><div id="m3msg" class="small"></div></div>
-      </div>
-    </div>`;
-  modal.appendChild(box); document.body.appendChild(modal);
-  box.querySelector('#closeCasino').onclick = ()=> modal.remove();
-
-  // Machine 1 reels
-  const m1Symbols = ['🔔','7','❤️','♦','⭐'];
-  const m1area = box.querySelector('#m1area');
-  const r1 = createReel(m1Symbols, 20), r2 = createReel(m1Symbols, 20), r3 = createReel(m1Symbols, 20);
-  m1area.appendChild(r1); m1area.appendChild(r2); m1area.appendChild(r3);
-  box.querySelector('#m1spin').onclick = async ()=>{
-    const bet = Math.max(1, Number(box.querySelector('#m1bet').value || 10));
-    if(getPoints() < bet){ box.querySelector('#m1msg').textContent = 'Not enough points.'; return; }
-    addPoints(-bet);
-    box.querySelector('#m1msg').textContent = 'Spinning...';
-    const t1 = m1Symbols[Math.floor(Math.random()*m1Symbols.length)];
-    const t2 = m1Symbols[Math.floor(Math.random()*m1Symbols.length)];
-    const t3 = m1Symbols[Math.floor(Math.random()*m1Symbols.length)];
-    await Promise.all([spinReelToSymbol(r1,t1,4,1200), (async()=>{await new Promise(r=>setTimeout(r,120)); return spinReelToSymbol(r2,t2,4,1300)})(), (async()=>{await new Promise(r=>setTimeout(r,240)); return spinReelToSymbol(r3,t3,4,1400)})()]);
-    // read center by sampling inner children at middle index
-    const read=(reel)=>{ const inner=reel._inner; const idx=Math.floor(inner.children.length/2); return inner.children[idx].textContent; };
-    const a=read(r1), b=read(r2), c=read(r3);
-    let payout=0;
-    if(a===b && b===c) payout = bet*10;
-    else if(a===b || b===c || a===c) payout = bet*2;
-    if(payout>0){ addPoints(payout); box.querySelector('#m1msg').textContent = `Won ${payout}!`; celebrateConfetti(); } else box.querySelector('#m1msg').textContent = `Lost ${bet}.`;
-  };
-
-  // Machine 2: open cups modal
-  box.querySelector('#m2play').onclick = ()=> { modal.remove(); openCupsModal(); };
-
-  // Machine 3 reels and jackpot
-  const m3Symbols = ['💎','🔔','7','⭐','♦'];
-  const m3area = box.querySelector('#m3area');
-  const s1 = createReel(m3Symbols, 24), s2 = createReel(m3Symbols,24), s3 = createReel(m3Symbols,24);
-  m3area.appendChild(s1); m3area.appendChild(s2); m3area.appendChild(s3);
-  box.querySelector('#m3spin').onclick = async ()=>{
-    const bet = Math.max(5, Number(box.querySelector('#m3bet').value || 25));
-    if(getPoints() < bet){ box.querySelector('#m3msg').textContent = 'Not enough points.'; return; }
-    addPoints(-bet); box.querySelector('#m3msg').textContent = 'Spinning...';
-    const chance = Math.random();
-    const jackpot = chance < 0.035; // rare
-    const tgt = (i)=> jackpot ? '💎' : m3Symbols[Math.floor(Math.random()*m3Symbols.length)];
-    await Promise.all([spinReelToSymbol(s1,tgt(0),5,1400), (async()=>{await new Promise(r=>setTimeout(r,120));return spinReelToSymbol(s2,tgt(1),5,1520)})(), (async()=>{await new Promise(r=>setTimeout(r,240));return spinReelToSymbol(s3,tgt(2),5,1640)})()]);
-    const read=(reel)=>{ const inner=reel._inner; const idx=Math.floor(inner.children.length/2); return inner.children[idx].textContent; };
-    const a=read(s1), b=read(s2), c=read(s3);
-    if(jackpot && a===b && b===c && a==='💎'){
-      const reward = Math.max(200, bet*12);
-      addPoints(reward); box.querySelector('#m3msg').textContent = `JACKPOT! Won ${reward} pts! Air Hockey unlocked.`;
-      const u=getUnlocks(); u.airHockey=true; setUnlocks(u); celebrateFiveFireworks(); celebrateConfetti(); logActivity('Jackpot '+reward); alert('JACKPOT! Air Hockey unlocked.');
-    } else {
-      let payout=0;
-      if(a===b && b===c) payout=bet*8; else if(a===b || b===c || a===c) payout=bet*2;
-      if(payout>0){ addPoints(payout); box.querySelector('#m3msg').textContent = `Won ${payout}!`; celebrateConfetti(); } else box.querySelector('#m3msg').textContent = `Lost ${bet}.`;
-    }
-  };
-}
-
-/* Small confetti + fireworks functions */
+/* small fireworks/confetti visual (non-blocking) */
 const fxCanvas = document.getElementById('fxCanvas'); fxCanvas.width = innerWidth; fxCanvas.height = innerHeight; const fxCtx = fxCanvas.getContext('2d');
 window.addEventListener('resize', ()=>{ fxCanvas.width = innerWidth; fxCanvas.height = innerHeight; });
-
 let particles = [];
-function spawnConfettiBurst(cx=null, cy=null, count=80){
-  const x = cx || window.innerWidth/2, y = cy || window.innerHeight/3;
+function spawnConfetti(x=window.innerWidth/2, y=window.innerHeight/3, count=60){
+  for(let i=0;i<count;i++) particles.push({x,y,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.8)*6,life:80+Math.random()*40,size:3+Math.random()*8,h:Math.random()*360});
+}
+function spawnFirework(x,y,count=80){
   for(let i=0;i<count;i++){
-    particles.push({x, y, vx:(Math.random()-0.5)*6, vy:(Math.random()-0.8)*6, life:80+Math.floor(Math.random()*80), size:4+Math.random()*10, hue:Math.floor(Math.random()*360)});
+    const a = Math.random()*Math.PI*2, s = 1+Math.random()*5;
+    particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:80+Math.random()*60,size:1+Math.random()*3,h:Math.random()*360});
   }
 }
-function celebrateConfetti(){ spawnConfettiBurst(); }
-function celebrateConfettiSmall(x,y){ spawnConfettiBurst(x,y,36); }
-
-function spawnFirework(cx,cy, count=80){
-  const hue = Math.floor(Math.random()*360);
-  for(let i=0;i<count;i++){
-    const angle = Math.random()*Math.PI*2, speed = 1+Math.random()*6;
-    particles.push({x:cx, y:cy, vx:Math.cos(angle)*speed, vy:Math.sin(angle)*speed, life:80+Math.floor(Math.random()*50), size:1+Math.random()*3, hue});
-  }
+function celebrate(){
+  const cx = innerWidth/2, cy = innerHeight/3;
+  for(let i=0;i<5;i++) setTimeout(()=> spawnFirework(cx + (Math.random()-0.5)*200, cy + (Math.random()-0.5)*120, 80), i*280);
+  spawnConfetti();
 }
-function celebrateFiveFireworks(cx=null, cy=null){
-  const X = cx || window.innerWidth/2; const Y = cy || window.innerHeight/3;
-  for(let i=0;i<5;i++) setTimeout(()=> spawnFirework(X + (Math.random()-0.5)*200, Y + (Math.random()-0.5)*150, 80), i*300);
-}
-
 function fxLoop(){
   fxCtx.clearRect(0,0,fxCanvas.width, fxCanvas.height);
   for(let i=particles.length-1;i>=0;i--){
     const p = particles[i];
-    p.x += p.vx; p.y += p.vy; p.vy += 0.08; p.life--;
-    fxCtx.beginPath();
-    if(p.hue !== undefined) fxCtx.fillStyle = `hsl(${p.hue} 80% 60% / ${Math.max(0, p.life/120)})`;
-    else fxCtx.fillStyle = `rgba(255,200,50, ${Math.max(0, p.life/120)})`;
-    if(p.size > 6) fxCtx.fillRect(p.x, p.y, p.size, p.size);
-    else fxCtx.arc(p.x, p.y, p.size, 0, Math.PI*2), fxCtx.fill();
+    p.x += p.vx; p.y += p.vy; p.vy += 0.06; p.life--;
+    fxCtx.fillStyle = `hsl(${p.h} 80% 60% / ${Math.max(0, p.life/120)})`;
+    if(p.size > 6) fxCtx.fillRect(p.x,p.y,p.size,p.size); else { fxCtx.beginPath(); fxCtx.arc(p.x,p.y,p.size,0,Math.PI*2); fxCtx.fill(); }
     if(p.life <= 0) particles.splice(i,1);
   }
   requestAnimationFrame(fxLoop);
 }
 fxLoop();
 
-/* -----------------------
-   Cups secret (modal) with visible shuffle
-   ----------------------- */
-function openCupsModal(){
-  const u = getUnlocks();
-  if(!u.casino){ alert('Casino unlock needed to access secret cups.'); return; }
-  const modal = document.createElement('div'); modal.className='modal';
-  const box = document.createElement('div'); box.className='modal-box';
-  box.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0">Secret Cups Challenge</h3><div><button id="closeCups" class="btn secondary">Close</button></div></div><div style="margin-top:8px" class="small">Beat Levels 1→3. Red cups. Visible shuffle.</div><div id="cupsModalArea" style="margin-top:12px;min-height:220px"></div>`;
-  modal.appendChild(box); document.body.appendChild(modal); box.querySelector('#closeCups').onclick = ()=> modal.remove();
-  startCupsModalLevel(box,1,modal);
+/* floating points popup like Gimkit */
+function showFloatingPoints(n){
+  const popup = document.createElement('div'); popup.textContent = (n>0? '+'+n : String(n)); popup.style.position='fixed';
+  const startX = window.innerWidth/2; const startY = window.innerHeight/3;
+  popup.style.left = startX + 'px'; popup.style.top = startY + 'px';
+  popup.style.padding = '6px 10px'; popup.style.borderRadius='999px'; popup.style.background = '#ffd27a'; popup.style.fontWeight = '800';
+  popup.style.transform = 'translate(-50%,-50%)'; popup.style.transition = 'transform 900ms cubic-bezier(.2,.9,.2,1), opacity 900ms';
+  popup.style.zIndex = 2000;
+  document.body.appendChild(popup);
+  requestAnimationFrame(()=> popup.style.transform = 'translate(-50%,-120%) scale(1.05)');
+  setTimeout(()=> {
+    const target = document.querySelector('.points').getBoundingClientRect();
+    const dx = (target.left + target.width/2) - startX;
+    const dy = (target.top + target.height/2) - startY;
+    popup.style.transform = `translate(${dx}px, ${dy}px) scale(.4)`;
+    popup.style.opacity = '0';
+    setTimeout(()=> popup.remove(), 950);
+  }, 600);
 }
-function startCupsModalLevel(box, level, modal){
-  const area = box.querySelector('#cupsModalArea'); area.innerHTML = '';
-  const info = document.createElement('div'); info.className='small'; info.textContent = `Level ${level} — watch the shuffle then pick.`;
-  area.appendChild(info);
-  const wrap = document.createElement('div'); wrap.className='cups'; area.appendChild(wrap);
-  const cupEls = [];
-  let ballIndex = Math.floor(Math.random()*3);
-  for(let i=0;i<3;i++){
-    const cup=document.createElement('div'); cup.className='cup'; cup.style.transform=`translateX(${(i-1)*140}px)`; const ball=document.createElement('div'); ball.className='ball'; ball.style.opacity = (i===ballIndex)?'1':'0'; cup.appendChild(ball); wrap.appendChild(cup); cupEls.push(cup);
-  }
-  setTimeout(()=> cupEls.forEach(c=> c.querySelector('.ball').style.opacity='0'), 900);
-  async function shuffle(shuffles, speed){
-    for(let s=0;s<shuffles;s++){
-      const a = Math.floor(Math.random()*3); let b = Math.floor(Math.random()*3); while(b===a) b = Math.floor(Math.random()*3);
-      const curX = cupEls.map(c=> parseFloat(c.style.transform.replace(/translateX\(|px\)/g,'')));
-      const ax = curX[a], bx = curX[b];
-      cupEls[a].style.transition = `transform ${speed}ms cubic-bezier(.2,.9,.2,1)`; cupEls[b].style.transition = `transform ${speed}ms cubic-bezier(.2,.9,.2,1)`;
-      cupEls[a].style.transform = `translateX(${bx}px)`; cupEls[b].style.transform = `translateX(${ax}px)`;
-      await new Promise(r=>setTimeout(r, speed+20));
-      const tmp = cupEls[a]; cupEls[a] = cupEls[b]; cupEls[b] = tmp;
-      cupEls.forEach(c=> c.style.transition = '');
-      await new Promise(r=>setTimeout(r, 90));
+
+/* Tiles spec */
+const tilesSpec = [
+  {id:'trivia', title:'Trivia (50 levels)', desc:'10-question rounds. Pass 7/10.'},
+  {id:'rapid', title:'Rapid Fire', desc:'Timed speed rounds.'},
+  {id:'maze', title:'Math Maze', desc:'Gates require a math answer.'},
+  {id:'pattern', title:'Pattern Builder', desc:'Continue number sequences.'},
+  {id:'prob', title:'Probability Cups', desc:'Choose highest EV.'},
+  {id:'casino', title:'Casino', desc:'Slots, Secret Cups, Jackpot.'},
+  {id:'cups', title:'Secret Cups', desc:'Red cups shuffle challenge.'},
+  {id:'air', title:'Air Hockey', desc:'Simple air hockey with treasure Qs.'}
+];
+
+/* Create tiles and basic UI placeholders */
+const grid = document.getElementById('tilesGrid');
+tilesSpec.forEach(spec => {
+  const tile = document.createElement('div'); tile.className = 'tile'; tile.id = 'tile-' + spec.id;
+  tile.innerHTML = `
+    <h3>${spec.title}</h3>
+    <div class="small">${spec.desc}</div>
+    <div class="playRow">
+      <button class="btn" data-action="play" data-game="${spec.id}">Play</button>
+      <button class="btn secondary" data-action="close" data-game="${spec.id}">Close</button>
+      <div style="flex:1"></div>
+      <div class="small" id="status-${spec.id}">Ready</div>
+    </div>
+    <div class="gameArea" id="area-${spec.id}"></div>
+  `;
+  grid.appendChild(tile);
+});
+
+/* Delegated click listeners for Play/Close */
+grid.addEventListener('click', (e)=>{
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  const action = btn.dataset.action, game = btn.dataset.game;
+  if(action === 'play') openGameInline(game);
+  if(action === 'close') closeGameInline(game);
+});
+
+/* Open/close in-place and initialize once */
+function openGameInline(id){
+  const area = document.getElementById('area-' + id); if(!area) return;
+  area.classList.add('show');
+  if(area.dataset.inited) return;
+  area.dataset.inited = '1';
+  initializeGame(id, area);
+  document.getElementById('status-' + id).textContent = 'Playing';
+}
+function closeGameInline(id){
+  const area = document.getElementById('area-' + id); if(!area) return;
+  area.classList.remove('show');
+  document.getElementById('status-' + id).textContent = 'Ready';
+}
+
+/* Basic game initializers (robust, minimal) */
+function initializeGame(id, area){
+  if(id === 'trivia') initTrivia(area);
+  else if(id === 'rapid') initRapid(area);
+  else if(id === 'maze') initMaze(area);
+  else if(id === 'pattern') initPattern(area);
+  else if(id === 'prob') initProb(area);
+  else if(id === 'casino') initCasino(area);
+  else if(id === 'cups') initCups(area);
+  else if(id === 'air') initAir(area);
+}
+
+/* Trivia: small embedded UI */
+function initTrivia(area){
+  area.innerHTML = `
+    <div style="display:flex;gap:8px;align-items:center">
+      <label>Level: <select id="trivia-level"></select></label>
+      <button id="trivia-start" class="btn">Start</button>
+      <div style="flex:1"></div>
+      <div class="small">Pass 7/10 to advance (auto points).</div>
+    </div>
+    <div id="trivia-ui" style="margin-top:10px"></div>
+  `;
+  const sel = area.querySelector('#trivia-level');
+  for(let i=1;i<=50;i++){ const o=document.createElement('option'); o.value=i; o.text='Level '+i; sel.appendChild(o); }
+  area.querySelector('#trivia-start').addEventListener('click', ()=> {
+    const level = Number(sel.value);
+    runTriviaRound(level, area.querySelector('#trivia-ui'));
+  });
+}
+function runTriviaRound(level, container){
+  const questions = []; for(let i=0;i<10;i++) questions.push(generateMathQuestion(level + Math.floor(i/4)));
+  let idx=0, score=0;
+  function render(){
+    container.innerHTML = '';
+    if(idx >= questions.length){
+      container.innerHTML = `<div style="font-weight:800">Round complete</div><div class="small">Score: ${score}/10</div>`;
+      if(score >= 7){ const pts = Math.max(25, Math.round(30 + level*1.5)); addPoints(pts); celebrate(); container.innerHTML += `<div class="small">Passed +${pts} pts</div>`; }
+      else { container.innerHTML += `<div class="small">Failed — try again</div>`; }
+      return;
     }
+    const q = questions[idx];
+    const qdiv = document.createElement('div'); qdiv.innerHTML = `<div class="question">Q${idx+1}: ${q.q}</div>`;
+    const answers = document.createElement('div'); answers.className='answers';
+    q.choices.forEach(choice=>{
+      const b = document.createElement('button'); b.className='ans-btn'; b.textContent = choice;
+      b.onclick = ()=>{
+        Array.from(answers.children).forEach(ch=> ch.disabled=true);
+        if(choice === q.answer){ b.style.background = '#bff6d9'; const r=b.getBoundingClientRect(); addPoints(10); score++; spawnConfetti(); }
+        else b.style.background = '#ffd6d6';
+        Array.from(answers.children).forEach(ch=> { if(ch.textContent === q.answer) ch.style.border='2px solid #08c27b'; });
+        setTimeout(()=> { idx++; render(); }, 600);
+      };
+      answers.appendChild(b);
+    });
+    qdiv.appendChild(answers); container.appendChild(qdiv);
   }
-  const cfg = level===1?{shuffles:6, speed:240}: level===2?{shuffles:12, speed:160}:{shuffles:20, speed:110};
-  (async()=>{
-    await new Promise(r=>setTimeout(r,700));
-    await shuffle(cfg.shuffles, cfg.speed);
-    info.textContent = 'Pick a cup';
+  render();
+}
+
+/* Rapid: minimal */
+function initRapid(area){
+  area.innerHTML = `
+    <div style="display:flex;gap:8px;align-items:center">
+      <label>Difficulty:
+        <select id="rapid-diff"><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select>
+      </label>
+      <button id="rapid-start" class="btn">Start</button>
+      <div style="flex:1"></div>
+      <div class="small">Timed quick questions</div>
+    </div>
+    <div id="rapid-ui" style="margin-top:10px"></div>
+  `;
+  area.querySelector('#rapid-start').addEventListener('click', ()=> {
+    const diff = area.querySelector('#rapid-diff').value;
+    runRapid(area.querySelector('#rapid-ui'), diff);
+  });
+}
+function runRapid(container, diff){
+  const timePer = diff==='easy'?6: diff==='medium'?4:2.5;
+  const questions = Array.from({length:12}, ()=> generateMathQuestion(randInt(1,45)));
+  let idx=0, score=0, timer=null;
+  function render(){
+    container.innerHTML = '';
+    if(idx >= questions.length){
+      const pts = score*8; addPoints(pts); container.innerHTML = `<div class="small">Done ${score}/${questions.length} +${pts} pts</div>`; if(score >= Math.ceil(questions.length*0.6)) celebrate();
+      return;
+    }
+    const q = questions[idx];
+    const qdiv = document.createElement('div'); qdiv.innerHTML = `<div class="question">Q${idx+1}: ${q.q}</div><div class="small">Time: <span id="rapidTime">${timePer.toFixed(1)}</span>s</div>`;
+    const answers = document.createElement('div'); answers.className='answers';
+    q.choices.forEach(choice=>{
+      const b = document.createElement('button'); b.className='ans-btn'; b.textContent = choice;
+      b.onclick = () => { clearInterval(timer); if(choice === q.answer){ score++; addPoints(10); spawnConfetti(); } idx++; render(); };
+      answers.appendChild(b);
+    });
+    qdiv.appendChild(answers); container.appendChild(qdiv);
+    let t = timePer; const timeEl = container.querySelector('#rapidTime'); timeEl.textContent = t.toFixed(1);
+    timer = setInterval(()=> { t -= 0.1; if(timeEl) timeEl.textContent = t.toFixed(1); if(t <= 0){ clearInterval(timer); idx++; render(); } }, 100);
+  }
+  render();
+}
+
+/* Maze: simple visual with gate prompts */
+function initMaze(area){
+  const w = 320, h = 320;
+  area.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><button id="maze-gen" class="btn">Generate Maze</button><div style="flex:1"></div><div class="small">Use arrow keys to move (gates ask questions)</div></div><canvas id="maze-canvas" width="${w}" height="${h}" style="margin-top:8px"></canvas>`;
+  const canvas = area.querySelector('#maze-canvas'); const ctx = canvas.getContext('2d');
+  let maze = null, cell = 20, player = {x:1,y:1}, keyListener = null;
+  area.querySelector('#maze-gen').addEventListener('click', ()=>{
+    maze = makeMaze(15,15); cell = Math.floor(Math.min(w/maze.w, h/maze.h)); player = {x:1,y:1}; draw();
+    if(keyListener) document.removeEventListener('keydown', keyListener);
+    keyListener = (e)=> {
+      const map = {'ArrowUp':[0,-1],'ArrowDown':[0,1],'ArrowLeft':[-1,0],'ArrowRight':[1,0],'w':[0,-1],'s':[0,1],'a':[-1,0],'d':[1,0]};
+      const d = map[e.key]; if(!d) return;
+      const nx = player.x + d[0], ny = player.y + d[1]; if(nx<0||ny<0||nx>=maze.w||ny>=maze.h) return;
+      const cellVal = maze.grid[ny][nx];
+      if(cellVal === 1) return; // wall
+      if(cellVal === 2){ // gate
+        const q = generateMathQuestion(randInt(1,30));
+        const ans = prompt(`Gate puzzle: ${q.q}\nChoices: ${q.choices.join(' | ')}`);
+        if(ans === null) return;
+        if(String(ans).trim() === String(q.answer)){ maze.grid[ny][nx]=0; addPoints(10); draw(); } else { alert('Wrong'); return; }
+      } else player.x = nx, player.y = ny;
+      draw();
+      if(player.x === maze.exit.x && player.y === maze.exit.y){ addPoints(60); celebrate(); alert('Reached exit! +60 pts'); document.removeEventListener('keydown', keyListener); }
+    };
+    document.addEventListener('keydown', keyListener);
+  });
+  function draw(){
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    if(!maze) return;
+    for(let y=0;y<maze.h;y++){
+      for(let x=0;x<maze.w;x++){
+        const v = maze.grid[y][x];
+        if(v===1) ctx.fillStyle='#133', ctx.fillRect(x*cell,y*cell,cell,cell);
+        else if(v===2) ctx.fillStyle='#b36', ctx.fillRect(x*cell,y*cell,cell,cell);
+        else ctx.fillStyle='#f7fff7', ctx.fillRect(x*cell,y*cell,cell,cell);
+      }
+    }
+    ctx.fillStyle='#1a73e8'; ctx.beginPath(); ctx.arc((player.x+0.5)*cell,(player.y+0.5)*cell,cell*0.35,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#ff9'; ctx.fillRect(maze.exit.x*cell+cell*0.15, maze.exit.y*cell+cell*0.15, cell*0.7, cell*0.7);
+  }
+  function makeMaze(cols, rows){
+    if(cols%2===0) cols++; if(rows%2===0) rows++;
+    const g = Array.from({length:rows}, ()=> Array(cols).fill(1));
+    for(let y=1;y<rows;y+=2) for(let x=1;x<cols;x+=2) g[y][x]=0;
+    function neigh(x,y){ const n=[]; if(y-2>0) n.push([x,y-2]); if(y+2<rows-1) n.push([x,y+2]); if(x-2>0) n.push([x-2,y]); if(x+2<cols-1) n.push([x+2,y]); return n; }
+    const stack=[[1,1]], visited=new Set(['1,1']);
+    while(stack.length){
+      const [cx,cy] = stack[stack.length-1]; const opts = neigh(cx,cy).filter(n=> !visited.has(n.join(',')));
+      if(opts.length){ const n = opts[Math.floor(Math.random()*opts.length)]; const wx=(cx+n[0])/2, wy=(cy+n[1])/2; g[wy][wx]=0; visited.add(n.join(',')); stack.push(n); } else stack.pop();
+    }
+    // place some gates
+    for(let i=0;i<6;i++){ let placed=false; for(let t=0;t<300 && !placed;t++){ const gx=randInt(1,cols-2), gy=randInt(1,rows-2); if(g[gy][gx]===1){ const dirs=[[1,0],[-1,0],[0,1],[0,-1]]; if(dirs.some(d=> g[gy+d[1]][gx+d[0]]===0)){ g[gy][gx]=2; placed=true; } } } }
+    let ex=cols-2, ey=rows-2; while(g[ey][ex]!==0){ ex--; if(ex<1){ ex=cols-2; ey--; if(ey<1) break; } }
+    return {grid:g,w:cols,h:rows, exit:{x:ex,y:ey}};
+  }
+}
+
+/* Pattern */
+function initPattern(area){
+  area.innerHTML = `
+    <div style="display:flex;gap:8px;align-items:center">
+      <label>Level: <select id="pattern-level"></select></label>
+      <button id="pattern-start" class="btn">Start</button>
+      <div style="flex:1"></div>
+      <div class="small">Finish 5 sequences.</div>
+    </div>
+    <div id="pattern-ui" style="margin-top:10px"></div>
+  `;
+  const sel = area.querySelector('#pattern-level'); for(let i=1;i<=30;i++){ const o=document.createElement('option'); o.value=i; o.text='Level '+i; sel.appendChild(o); }
+  area.querySelector('#pattern-start').addEventListener('click', ()=> startPattern(Number(sel.value), area.querySelector('#pattern-ui')));
+}
+function startPattern(level, ui){
+  let i=0, score=0;
+  function next(){
+    if(i>=5){ ui.innerHTML = `<div class="small">Completed: ${score}/5</div>`; addPoints(score*15); if(score>=3) celebrate(); return; }
+    const p = generatePattern(level + i);
+    ui.innerHTML = `<div class="small">Type: ${p.type}</div><div class="question">${p.seq.join(', ')}, ...</div><input id="pat-answer" style="padding:8px;border-radius:6px;border:1px solid #ddd"><button id="pat-submit" class="btn" style="margin-left:6px">Submit</button>`;
+    ui.querySelector('#pat-submit').onclick = ()=> {
+      const v = ui.querySelector('#pat-answer').value;
+      if(String(v) === String(p.next)){ score++; addPoints(15); celebrateConfetti(); } else alert('Wrong — '+p.next);
+      i++; next();
+    };
+  }
+  next();
+}
+function generatePattern(level){
+  level = Math.max(1, Math.min(30, level));
+  const types = ['arithmetic','geometric','fib-like','alternating','squares'];
+  const t = types[level % types.length];
+  if(t==='arithmetic'){ const a=randInt(1,6), d=randInt(1,8); return {seq:[a,a+d,a+2*d,a+3*d,a+4*d], next: a+5*d, type:'Arithmetic +'+d}; }
+  if(t==='geometric'){ const a=randInt(1,4), r=randInt(2,4); return {seq:[a,a*r,a*r*r,a*r*r*r,a*r*r*r*r], next: a*Math.pow(r,5), type:'Geometric ×'+r}; }
+  if(t==='fib-like'){ const a=randInt(1,5), b=randInt(1,6); const seq=[a,b,a+b,b+(a+b),(a+b)+(b+(a+b))]; return {seq, next: seq[3]+seq[4], type:'Fib-like'}; }
+  if(t==='alternating'){ const a=randInt(1,6), b=randInt(7,12); const seq=[a,b,a+b,a+2*b,a+3*b]; return {seq, next: a+4*b, type:'Alternating'}; }
+  const s=randInt(1,6); return {seq:[s,s+1,s+4,s+9,s+16], next: s+25, type:'Squares offset'};
+}
+
+/* Probability */
+function initProb(area){
+  area.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><button id="prob-start" class="btn">Start</button><div style="flex:1"></div><div class="small">Pick the best EV</div></div><div id="prob-ui" style="margin-top:10px"></div>`;
+  area.querySelector('#prob-start').addEventListener('click', ()=> renderProb(area.querySelector('#prob-ui'), generateProbQuestion()));
+}
+function generateProbQuestion(){
+  const base = randInt(5,30); const p1=Math.random()*0.6+0.1, p2=Math.random()*0.6+0.05, p3=Math.random()*0.6+0.02;
+  const a1=base+randInt(0,base), a2=base+randInt(0,base+10), a3=base+randInt(0,base+20);
+  return {cups:[{label:'A',p:+p1.toFixed(2),payout:a1,ev: +(p1*a1).toFixed(2)},{label:'B',p:+p2.toFixed(2),payout:a2,ev: +(p2*a2).toFixed(2)},{label:'C',p:+p3.toFixed(2),payout:a3,ev: +(p3*a3).toFixed(2)}]};
+}
+function renderProb(container, q){
+  container.innerHTML = `<div class="question">Choose highest expected value</div>`; const row=document.createElement('div'); row.style.display='flex'; row.style.gap='8px';
+  q.cups.forEach(c=>{ const el=document.createElement('div'); el.style.flex='1'; el.style.padding='10px'; el.style.border='1px solid #eee'; el.style.borderRadius='8px'; el.style.textAlign='center'; el.innerHTML = `<div style="font-weight:800">${c.label}</div><div class="small">Payout: ${c.payout}</div><div class="small">Chance: ${Math.round(c.p*100)}%</div>`; el.onclick=()=>{ const best=q.cups.reduce((a,b)=> a.ev > b.ev ? a : b); if(c.label === best.label){ addPoints(20); celebrateConfetti(); alert('Correct +20 pts'); } else alert(`Incorrect — best was ${best.label} (EV ${best.ev})`); renderProb(container, generateProbQuestion()); }; row.appendChild(el); });
+  container.appendChild(row);
+}
+
+/* Casino: simplified embedded UI */
+function initCasino(area){
+  area.innerHTML = `
+    <div style="display:flex;gap:8px;align-items:center">
+      <div style="flex:1">
+        <div style="font-weight:800">Machine 1 — Slots</div>
+        <div style="margin-top:6px">
+          <span class="reel" id="m1r1">🔔</span>
+          <span class="reel" id="m1r2">7</span>
+          <span class="reel" id="m1r3">❤️</span>
+        </div>
+        <div style="margin-top:8px">
+          <label>Bet: <input id="m1bet" type="number" value="10" min="1" style="width:80px"></label>
+          <button id="m1spin" class="btn">Spin</button>
+          <span id="m1msg" class="small" style="margin-left:8px"></span>
+        </div>
+      </div>
+      <div style="flex:1">
+        <div style="font-weight:800">Machine 2 — Secret Cups</div>
+        <div class="small" style="margin-top:6px">Open the red-cups shuffle here.</div>
+        <div style="margin-top:8px"><button id="m2open" class="btn">Open Cups</button><span id="m2msg" class="small" style="margin-left:8px"></span></div>
+      </div>
+      <div style="flex:1">
+        <div style="font-weight:800">Machine 3 — Jackpot</div>
+        <div style="margin-top:6px">
+          <span class="reel" id="m3r1">💎</span>
+          <span class="reel" id="m3r2">🔔</span>
+          <span class="reel" id="m3r3">7</span>
+        </div>
+        <div style="margin-top:8px"><label>Bet: <input id="m3bet" type="number" value="25" min="5" style="width:80px"></label><button id="m3spin" class="btn">Spin</button><span id="m3msg" class="small" style="margin-left:8px"></span></div>
+      </div>
+    </div>
+    <div id="casino-cups" style="margin-top:10px"></div>
+  `;
+  const sy1 = ['🔔','7','❤️','♦','⭐'];
+  area.querySelector('#m1spin').addEventListener('click', ()=>{
+    const bet = Math.max(1, Number(area.querySelector('#m1bet').value || 10));
+    if(getPoints() < bet){ area.querySelector('#m1msg').textContent = 'Not enough points'; return; }
+    addPoints(-bet); area.querySelector('#m1msg').textContent = 'Spinning...';
+    const final = [sy1[randInt(0,sy1.length-1)], sy1[randInt(0,sy1.length-1)], sy1[randInt(0,sy1.length-1)]];
+    const els = [area.querySelector('#m1r1'), area.querySelector('#m1r2'), area.querySelector('#m1r3')];
+    els.forEach((el, idx)=>{
+      let ticks = 18 + idx*6;
+      const iv = setInterval(()=> el.textContent = sy1[randInt(0,sy1.length-1)], 50);
+      setTimeout(()=>{ clearInterval(iv); el.textContent = final[idx]; }, ticks*50);
+    });
+    setTimeout(()=> {
+      const [a,b,c] = final; let payout = 0;
+      if(a===b && b===c) payout = bet*10; else if(a===b || b===c || a===c) payout = bet*2;
+      if(payout>0){ addPoints(payout); area.querySelector('#m1msg').textContent = `Won ${payout}!`; celebrate(); } else area.querySelector('#m1msg').textContent = `Lost ${bet}.`;
+    }, 1400);
+  });
+
+  area.querySelector('#m2open').addEventListener('click', ()=> {
+    openCupsEmbedded(area.querySelector('#casino-cups'));
+  });
+
+  area.querySelector('#m3spin').addEventListener('click', ()=>{
+    const bet = Math.max(5, Number(area.querySelector('#m3bet').value || 25));
+    if(getPoints() < bet){ area.querySelector('#m3msg').textContent = 'Not enough points'; return; }
+    addPoints(-bet); area.querySelector('#m3msg').textContent = 'Spinning...';
+    const sy3 = ['💎','🔔','7','⭐','♦'];
+    const final = [sy3[randInt(0,sy3.length-1)], sy3[randInt(0,sy3.length-1)], sy3[randInt(0,sy3.length-1)]];
+    const els = [area.querySelector('#m3r1'), area.querySelector('#m3r2'), area.querySelector('#m3r3')];
+    els.forEach((el, idx)=>{
+      let ticks = 20 + idx*6;
+      const iv = setInterval(()=> el.textContent = sy3[randInt(0,sy3.length-1)], 50);
+      setTimeout(()=>{ clearInterval(iv); el.textContent = final[idx]; }, ticks*50);
+    });
+    setTimeout(()=> {
+      const [a,b,c] = final; const jackpot = (a==='💎' && a===b && b===c && Math.random() < 0.08); // small extra rarity
+      if(jackpot){ const reward = Math.max(200, bet*12); addPoints(reward); area.querySelector('#m3msg').textContent = `JACKPOT ${reward}!`; celebrate(); alert('JACKPOT! +'+reward+' pts'); }
+      else { let payout = 0; if(a===b && b===c) payout = bet*8; else if(a===b || b===c || a===c) payout = bet*2; if(payout>0){ addPoints(payout); area.querySelector('#m3msg').textContent = `Won ${payout}`; celebrate(); } else area.querySelector('#m3msg').textContent = `Lost ${bet}`; }
+    }, 1600);
+  });
+}
+
+/* Secret cups embedded */
+function initCups(area){
+  area.innerHTML = `<div class="small">Secret Cups: open via Casino or Play here.</div><div style="margin-top:10px"><button id="cups-start" class="btn">Start Secret Cups</button></div><div id="cups-ui" style="margin-top:8px"></div>`;
+  area.querySelector('#cups-start').addEventListener('click', ()=> openCupsEmbedded(area.querySelector('#cups-ui')));
+}
+function openCupsEmbedded(container){
+  container.innerHTML = '';
+  const status = document.createElement('div'); status.className='small'; status.textContent = 'Secret Cups — beat 3 levels for 250 pts'; container.appendChild(status);
+  startCupsLevel(container,1);
+}
+function startCupsLevel(container, level){
+  // clear previous level area
+  let lvlArea = container.querySelector('.level-area');
+  if(lvlArea) lvlArea.remove();
+  lvlArea = document.createElement('div'); lvlArea.className='level-area'; lvlArea.style.marginTop = '8px'; container.appendChild(lvlArea);
+  // create 3 cups
+  const cupEls = [];
+  let ballIndex = randInt(0,2);
+  for(let i=0;i<3;i++){
+    const cup = document.createElement('div'); cup.style.display='inline-block'; cup.style.width='90px'; cup.style.height='90px'; cup.style.background='#d33'; cup.style.marginRight='8px'; cup.style.borderRadius='8px'; cup.style.position='relative'; cup.style.cursor='pointer';
+    const ball = document.createElement('div'); ball.style.position='absolute'; ball.style.left='50%'; ball.style.bottom='14px'; ball.style.transform='translateX(-50%)'; ball.style.width='22px'; ball.style.height='22px'; ball.style.borderRadius='50%'; ball.style.background='#ffd'; ball.style.opacity=(i===ballIndex)?'1':'0';
+    cup.appendChild(ball); lvlArea.appendChild(cup); cupEls.push(cup);
+  }
+  // hide ball shortly
+  setTimeout(()=> cupEls.forEach(c=> c.querySelector('div').style.opacity='0'), 700);
+  // shuffle visibly (simple swapping)
+  const cfg = level===1?{sh:6,spd:200}: level===2?{sh:12,spd:150}:{sh:20,spd:100};
+  (async ()=>{
+    await new Promise(r=>setTimeout(r, 600));
+    for(let s=0;s<cfg.sh;s++){
+      const a = randInt(0,2), b = (a + randInt(1,2))%3;
+      // swap elements in DOM for visible effect
+      const ca = cupEls[a], cb = cupEls[b];
+      const cloneA = ca.cloneNode(true), cloneB = cb.cloneNode(true);
+      ca.replaceWith(cloneB); cb.replaceWith(cloneA);
+      cupEls[a] = cloneB; cupEls[b] = cloneA;
+      await new Promise(r=>setTimeout(r, cfg.spd));
+    }
+    // allow picks
+    const info = document.createElement('div'); info.className='small'; info.textContent = 'Pick a cup!';
+    lvlArea.appendChild(info);
     cupEls.forEach((cup, idx)=>{
       cup.onclick = ()=>{
-        cupEls.forEach(c=> c.querySelector('.ball').style.opacity='0');
-        cup.querySelector('.ball').style.opacity='1';
-        const revealedIndex = cupEls.findIndex(c=> c.querySelector('.ball').style.opacity === '1');
+        cupEls.forEach(c=> c.querySelector('div').style.opacity='0');
+        cup.querySelector('div').style.opacity='1';
+        const revealedIndex = cupEls.findIndex(c=> c.querySelector('div').style.opacity === '1');
         if(revealedIndex === idx){
-          info.textContent = 'Correct!';
-          if(level < 3) setTimeout(()=> startCupsModalLevel(box, level+1, modal), 900);
-          else { addPoints(250); celebrateConfetti(); celebrateFiveFireworks(); logActivity('Secret Cups +250'); alert('You beat Level 3! +250 pts, secret recorded.'); }
-        } else { info.textContent = 'Wrong — return to the casino to try again.'; }
+          if(level < 3){ addPoints(15); spawnConfetti(); setTimeout(()=> startCupsLevel(container, level+1), 800); }
+          else { addPoints(250); celebrate(); alert('You beat level 3! +250 pts'); container.innerHTML = '<div class="small">Completed — well done!</div>'; }
+        } else alert('Wrong — try again from the casino');
       };
     });
   })();
 }
 
-/* show cups status in page */
-function showCupsStatus(){
-  const u = getUnlocks();
-  if(!u.secretGame) { document.getElementById('cupsMsg').textContent = 'Locked (unlock via casino machine 2)'; document.getElementById('cupsArea').innerHTML=''; return; }
-  document.getElementById('cupsMsg').textContent = 'Unlocked — play from here.';
-  document.getElementById('cupsArea').innerHTML = '<div class="small">Click Start to play the secret cups in modal.</div>';
-}
-
-/* -----------------------
-   Air Hockey wiring (kept simple)
-   ----------------------- */
-const airCanvas = document.getElementById('airCanvas'); const airCtx = airCanvas.getContext('2d');
-let airState = null;
-function initAirCanvas(){
-  const u = getUnlocks();
-  if(!u.airHockey){ alert('Air Hockey locked. Win a jackpot in Machine 3 to unlock.'); return; }
-  airCanvas.width = airCanvas.clientWidth; airCanvas.height = 360;
-  airState = {playerScore:0, aiScore:0, puck:{x:airCanvas.width/2,y:airCanvas.height/2,vx:3,vy:2,r:10}, paddle:{x:60,y:airCanvas.height/2,r:24}, ai:{x:airCanvas.width-60,y:airCanvas.height/2,r:24}, running:false, sonarReveals:[]};
-  airLoop();
-}
-document.getElementById('startAir').addEventListener('click', ()=> {
-  const u=getUnlocks(); if(!u.airHockey){ alert('Air Hockey locked.'); return; } if(!airState) initAirCanvas(); airState.running=true; airState.playerScore=0; airState.aiScore=0; logActivity('Air Hockey started');
-});
-function airLoop(){
-  requestAnimationFrame(airLoop);
-  if(!airState) return;
-  if(airState.running){
-    airState.puck.x += airState.puck.vx; airState.puck.y += airState.puck.vy;
-    if(airState.puck.y <= airState.puck.r || airState.puck.y >= airCanvas.height - airState.puck.r) airState.puck.vy *= -1;
-    const dxP = airState.puck.x - airState.paddle.x, dyP = airState.puck.y - airState.paddle.y;
-    if(Math.hypot(dxP,dyP) < airState.puck.r + airState.paddle.r){ airState.puck.vx = Math.abs(airState.puck.vx) + 0.6; airState.puck.vy += dyP*0.05; }
-    const dxA = airState.puck.x - airState.ai.x, dyA = airState.puck.y - airState.ai.y;
-    if(Math.hypot(dxA,dyA) < airState.puck.r + airState.ai.r){ airState.puck.vx = -Math.abs(airState.puck.vx) - 0.6; airState.puck.vy += dyA*0.05; }
-    airState.ai.y += (airState.puck.y - airState.ai.y) * 0.04;
-    if(airState.puck.x < 0){ airState.aiScore++; resetPuck(); triggerSonar(); }
-    if(airState.puck.x > airCanvas.width){ airState.playerScore++; resetPuck(); triggerSonar(); }
-    airState.puck.vx = Math.max(-12, Math.min(12, airState.puck.vx)); airState.puck.vy = Math.max(-12, Math.min(12, airState.puck.vy));
-    airState.sonarReveals.forEach(s=> s.radius += 3); airState.sonarReveals = airState.sonarReveals.filter(s=>s.radius < Math.max(airCanvas.width, airCanvas.height));
+/* Air (simple) */
+function initAir(area){
+  area.innerHTML = `<div class="small">Air (mini) — simple play</div><canvas id="air-canvas" width="360" height="200" style="margin-top:8px"></canvas><div style="margin-top:8px"><button id="air-start" class="btn">Start</button><button id="air-stop" class="btn secondary">Stop</button></div>`;
+  const canvas = area.querySelector('#air-canvas'); const ctx = canvas.getContext('2d');
+  let state = null;
+  area.querySelector('#air-start').addEventListener('click', ()=> {
+    if(!state) initMatch(); state.running = true;
+  });
+  area.querySelector('#air-stop').addEventListener('click', ()=> { if(state) state.running = false; });
+  function initMatch(){
+    state = {paddleY:canvas.height/2, aiY:canvas.height/2, puck:{x:canvas.width/2,y:canvas.height/2,vx:3,vy:2,r:6}, scoreP:0, scoreAI:0, running:false, sonar:[]};
+    canvas.onmousemove = (e)=>{ const r=canvas.getBoundingClientRect(); state.paddleY = Math.max(12, Math.min(canvas.height-12, e.clientY - r.top)); };
+    function loop(){ requestAnimationFrame(loop); if(!state) return; if(state.running){ state.puck.x += state.puck.vx; state.puck.y += state.puck.vy; if(state.puck.y <= state.puck.r || state.puck.y >= canvas.height - state.puck.r) state.puck.vy *= -1; const dx = state.puck.x - 20, dy = state.puck.y - state.paddleY; if(Math.hypot(dx,dy) < state.puck.r + 12 && state.puck.vx < 0){ state.puck.vx = Math.abs(state.puck.vx) + 0.8; state.puck.vy += dy*0.05; } const dx2 = state.puck.x - (canvas.width-20), dy2 = state.puck.y - state.aiY; if(Math.hypot(dx2,dy2) < state.puck.r + 12 && state.puck.vx > 0){ state.puck.vx = -Math.abs(state.puck.vx) - 0.8; state.puck.vy += dy2*0.05; } state.aiY += (state.puck.y - state.aiY)*0.05; if(state.puck.x < 0){ state.scoreAI++; resetP(); } if(state.puck.x > canvas.width){ state.scoreP++; resetP(); } } draw(); }
+    function resetP(){ state.puck.x = canvas.width/2; state.puck.y = canvas.height/2; state.puck.vx = (Math.random()>0.5?3:-3); state.puck.vy = (Math.random()-0.5)*3; }
+    function draw(){ ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#e6fbff'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#1a73e8'; ctx.fillRect(12, state.paddleY-18, 8, 36); ctx.fillStyle='#ff6b6b'; ctx.fillRect(canvas.width-20, state.aiY-18, 8, 36); ctx.beginPath(); ctx.fillStyle='#06263a'; ctx.arc(state.puck.x,state.puck.y,state.puck.r,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#072033'; ctx.font='14px Inter'; ctx.fillText(state.scoreP+' - '+state.scoreAI, canvas.width/2 - 12, 16); } loop();
   }
-  drawAir();
 }
-function resetPuck(){ airState.puck.x = airCanvas.width/2; airState.puck.y = airCanvas.height/2; airState.puck.vx = (Math.random()>0.5?4:-4); airState.puck.vy = (Math.random()-0.5)*4; }
-function drawAir(){
-  airCtx.clearRect(0,0,airCanvas.width, airCanvas.height); airCtx.fillStyle='#e6fbff'; airCtx.fillRect(0,0,airCanvas.width,airCanvas.height);
-  airCtx.strokeStyle='#cdeaf6'; airCtx.lineWidth=2; airCtx.beginPath(); airCtx.moveTo(airCanvas.width/2,0); airCtx.lineTo(airCanvas.width/2,airCanvas.height); airCtx.stroke();
-  airCtx.fillStyle='#1a73e8'; airCtx.beginPath(); airCtx.arc(airState.paddle.x, airState.paddle.y, airState.paddle.r,0,Math.PI*2); airCtx.fill();
-  airCtx.fillStyle='#ff6b6b'; airCtx.beginPath(); airCtx.arc(airState.ai.x, airState.ai.y, airState.ai.r,0,Math.PI*2); airCtx.fill();
-  airCtx.fillStyle='#06263a'; airCtx.beginPath(); airCtx.arc(airState.puck.x, airState.puck.y, airState.puck.r,0,Math.PI*2); airCtx.fill();
-  for(const s of airState.sonarReveals){ airCtx.save(); airCtx.beginPath(); airCtx.arc(s.x,s.y,s.radius,0,Math.PI*2); airCtx.strokeStyle='rgba(12,130,180,0.5)'; airCtx.lineWidth=2; airCtx.stroke(); if(s.question) { airCtx.fillStyle='#072033'; airCtx.font='bold 12px Inter'; airCtx.fillText(s.question.q, s.x - 30, s.y - 10); } airCtx.restore(); }
-  document.getElementById('airScore').textContent = `Score: ${airState.playerScore} - ${airState.aiScore}`;
+
+/* --------------------------
+   Helpers used above
+   -------------------------- */
+function randInt(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
+function generateMathQuestion(level){
+  level = Math.max(1, Math.min(50, Math.round(level)));
+  if(level <= 8){ const a=randInt(1,12), b=randInt(1,12); return {q:`${a} + ${b} = ?`, choices: shuffle([String(a+b), String(a+b+1), String(Math.abs(a-b)), String(a*b)]), answer:String(a+b)}; }
+  if(level <= 16){ const a=randInt(2,15), b=randInt(2,12); return {q:`${a} × ${b} = ?`, choices: shuffle([String(a*b), String(a*b+randInt(1,6)), String(a*b-randInt(1,6)), String(a+b)]), answer:String(a*b)}; }
+  if(level <= 24){ const a=randInt(10,80), b=randInt(2,9); return {q:`${a} ÷ ${b} = ? (nearest int)`, choices: shuffle([String(Math.round(a/b)), String(Math.floor(a/b)), String(Math.ceil(a/b)), String(Math.round((a+b)/b))]), answer:String(Math.round(a/b))}; }
+  if(level <= 32){ const a=randInt(2,12), b=randInt(2,6); return {q:`What is ${a}^${b}?`, choices: shuffle([String(Math.pow(a,b)), String(Math.pow(a,b)+randInt(1,20)), String(Math.pow(a+1,b)), String(Math.pow(a,b)-randInt(1,20))]), answer:String(Math.pow(a,b))}; }
+  if(level <= 40){ const a=randInt(10,60), b=randInt(2,12), c=randInt(1,10); const val = a + b*c; return {q:`${a} + ${b} × ${c} = ?`, choices: shuffle([String(val), String(val+1), String(val-1), String(a*b+c)]), answer:String(val)}; }
+  if(level <= 46){ const a=randInt(1,9), b=randInt(1,9), c=randInt(1,9); const val = Number(((a/b)+(c/b)).toFixed(2)); return {q:`${a}/${b} + ${c}/${b} = ? (2 dp)`, choices: shuffle([String(val), String(Number((val+0.5).toFixed(2))), String(Number((val-0.25).toFixed(2))), String(Number((val+0.1).toFixed(2)))]), answer:String(val)}; }
+  const a=randInt(2,12), b=randInt(2,12), c=randInt(1,10); const val = (a*b + c)/a; return {q:`Solve: ${a}x - ${c} = ${a*b}. x = ?`, choices: shuffle([String(val), String(Math.floor(val)), String(Math.ceil(val)), String(b)]), answer:String(val)};
 }
-function triggerSonar(){
-  const tx = randInt(80, airCanvas.width-80), ty = randInt(40, airCanvas.height-40);
-  const q = generateMathQuestion(randInt(10,40));
-  airState.sonarReveals.push({x:tx,y:ty,radius:10,question:{q:q.q,answer:q.answer}});
-  setTimeout(()=> {
-    const ans = prompt(`Treasure found! Solve to claim: ${q.q}\nChoices: ${q.choices.join(' | ')}`);
-    if(ans !== null && String(ans).trim() === String(q.answer)){ const pts=40; addPoints(pts); celebrateFiveFireworks(); celebrateConfetti(); alert(`Correct! +${pts} pts`); } else alert('Incorrect or cancelled.');
-  }, 900);
-}
-airCanvas.addEventListener('mousemove', (e)=>{ if(!airState) return; const rect = airCanvas.getBoundingClientRect(); airState.paddle.y = Math.max(airState.paddle.r, Math.min(airCanvas.height - airState.paddle.r, e.clientY - rect.top)); });
+function shuffle(arr){ const r = arr.slice(); for(let i=r.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [r[i], r[j]]=[r[j], r[i]] } return r; }
+function celebrateConfetti(){ spawnConfetti(); }
+function spawnConfetti(){ spawnConfettiAt(); }
+function spawnConfettiAt(x=window.innerWidth/2, y=window.innerHeight/3){ for(let i=0;i<60;i++) particles.push({x,y,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.8)*6,life:80+Math.random()*40,size:3+Math.random()*7,h:Math.random()*360}); }
 
-/* -----------------------
-   Helper: getUnlocks/setUnlocks render
-   ----------------------- */
-function getUnlocks(){ return JSON.parse(localStorage.getItem(UNLOCK_KEY) || JSON.stringify(DEFAULT_UNLOCKS)); }
-function setUnlocks(u){ localStorage.setItem(UNLOCK_KEY, JSON.stringify(u)); renderTiles(); renderUnlockedList(); }
-function renderUnlockedList(){ const u=getUnlocks(); document.getElementById('unlockedList').textContent = Object.keys(u).filter(k=>u[k]).join(', ') || 'None'; }
-
-/* -----------------------
-   Small UI helpers and init
-   ----------------------- */
-function renderTiles(){ const c=document.getElementById('tilesContainer'); c.innerHTML=''; const u=getUnlocks(); tiles.forEach(t=>{ const locked = (t.id==='casino' && !u.casino) || (t.id==='cups' && !u.secretGame) || (t.id==='air' && !u.airHockey); const div=document.createElement('div'); div.className='tile'+(locked?' locked':''); div.innerHTML=`<div style="font-weight:800">${t.title}</div><div class="small">${t.desc}</div>`; if(!locked) div.onclick=()=> openPage(t.id); else div.onclick=()=> alert('Locked: reach required tier or unlock via casino.'); c.appendChild(div); }); }
-renderTiles(); renderUnlockedList();
-
-/* Export/reset */
-document.getElementById('exportBtn').addEventListener('click', ()=> { const data={points:getPoints(), unlocks:getUnlocks(), activity: JSON.parse(localStorage.getItem(ACTIVITY_KEY)||'[]')}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='btl_export.json'; a.click(); });
-document.getElementById('resetBtn').addEventListener('click', ()=> { if(confirm('Reset progress?')){ localStorage.removeItem(POINTS_KEY); localStorage.setItem(UNLOCK_KEY, JSON.stringify(DEFAULT_UNLOCKS)); localStorage.removeItem(ACTIVITY_KEY); renderPoints(); renderTiles(); renderUnlockedList(); renderActivity(); alert('Reset done.'); } });
-
-/* -----------------------
-   Minimal initializations
-   ----------------------- */
-if(!localStorage.getItem(UNLOCK_KEY)) localStorage.setItem(UNLOCK_KEY, JSON.stringify(DEFAULT_UNLOCKS));
-if(!localStorage.getItem(POINTS_KEY)) localStorage.setItem(POINTS_KEY,'0');
+/* initial state: points shown */
 renderPoints();
-renderActivity();
 
 </script>
 </body>
