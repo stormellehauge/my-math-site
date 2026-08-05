@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
+<script src="functions.js" defer></script>
 <title>BREAK THE LOGIC — Math Hub (EN / 中文 / DA / FR / 日本語)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600;800&display=swap" rel="stylesheet">
 <style>
@@ -38,10 +39,12 @@
   .game-page{display:none;padding:16px}
   .game-page.active{display:block}
   .page-header{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+  /* magical background applied when player reaches magical threshold */
   .magical-bg {
     animation: hueShift 6s linear infinite;
     background: linear-gradient(45deg, #ff6b6b, #fbc531, #7efff5, #8e44ad);
     background-size: 400% 400%;
+    color: #001;
   }
   @keyframes hueShift {
     0%{background-position:0% 50%}
@@ -49,9 +52,9 @@
     100%{background-position:0% 50%}
   }
   @media(max-width:980px){ .layout{grid-template-columns:1fr} .game-grid{grid-template-columns:1fr} }
-  /* Leaderboard */
-  .leaderboard{margin-top:12px}
-  .leaderboard ol{padding-left:18px;margin:6px 0}
+  /* leaderboard small styles */
+  .leaderboard-list { margin-top:8px; font-size:14px }
+  .leaderboard-list ol { padding-left:18px; margin:6px 0; }
 </style>
 </head>
 <body>
@@ -81,52 +84,52 @@
       <div class="card game-page" id="page-trivia">
         <div class="page-header">
           <button class="btn secondary backBtn" data-dest="hub">Back</button>
-          <h3 style="margin:0" id="pageTitle-trivia">Trivia — Full</h3>
+          <h3 style="margin:0">Trivia — Full</h3>
           <div style="flex:1"></div>
-          <div class="small" id="page-note-trivia">5s per question</div>
+          <div class="small">5s per question</div>
         </div>
         <div id="page-area-trivia"></div>
       </div>
 
       <div class="card game-page" id="page-rapid">
-        <div class="page-header"><button class="btn secondary backBtn" data-dest="hub">Back</button><h3 style="margin:0" id="pageTitle-rapid">Rapid Fire — Full</h3></div>
+        <div class="page-header"><button class="btn secondary backBtn" data-dest="hub">Back</button><h3 style="margin:0">Rapid Fire — Full</h3></div>
         <div id="page-area-rapid"></div>
       </div>
 
       <div class="card game-page" id="page-maze">
-        <div class="page-header"><button class="btn secondary backBtn" data-dest="hub">Back</button><h3 style="margin:0" id="pageTitle-maze">Math Maze — Full</h3></div>
+        <div class="page-header"><button class="btn secondary backBtn" data-dest="hub">Back</button><h3 style="margin:0">Math Maze — Full</h3></div>
         <div id="page-area-maze"></div>
       </div>
 
       <div class="card game-page" id="page-pattern">
-        <div class="page-header"><button class="btn secondary backBtn" data-dest="hub">Back</button><h3 style="margin:0" id="pageTitle-pattern">Pattern Builder — Full</h3></div>
+        <div class="page-header"><button class="btn secondary backBtn" data-dest="hub">Back</button><h3 style="margin:0">Pattern Builder — Full</h3></div>
         <div id="page-area-pattern"></div>
       </div>
 
       <div class="card game-page" id="page-prob">
-        <div class="page-header"><button class="btn secondary backBtn" data-dest="hub">Back</button><h3 style="margin:0" id="pageTitle-prob">Probability Cups — Full</h3></div>
+        <div class="page-header"><button class="btn secondary backBtn" data-dest="hub">Back</button><h3 style="margin:0">Probability Cups — Full</h3></div>
         <div id="page-area-prob"></div>
       </div>
 
       <div class="card game-page" id="page-casino">
-        <div class="page-header"><button class="btn secondary backBtn" data-dest="hub">Back</button><h3 style="margin:0" id="pageTitle-casino">Casino — Full</h3></div>
+        <div class="page-header"><button class="btn secondary backBtn" data-dest="hub">Back</button><h3 style="margin:0">Casino — Full</h3></div>
         <div id="page-area-casino"></div>
       </div>
 
       <div class="card game-page" id="page-cups">
-        <div class="page-header"><button class="btn secondary backBtn" data-dest="hub">Back</button><h3 style="margin:0" id="pageTitle-cups">Secret Cups — Full</h3></div>
+        <div class="page-header"><button class="btn secondary backBtn" data-dest="hub">Back</button><h3 style="margin:0">Secret Cups — Full</h3></div>
         <div id="page-area-cups"></div>
       </div>
 
       <div class="card game-page" id="page-air">
-        <div class="page-header"><button class="btn secondary backBtn" data-dest="hub">Back</button><h3 style="margin:0" id="pageTitle-air">Air Hockey — Full</h3></div>
+        <div class="page-header"><button class="btn secondary backBtn" data-dest="hub">Back</button><h3 style="margin:0">Air Hockey — Full</h3></div>
         <div id="page-area-air"></div>
       </div>
 
     </section>
 
     <aside>
-      <div class="card">
+      <div class="card" id="profileCard">
         <h3 id="profileTitle">Profile</h3>
         <div class="small" id="profileText">Earn points to climb tiers.</div>
 
@@ -152,9 +155,9 @@
         </div>
       </div>
 
-      <div class="card leaderboard" style="margin-top:12px">
+      <div class="card leaderboard-card" style="margin-top:12px">
         <h4 id="leaderboardTitle">Leaderboard</h4>
-        <div class="small" id="leaderboardList">No players yet.</div>
+        <div class="leaderboard-list" id="leaderboardList">No players yet.</div>
       </div>
 
       <div class="card" style="margin-top:12px">
@@ -167,551 +170,681 @@
 
 <canvas id="fxCanvas"></canvas>
 
+<!-- Additional script appended onto page; it augments existing game code (functions.js) without removing it -->
 <script>
-/* ---------- Full localization (every UI string) ---------- */
-const LANG = {
-  en: {
-    brand:'BREAK THE LOGIC', tagline:'Math games hub — train logic, speed, and math knowledge',
-    hubTitle:'Game Hub — Math Edition', hubDesc:'All games are visible below. Click Play to open the full game page.',
-    profileTitle:'Profile', profileText:'Earn points to climb tiers.', nameLabel:'Name:', saveName:'Save',
-    export:'Export', reset:'Reset', exportPoints:'Export', resetPoints:'Reset',
-    tierTitle:'Tier', recentTitle:'Recent', leaderboardTitle:'Leaderboard',
-    play:'Play', ready:'Ready', playing:'Playing', start:'Start', submit:'Submit', back:'Back',
-    timerNote:'5s per question',
-    airLocked:'Air Hockey requires at least 5000 points to play.',
-    magicianTitle:'Mathematical Magician',
-    reachedMagician:'Congratulations — you reached Mathematical Magician!',
-    viewLeader:'Leaderboard updated'
-  },
-  zh: {
-    brand:'破除逻辑', tagline:'数学游戏中心 — 训练逻辑、速度和数学能力',
-    hubTitle:'游戏中心 — 数学版', hubDesc:'下方显示所有游戏。点击 Play 打开完整游戏页面。',
-    profileTitle:'个人', profileText:'赚取积分以提升段位。', nameLabel:'名称：', saveName:'保存',
-    export:'导出', reset:'重置', exportPoints:'导出', resetPoints:'重置',
-    tierTitle:'段位', recentTitle:'近期', leaderboardTitle:'排行榜',
-    play:'开始', ready:'就绪', playing:'进行中', start:'开始', submit:'提交', back:'返回',
-    timerNote:'每题 5 秒',
-    airLocked:'气垫球需要至少 5000 积分才能游玩。',
-    magicianTitle:'数学魔术师',
-    reachedMagician:'恭喜 — 你已成为 数学魔术师！',
-    viewLeader:'排行榜已更新'
-  },
-  da: {
-    brand:'BRYD LOGIKKEN', tagline:'Math-spil hub — træn logik, hastighed og matematisk viden',
-    hubTitle:'Spil Hub — Matematik', hubDesc:'Alle spil er synlige nedenfor. Klik Play for at åbne hele spillet.',
-    profileTitle:'Profil', profileText:'Tjen point for at stige i rang.', nameLabel:'Navn:', saveName:'Gem',
-    export:'Eksport', reset:'Nulstil', exportPoints:'Eksport', resetPoints:'Nulstil',
-    tierTitle:'Rang', recentTitle:'Seneste', leaderboardTitle:'Highscore',
-    play:'Spil', ready:'Klar', playing:'Spiller', start:'Start', submit:'Indsend', back:'Tilbage',
-    timerNote:'5s pr. spørgsmål',
-    airLocked:'Air Hockey kræver mindst 5000 point for at spille.',
-    magicianTitle:'Matematisk Magiker',
-    reachedMagician:'Tillykke — du nåede Matematisk Magiker!',
-    viewLeader:'Highscore opdateret'
-  },
-  fr: {
-    brand:'BRAIN THE LOGIC', tagline:'Hub de jeux math — entraînez logique, rapidité et mathématiques',
-    hubTitle:'Hub de jeux — Math', hubDesc:'Tous les jeux sont visibles ci-dessous. Cliquez Play pour ouvrir le jeu complet.',
-    profileTitle:'Profil', profileText:'Gagnez des points pour monter en niveau.', nameLabel:'Nom :', saveName:'Enregistrer',
-    export:'Exporter', reset:'Réinitialiser', exportPoints:'Exporter', resetPoints:'Réinitialiser',
-    tierTitle:'Niveau', recentTitle:'Récent', leaderboardTitle:'Classement',
-    play:'Jouer', ready:'Prêt', playing:'En jeu', start:'Démarrer', submit:'Soumettre', back:'Retour',
-    timerNote:'5s par question',
-    airLocked:'Air Hockey nécessite au moins 5000 points pour jouer.',
-    magicianTitle:'Magicien Mathématique',
-    reachedMagician:'Félicitations — vous êtes Magicien Mathématique !',
-    viewLeader:'Classement mis à jour'
-  },
-  ja: {
-    brand:'ロジックをやぶれ', tagline:'数学ゲームハブ — 論理、速度、数学力を鍛える',
-    hubTitle:'ゲームハブ — 数学版', hubDesc:'以下にすべてのゲームが表示されています。Playでフルページを開きます。',
-    profileTitle:'プロフィール', profileText:'ポイントを獲得してランクアップしましょう。', nameLabel:'名前：', saveName:'保存',
-    export:'エクスポート', reset:'リセット', exportPoints:'エクスポート', resetPoints:'リセット',
-    tierTitle:'ランク', recentTitle:'最近', leaderboardTitle:'ランキング',
-    play:'再生', ready:'準備完了', playing:'プレイ中', start:'開始', submit:'送信', back:'戻る',
-    timerNote:'各問5秒',
-    airLocked:'エアホッケーは5000ポイント以上でのみ遊べます。',
-    magicianTitle:'数学の魔術師',
-    reachedMagician:'おめでとう — あなたは数学の魔術師になりました！',
-    viewLeader:'ランキングを更新しました'
-  }
-};
-const LANG_CODES = ['en','zh','da','fr','ja'];
-let lang = localStorage.getItem('btl_lang') || 'en';
-function L(k){ return (LANG[lang] && LANG[lang][k]) || (LANG.en && LANG.en[k]) || k; }
-
-/* language UI */
-function renderLangToggle(){
-  const wrap = document.getElementById('langToggle'); wrap.innerHTML = '';
-  LANG_CODES.forEach(code=>{
-    const b = document.createElement('button'); b.className='langBtn'; b.textContent = code.toUpperCase();
-    if(code===lang) b.style.fontWeight='800';
-    b.addEventListener('click', ()=>{ lang = code; localStorage.setItem('btl_lang', code); applyLanguage(); renderLangToggle(); });
-    wrap.appendChild(b);
-  });
-}
-function applyLanguage(){
-  document.getElementById('brandText').textContent = L('brand');
-  document.getElementById('tagline').textContent = L('tagline');
-  document.getElementById('hubTitle').textContent = L('hubTitle');
-  document.getElementById('hubDesc').textContent = L('hubDesc');
-  document.getElementById('profileTitle').textContent = L('profileTitle');
-  document.getElementById('profileText').textContent = L('profileText');
-  document.getElementById('nameLabel').textContent = L('nameLabel');
-  document.getElementById('saveName').textContent = L('saveName');
-  document.getElementById('exportBtn').textContent = L('export');
-  document.getElementById('resetBtn').textContent = L('reset');
-  document.getElementById('exportPoints').textContent = L('exportPoints');
-  document.getElementById('resetPoints').textContent = L('resetPoints');
-  document.getElementById('tierTitle').textContent = L('tierTitle');
-  document.getElementById('recentTitle').textContent = L('recentTitle');
-  document.getElementById('leaderboardTitle').textContent = L('leaderboardTitle');
-  Array.from(document.querySelectorAll('.backBtn')).forEach(b=> b.textContent = L('back'));
-  renderTiles(); renderPoints(); renderRecent(); renderLeaderboard();
-}
-renderLangToggle();
-applyLanguage();
-
-/* ---------- Player, Points, Tiers, Leaderboard ---------- */
-const POINTS_KEY = 'btl_points_combined';
-const RECENT_KEY = 'btl_recent_combined';
-const NAME_KEY = 'btl_player_name';
-const LEADER_KEY = 'btl_leaderboard';
-
-if(!localStorage.getItem(POINTS_KEY)) localStorage.setItem(POINTS_KEY,'0');
-if(!localStorage.getItem(NAME_KEY)) localStorage.setItem(NAME_KEY,'Player');
-
-function getPlayerName(){ return localStorage.getItem(NAME_KEY) || 'Player'; }
-function setPlayerName(n){ localStorage.setItem(NAME_KEY, String(n||'Player')); renderName(); updateLeaderboardEntry(); }
-
-document.getElementById('playerName').value = getPlayerName();
-document.getElementById('saveName').addEventListener('click', ()=> {
-  const v = (document.getElementById('playerName').value || '').trim();
-  if(v==='') { alert(L('nameLabel') + ' required'); return; }
-  setPlayerName(v);
-  alert(L('saveName') + ' ✓');
-});
-
-function renderName(){
-  document.getElementById('playerName').value = getPlayerName();
-  // if player is magician, show magical title in profile
-  if(getPoints() >= 20000) {
-    document.getElementById('playerName').value = L('magicianTitle');
-    // persist name change visually but keep underlying stored name for leaderboard identity
-    // We'll also display the magical title prominently:
-    document.getElementById('profileText').textContent = L('reachedMagician');
-  } else {
-    document.getElementById('profileText').textContent = L('profileText');
-  }
-}
-
-/* Points */
-function getPoints(){ return Number(localStorage.getItem(POINTS_KEY) || 0); }
-function setPoints(n){
-  const prev = getPoints();
-  localStorage.setItem(POINTS_KEY, String(n));
-  renderPoints();
-  // update leaderboard each time points change
-  updateLeaderboardEntry();
-  // if crossed magician threshold, apply effects
-  if(prev < 20000 && n >= 20000) {
-    announceMagician();
-  }
-}
-function addPoints(n){
-  setPoints(Math.max(0, getPoints() + n));
-  if(n !== 0) pushRecent(n);
-  showFloatingPoints(n);
-}
-function pushRecent(n){
-  const arr = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
-  arr.unshift({t:Date.now(), pts:n});
-  localStorage.setItem(RECENT_KEY, JSON.stringify(arr.slice(0,200)));
-  renderRecent();
-}
-
-/* Tiers */
-const TIERS = [
-  {name:{en:'Chill',zh:'Chill',da:'Chill',fr:'Cool',ja:'チル'}, min:0},
-  {name:{en:'Bronze',zh:'Bronze',da:'Bronze',fr:'Bronze',ja:'ブロンズ'}, min:1000},
-  {name:{en:'Silver',zh:'Silver',da:'Sølv',fr:'Argent',ja:'シルバー'}, min:1500},
-  {name:{en:'Gold',zh:'Gold',da:'Guld',fr:'Or',ja:'ゴールド'}, min:2000},
-  {name:{en:'Diamond',zh:'Diamond',da:'Diamant',fr:'Diamant',ja:'ダイヤモンド'}, min:2500},
-  {name:{en:'Legendary',zh:'Legendary',da:'Legendarisk',fr:'Légendaire',ja:'伝説'}, min:3000},
-  {name:{en:'Wizard',zh:'Wizard',da:'Troldmand',fr:'Sorcier',ja:'ウィザード'}, min:3500},
-  {name:{en:'King',zh:'King',da:'Konge',fr:'Roi',ja:'キング'}, min:5000},
-  {name:{en:'Master',zh:'Master',da:'Mester',fr:'Maître',ja:'マスター'}, min:8000},
-  {name:{en:'Hero',zh:'Hero',da:'Helt',fr:'Héros',ja:'ヒーロー'}, min:12000},
-  {name:{en:'Titan',zh:'Titan',da:'Titan',fr:'Titan',ja:'タイタン'}, min:16000},
-  {name:{en:'Magical Mathematician',zh:'数学魔术师',da:'Magisk matematiker',fr:'Mathématicien magique',ja:'数学の魔術師'}, min:20000}
-];
-
-function getTier(points){
-  let cur = TIERS[0];
-  for(const t of TIERS) if(points >= t.min) cur = t;
-  const next = TIERS.find(t => t.min > points) || null;
-  return {current:cur, next};
-}
-
-/* Render points/tier/recent */
-function renderPoints(){
-  document.getElementById('points').textContent = getPoints();
-  // show name or magical title when reached
-  if(getPoints() >= 20000){
-    document.getElementById('playerName').value = L('magicianTitle');
-    document.body.classList.add('magical-bg');
-  } else {
-    document.body.classList.remove('magical-bg');
-    document.getElementById('playerName').value = localStorage.getItem(NAME_KEY) || 'Player';
-  }
-  const info = getTier(getPoints());
-  const label = (typeof info.current.name === 'object') ? (info.current.name[lang] || info.current.name.en) : info.current.name;
-  document.getElementById('tierText').textContent = `${label} (${info.current.min}+)`;
-  const fill = info.next ? Math.min(1,(getPoints()-info.current.min)/(info.next.min-info.current.min)) : 1;
-  document.getElementById('tierFill').style.width = `${Math.round(fill*100)}%`;
-}
-function renderRecent(){ const arr = JSON.parse(localStorage.getItem(RECENT_KEY)||'[]').slice(0,6); const el=document.getElementById('recentList'); if(!arr.length){ el.textContent = (lang==='zh'?'暂无记录':'No recent wins'); return; } el.innerHTML = arr.map(r=> `${new Date(r.t).toLocaleString()}: ${r.pts>0?'+':''}${r.pts} pts`).join('<br>'); }
-
-/* Announce magician */
-function announceMagician(){
-  alert(L('reachedMagician'));
-  // change displayed name to magical title (visual); underlying stored name remains for leaderboard identity
-  document.getElementById('playerName').value = L('magicianTitle');
-}
-
-/* Leaderboard: store list of entries {id,name,points,ts} where id is original saved name */
-function readLeaderboard(){ return JSON.parse(localStorage.getItem(LEADER_KEY) || '[]'); }
-function saveLeaderboard(arr){ localStorage.setItem(LEADER_KEY, JSON.stringify(arr)); }
-function updateLeaderboardEntry(){
-  const realName = localStorage.getItem(NAME_KEY) || 'Player';
-  const points = getPoints();
-  const arr = readLeaderboard();
-  // find by original name (so if we show magical title visually we still attribute to person)
-  let entry = arr.find(e => e.id === realName);
-  if(entry){
-    entry.points = points;
-    entry.ts = Date.now();
-  } else {
-    arr.push({id: realName, name: realName, points: points, ts: Date.now()});
-  }
-  // sort desc by points
-  arr.sort((a,b)=> b.points - a.points || a.ts - b.ts);
-  // keep top 50
-  saveLeaderboard(arr.slice(0,50));
-  renderLeaderboard();
-}
-function renderLeaderboard(){
-  const arr = readLeaderboard();
-  const el = document.getElementById('leaderboardList');
-  if(!arr.length){ el.textContent = (lang==='zh'?'暂无玩家':'No players yet.'); return; }
-  const top = arr.slice(0,10);
-  const list = document.createElement('ol');
-  top.forEach((p, idx)=>{
-    const li = document.createElement('li');
-    const displayName = (p.points >= 20000) ? L('magicianTitle') : p.name;
-    li.innerHTML = `<strong>${escapeHtml(displayName)}</strong> — ${p.points} pts${p.points >= 20000 ? ` <em>(${L('magicianTitle')})</em>` : ''}`;
-    list.appendChild(li);
-  });
-  el.innerHTML = '';
-  el.appendChild(list);
-  // show small message translated
-  // (optional) notify user
-}
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-/* Export/reset points and leaderboard */
-document.getElementById('exportPoints').addEventListener('click', ()=>{
-  const data = {name: localStorage.getItem(NAME_KEY)||'Player', points:getPoints(), recent: JSON.parse(localStorage.getItem(RECENT_KEY)||'[]'), leaderboard: readLeaderboard()};
-  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='btl_export.json'; a.click();
-});
-document.getElementById('resetPoints').addEventListener('click', ()=>{
-  if(confirm(L('reset') + '?')){ localStorage.removeItem(POINTS_KEY); localStorage.removeItem(RECENT_KEY); localStorage.removeItem(LEADER_KEY); setPoints(0); renderRecent(); renderLeaderboard(); alert(L('reset') + ' ✓'); }
-});
-
-/* ---------- Visual FX: fireworks & confetti ---------- */
-const fxCanvas = document.getElementById('fxCanvas'); fxCanvas.width = innerWidth; fxCanvas.height = innerHeight; const fxCtx = fxCanvas.getContext('2d');
-window.addEventListener('resize', ()=>{ fxCanvas.width = innerWidth; fxCanvas.height = innerHeight; });
-let particles = [];
-function spawnFirework(cx,cy,count=80){ const hue=Math.floor(Math.random()*360); for(let i=0;i<count;i++){ const ang=Math.random()*Math.PI*2, sp=1+Math.random()*5; particles.push({x:cx,y:cy,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp,life:60+Math.random()*60,size:1+Math.random()*3,hue}); } }
-function spawnConfetti(x=innerWidth/2,y=innerHeight/3,count=60){ for(let i=0;i<count;i++) particles.push({x,y,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.8)*6,life:80+Math.random()*40,size:3+Math.random()*8,hue:Math.random()*360}); }
-function celebrateAt(cx=innerWidth/2,cy=innerHeight/3){ for(let i=0;i<5;i++) setTimeout(()=> spawnFirework(cx+(Math.random()-0.5)*200, cy+(Math.random()-0.5)*120, 90), i*260); spawnConfetti(); }
-function fxLoop(){ fxCtx.clearRect(0,0,fxCanvas.width, fxCanvas.height); for(let i=particles.length-1;i>=0;i--){ const p=particles[i]; p.x+=p.vx; p.y+=p.vy; p.vy+=0.06; p.life--; fxCtx.beginPath(); fxCtx.fillStyle = `hsl(${p.hue} 80% 60% / ${Math.max(0,p.life/120)})`; fxCtx.arc(p.x,p.y,p.size,0,Math.PI*2); fxCtx.fill(); if(p.life<=0) particles.splice(i,1); } requestAnimationFrame(fxLoop); } fxLoop();
-function showFloatingPoints(n){ const el=document.createElement('div'); el.textContent=(n>0? '+'+n: String(n)); el.style.position='fixed'; el.style.left=(innerWidth/2)+'px'; el.style.top=(innerHeight/3)+'px'; el.style.padding='6px 10px'; el.style.borderRadius='999px'; el.style.background='#ffd27a'; el.style.fontWeight='800'; el.style.transition='transform 900ms,opacity 900ms'; el.style.zIndex=2000; document.body.appendChild(el); requestAnimationFrame(()=> el.style.transform='translate(-50%,-120%) scale(1.05)'); setTimeout(()=>{ const tgt=document.querySelector('.points').getBoundingClientRect(); const dx=(tgt.left+tgt.width/2)-innerWidth/2; const dy=(tgt.top+tgt.height/2)-innerHeight/3; el.style.transform=`translate(${dx}px, ${dy}px) scale(.36)`; el.style.opacity='0'; setTimeout(()=> el.remove(),950); },600); }
-
-/* ---------- Helpers ---------- */
-function randInt(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
-function shuffle(arr){ const r=arr.slice(); for(let i=r.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [r[i],r[j]]=[r[j],r[i]]; } return r; }
-
-/* ---------- Tiles + Previews (front page visible) ---------- */
-const GAMES = [
-  {id:'trivia', label:{en:'Trivia (100 levels)',zh:'问答（100级）',da:'Quiz (100 niveauer)',fr:'Quiz (100 niveaux)',ja:'トリビア（100レベル）'}},
-  {id:'rapid', label:{en:'Rapid Fire',zh:'速答',da:'Hurtig',fr:'Rapide',ja:'ラピッド'}},
-  {id:'maze', label:{en:'Math Maze',zh:'数学迷宫',da:'Labyrint',fr:'Labyrinthe',ja:'数学迷路'}},
-  {id:'pattern', label:{en:'Pattern Builder',zh:'数列挑战',da:'Mønster',fr:'Suite',ja:'パターン'}},
-  {id:'prob', label:{en:'Probability Cups',zh:'概率杯子',da:'Sandsynlighedskopper',fr:'Coupes',ja:'確率カップ'}},
-  {id:'casino', label:{en:'Casino',zh:'赌场',da:'Casino',fr:'Casino',ja:'カジノ'}},
-  {id:'cups', label:{en:'Secret Cups',zh:'神秘杯',da:'Hemmelige kopper',fr:'Coupes secrètes',ja:'シークレットカップ'}},
-  {id:'air', label:{en:'Air Hockey',zh:'气垫球',da:'Airhockey',fr:'Air Hockey',ja:'エアホッケー'}}
-];
-
-function renderTiles(){
-  const container = document.getElementById('tilesContainer'); container.innerHTML='';
-  GAMES.forEach(g=>{
-    const title = g.label[lang] || g.label.en;
-    const div = document.createElement('div'); div.className='tile'; div.id='tile-'+g.id;
-    div.innerHTML = `<h3>${escapeHtml(title)}</h3>
-      <div class="preview" id="preview-${g.id}"></div>
-      <div class="playRow">
-        <button class="btn play-btn" data-game="${g.id}">${L('play')}</button>
-        <div style="flex:1"></div>
-        <div class="small" id="status-${g.id}">${L('ready')}</div>
-      </div>`;
-    container.appendChild(div);
-  });
-
-  // Ensure previews are immediately visible
-  // trivia preview
-  const pvTri = document.getElementById('preview-trivia');
-  if(pvTri){ const q=genArithmeticQuestion(3); pvTri.innerHTML = `<div class="question">${q.q}</div><div class="small">${q.choices.slice(0,2).join(' | ')} ...</div>`; }
-  const pvRapid = document.getElementById('preview-rapid'); if(pvRapid){ const q=genArithmeticQuestion(8); pvRapid.innerHTML = `<div class="question">${q.q}</div><div class="small">Sample</div>`; }
-  const pvMaze = document.getElementById('preview-maze'); if(pvMaze) pvMaze.innerHTML = `<div class="small">${lang==='zh'?'迷宫预览 — 点击 Play':'Maze preview — click Play'}</div>`;
-  const pvPattern = document.getElementById('preview-pattern'); if(pvPattern){ const p=generatePattern(2); pvPattern.innerHTML = `<div class="small">${p.type}</div><div class="question">${p.seq.join(', ')}, ...</div>`; }
-  const pvProb = document.getElementById('preview-prob'); if(pvProb){ const q=generateProbQuestion(); pvProb.innerHTML = `<div class="small">Sample cups</div>`; }
-  const pvCasino = document.getElementById('preview-casino'); if(pvCasino){ pvCasino.innerHTML = `<div><span class="reel">🔔</span><span class="reel">7</span><span class="reel">❤️</span></div><div class="small">Preview</div>`; }
-  const pvCups = document.getElementById('preview-cups'); if(pvCups) pvCups.innerHTML = `<div style="display:flex;gap:6px"><div style="flex:1;padding:8px;background:#d33;border-radius:6px"></div><div style="flex:1;padding:8px;background:#d33;border-radius:6px"></div><div style="flex:1;padding:8px;background:#d33;border-radius:6px"></div></div>`;
-  const pvAir = document.getElementById('preview-air'); if(pvAir) pvAir.innerHTML = `<canvas width="220" height="120" style="background:#f7fbff;border-radius:6px"></canvas><div class="small">Preview</div>`;
-}
-renderTiles();
-
-/* ---------- Navigation: Play -> open full page (hash-based SPA) ---------- */
-document.addEventListener('click', (e)=>{
-  const play = e.target.closest('.play-btn');
-  if(play){ openGamePage(play.dataset.game); return; }
-});
-function openGamePage(id){
-  document.getElementById('hubCard').style.display = 'none';
-  document.querySelectorAll('.game-page').forEach(p=>p.classList.remove('active'));
-  const page = document.getElementById('page-'+id); if(!page) return;
-  page.classList.add('active');
-  location.hash = 'game=' + id;
-  const area = document.getElementById('page-area-'+id);
-  if(area && !area.dataset.inited){ area.dataset.inited='1'; initFullGame(id, area); }
-  const status = document.getElementById('status-'+id); if(status) status.textContent = L('playing');
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-Array.from(document.querySelectorAll('.backBtn')).forEach(b=> b.addEventListener('click', ()=> {
-  document.querySelectorAll('.game-page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('hubCard').style.display = 'block';
-  if(location.hash.startsWith('#game=')) history.replaceState(null,'', location.pathname + location.search);
-  GAMES.forEach(g=>{ const s=document.getElementById('status-'+g.id); if(s) s.textContent = L('ready'); });
-  window.scrollTo({top:0,behavior:'smooth'});
-}));
-(function initFromHash(){ const h=location.hash.slice(1); if(!h) return; const m=h.match(/game=([a-z0-9_-]+)/i); if(m) setTimeout(()=> openGamePage(m[1]), 120); })();
-
-/* ---------- Full game initializers (called when page opened) ---------- */
-function initFullGame(id, area){
-  if(id==='trivia') initFullTrivia(area);
-  if(id==='rapid') initFullRapid(area);
-  if(id==='maze') initFullMaze(area);
-  if(id==='pattern') initFullPattern(area);
-  if(id==='prob') initFullProb(area);
-  if(id==='casino') initFullCasino(area);
-  if(id==='cups') initFullCups(area);
-  if(id==='air') initFullAir(area);
-}
-
-/* ---------- Full Trivia (kept concise) ---------- */
-let triviaTimer = null;
-function initFullTrivia(area){
-  area.innerHTML = `
-    <div style="display:flex;gap:8px;align-items:center">
-      <label>${L('triviaLevel') || 'Level'} <select class="full-trivia-level"></select></label>
-      <button class="btn full-trivia-start">${L('start')}</button>
-      <div style="flex:1"></div>
-      <div class="small">${L('timerNote')}</div>
-    </div>
-    <div class="full-trivia-ui" style="margin-top:10px"></div>
-  `;
-  const sel = area.querySelector('.full-trivia-level');
-  for(let i=1;i<=100;i++){ const o=document.createElement('option'); o.value=i; o.text='Level '+i; sel.appendChild(o); }
-  area.querySelector('.full-trivia-start').addEventListener('click', ()=> { startTriviaRound(Number(sel.value||1), area.querySelector('.full-trivia-ui')); });
-}
-function startTriviaRound(level, container){
-  clearInterval(triviaTimer);
-  const qs = Array.from({length:10}, (_,i)=> genArithmeticQuestion(level + Math.floor(i/3)));
-  let idx=0, score=0;
-  function render(){
-    clearInterval(triviaTimer);
-    container.innerHTML='';
-    if(idx>=qs.length){
-      container.innerHTML = `<div style="font-weight:800">${lang==='zh'?'回合完成':'Round complete'}</div><div class="small">${lang==='zh'?'得分':'Score'}: ${score}/${qs.length}</div>`;
-      if(score>=7){ const pts=Math.max(25, Math.round(30 + level*1.2)); addPoints(pts); celebrateAt(); container.innerHTML += `<div class="small">${lang==='zh'?'奖励 ':'Awarded '}${pts} pts</div>`; }
-      return;
+(function(){
+  // ---------- Translation strings (every UI label used) ----------
+  const TRANSLATIONS = {
+    en: {
+      brand: 'BREAK THE LOGIC',
+      tagline: 'Math games hub — train logic, speed, and math knowledge',
+      hubTitle: 'Game Hub — Math Edition',
+      hubDesc: 'All games are visible below. Click Play to open the full game page.',
+      profileTitle: 'Profile',
+      profileText: 'Earn points to climb tiers.',
+      nameLabel: 'Name:',
+      saveName: 'Save',
+      export: 'Export',
+      reset: 'Reset',
+      exportPoints: 'Export',
+      resetPoints: 'Reset',
+      tierTitle: 'Tier',
+      recentTitle: 'Recent',
+      leaderboardTitle: 'Leaderboard',
+      play: 'Play',
+      ready: 'Ready',
+      playing: 'Playing',
+      start: 'Start',
+      submit: 'Submit',
+      back: 'Back',
+      timerNote: '5s per question',
+      airLocked: 'Air Hockey requires at least 5000 points to play.',
+      magicianTitle: 'Mathematical Magician',
+      reachedMagician: 'Congratulations — you reached Mathematical Magician!',
+      setNameRequired: 'Name cannot be empty.',
+      noPlayers: 'No players yet.',
+      leaderboardUpdated: 'Leaderboard updated'
+    },
+    zh: {
+      brand: '破除逻辑',
+      tagline: '数学游戏中心 — 训练逻辑、速度和数学能力',
+      hubTitle: '游戏中心 — 数学版',
+      hubDesc: '下方显示所有游戏。点击 Play 打开完整游戏页面。',
+      profileTitle: '个人',
+      profileText: '赚取积分以提升段位。',
+      nameLabel: '名称：',
+      saveName: '保存',
+      export: '导出',
+      reset: '重置',
+      exportPoints: '导出',
+      resetPoints: '重置',
+      tierTitle: '段位',
+      recentTitle: '近期',
+      leaderboardTitle: '排行榜',
+      play: '开始',
+      ready: '就绪',
+      playing: '进行中',
+      start: '开始',
+      submit: '提交',
+      back: '返回',
+      timerNote: '每题 5 秒',
+      airLocked: '气垫球需要至少 5000 积分才能游玩。',
+      magicianTitle: '数学魔术师',
+      reachedMagician: '恭喜 — 你已成为数学魔术师！',
+      setNameRequired: '名称不能为空。',
+      noPlayers: '暂无玩家。',
+      leaderboardUpdated: '排行榜已更新'
+    },
+    da: {
+      brand: 'BRYD LOGIKKEN',
+      tagline: 'Math-spil hub — træn logik, hastighed og matematisk viden',
+      hubTitle: 'Spil Hub — Matematik',
+      hubDesc: 'Alle spil er synlige nedenfor. Klik Play for at åbne hele spillet.',
+      profileTitle: 'Profil',
+      profileText: 'Tjen point for at stige i rang.',
+      nameLabel: 'Navn:',
+      saveName: 'Gem',
+      export: 'Eksport',
+      reset: 'Nulstil',
+      exportPoints: 'Eksport',
+      resetPoints: 'Nulstil',
+      tierTitle: 'Rang',
+      recentTitle: 'Seneste',
+      leaderboardTitle: 'Highscore',
+      play: 'Spil',
+      ready: 'Klar',
+      playing: 'Spiller',
+      start: 'Start',
+      submit: 'Indsend',
+      back: 'Tilbage',
+      timerNote: '5s pr. spørgsmål',
+      airLocked: 'Air Hockey kræver mindst 5000 point for at spille.',
+      magicianTitle: 'Matematisk Magiker',
+      reachedMagician: 'Tillykke — du nåede Matematisk Magiker!',
+      setNameRequired: 'Navn må ikke være tomt.',
+      noPlayers: 'Ingen spillere endnu.',
+      leaderboardUpdated: 'Highscore opdateret'
+    },
+    fr: {
+      brand: 'BRAIN THE LOGIC',
+      tagline: 'Hub de jeux math — entraînez logique, rapidité et mathématiques',
+      hubTitle: 'Hub de jeux — Math',
+      hubDesc: 'Tous les jeux sont visibles ci-dessous. Cliquez Play pour ouvrir le jeu complet.',
+      profileTitle: 'Profil',
+      profileText: 'Gagnez des points pour monter en niveau.',
+      nameLabel: 'Nom :',
+      saveName: 'Enregistrer',
+      export: 'Exporter',
+      reset: 'Réinitialiser',
+      exportPoints: 'Exporter',
+      resetPoints: 'Réinitialiser',
+      tierTitle: 'Niveau',
+      recentTitle: 'Récent',
+      leaderboardTitle: 'Classement',
+      play: 'Jouer',
+      ready: 'Prêt',
+      playing: 'En jeu',
+      start: 'Démarrer',
+      submit: 'Soumettre',
+      back: 'Retour',
+      timerNote: '5s par question',
+      airLocked: 'Air Hockey nécessite au moins 5000 points pour jouer.',
+      magicianTitle: 'Magicien Mathématique',
+      reachedMagician: 'Félicitations — vous êtes Magicien Mathématique !',
+      setNameRequired: 'Le nom ne peut pas être vide.',
+      noPlayers: 'Pas encore de joueurs.',
+      leaderboardUpdated: 'Classement mis à jour'
+    },
+    ja: {
+      brand: 'ロジックをやぶれ',
+      tagline: '数学ゲームハブ — 論理、速度、数学力を鍛える',
+      hubTitle: 'ゲームハブ — 数学版',
+      hubDesc: '以下にすべてのゲームが表示されています。Playでフルページを開きます。',
+      profileTitle: 'プロフィール',
+      profileText: 'ポイントを獲得してランクアップしましょう。',
+      nameLabel: '名前：',
+      saveName: '保存',
+      export: 'エクスポート',
+      reset: 'リセット',
+      exportPoints: 'エクスポート',
+      resetPoints: 'リセット',
+      tierTitle: 'ランク',
+      recentTitle: '最近',
+      leaderboardTitle: 'ランキング',
+      play: '再生',
+      ready: '準備完了',
+      playing: 'プレイ中',
+      start: '開始',
+      submit: '送信',
+      back: '戻る',
+      timerNote: '各問5秒',
+      airLocked: 'エアホッケーは5000ポイント以上でのみ遊べます。',
+      magicianTitle: '数学の魔術師',
+      reachedMagician: 'おめでとう — あなたは数学の魔術師になりました！',
+      setNameRequired: '名前を入力してください。',
+      noPlayers: 'まだプレイヤーはいません。',
+      leaderboardUpdated: 'ランキングを更新しました'
     }
-    const q = qs[idx]; const qdiv=document.createElement('div'); qdiv.innerHTML = `<div class="question">Q${idx+1}: ${q.q}</div>`;
-    const answrap=document.createElement('div'); answrap.className='answers';
-    q.choices.forEach(choice=>{ const b=document.createElement('button'); b.className='ans-btn'; b.textContent=choice; b.onclick=()=>{ clearInterval(triviaTimer); finalize(choice); }; answrap.appendChild(b); });
-    const timerEl=document.createElement('div'); timerEl.className='small'; timerEl.textContent = 'Time left: 5.0s';
-    qdiv.appendChild(answrap); container.appendChild(qdiv); container.appendChild(timerEl);
-    let t=5.0; triviaTimer=setInterval(()=>{ t=Math.max(0,t-0.1); timerEl.textContent='Time left: '+t.toFixed(1)+'s'; if(t<=0){ clearInterval(triviaTimer); finalize(null,true); } },100);
-    function finalize(choice,timedOut=false){ Array.from(answrap.children).forEach(ch=>{ ch.disabled=true; if(ch.textContent==String(q.answer)) ch.classList.add('correct'); }); if(!timedOut && choice && String(choice)===String(q.answer)){ score++; addPoints(8); spawnConfetti(); } setTimeout(()=>{ idx++; render(); },700); }
+  };
+
+  const LANG_CODES = ['en','zh','da','fr','ja'];
+  let currentLang = localStorage.getItem('btl_lang') || 'en';
+
+  function tr(key){
+    return (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][key]) || TRANSLATIONS['en'][key] || key;
   }
-  render();
-}
 
-/* ---------- Full Rapid ---------- */
-function initFullRapid(area){
-  area.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><label>Difficulty <select class="full-rapid-diff"><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select></label><button class="btn full-rapid-start">${L('start')}</button></div><div class="full-rapid-ui" style="margin-top:10px"></div>`;
-  area.querySelector('.full-rapid-start').addEventListener('click', ()=> { const diff = area.querySelector('.full-rapid-diff').value; startRapidRound(area.querySelector('.full-rapid-ui'), diff); });
-}
-function startRapidRound(container, diff){
-  const timePer = diff==='easy'?6: diff==='medium'?4:2.5;
-  const qs = Array.from({length:12}, ()=> genArithmeticQuestion(randInt(1,70)));
-  let idx=0, score=0, timer=null;
-  function render(){ clearInterval(timer); container.innerHTML=''; if(idx>=qs.length){ const pts = score*8; addPoints(pts); container.innerHTML = `<div class="small">Done ${score}/${qs.length} +${pts} pts</div>`; return; } const q=qs[idx]; const div=document.createElement('div'); div.innerHTML=`<div class="question">Q${idx+1}: ${q.q}</div><div class="small">Time: <span id="rfTime">${timePer.toFixed(1)}</span>s</div>`; const answrap=document.createElement('div'); answrap.className='answers'; q.choices.forEach(choice=>{ const b=document.createElement('button'); b.className='ans-btn'; b.textContent=choice; b.onclick=()=>{ clearInterval(timer); if(String(choice)===String(q.answer)) score++; idx++; render(); }; answrap.appendChild(b); }); div.appendChild(answrap); container.appendChild(div); let t=timePer; const te = div.querySelector('#rfTime'); timer=setInterval(()=>{ t=Math.max(0,t-0.1); if(te) te.textContent = t.toFixed(1); if(t<=0){ clearInterval(timer); idx++; render(); } },100); }
-  render();
-}
+  // language UI toggles
+  function renderLangUI(){
+    const wrap = document.getElementById('langToggle');
+    if(!wrap) return;
+    wrap.innerHTML = '';
+    LANG_CODES.forEach(code=>{
+      const b = document.createElement('button');
+      b.className = 'langBtn';
+      b.textContent = code.toUpperCase();
+      if(code === currentLang) b.style.fontWeight = '800';
+      b.addEventListener('click', ()=>{
+        currentLang = code;
+        localStorage.setItem('btl_lang', code);
+        applyTranslations();
+      });
+      wrap.appendChild(b);
+    });
+  }
 
-/* ---------- Full Maze ---------- */
-function initFullMaze(area){
-  area.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><button class="btn full-maze-gen">Generate Maze</button><div style="flex:1"></div><div class="small">Use arrow keys to move</div></div><div class="full-maze-ui" style="margin-top:10px"></div>`;
-  area.querySelector('.full-maze-gen').addEventListener('click', ()=> {
-    const container = area.querySelector('.full-maze-ui'); container.innerHTML=''; const size=420; const canvas=document.createElement('canvas'); canvas.width=size; canvas.height=size; container.appendChild(canvas); const ctx=canvas.getContext('2d');
-    const gridObj = makeMazeGrid(17,17); let cell = Math.floor(size/gridObj.w); let px=1, py=1, solved=0;
-    draw();
-    function draw(){ ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#eef6ff'; ctx.fillRect(0,0,canvas.width,canvas.height); for(let y=0;y<gridObj.h;y++) for(let x=0;x<gridObj.w;x++){ const v=gridObj.grid[y][x]; const sx=x*cell, sy=y*cell; if(v===1){ ctx.fillStyle='#133'; ctx.fillRect(sx,sy,cell,cell); } else if(v===2){ ctx.fillStyle='#ffd'; ctx.fillRect(sx,sy,cell,cell); ctx.fillStyle='#6a3bdb'; ctx.fillRect(sx+cell*0.2, sy+cell*0.2, cell*0.6, cell*0.6); } else ctx.fillStyle='#f7fff7', ctx.fillRect(sx,sy,cell,cell); } ctx.fillStyle='#1a73e8'; ctx.beginPath(); ctx.arc((px+0.5)*cell,(py+0.5)*cell,cell*0.28,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#ff9'; ctx.fillRect(gridObj.exit.x*cell+cell*0.15, gridObj.exit.y*cell+cell*0.15, cell*0.7, cell*0.7); }
-    function move(dx,dy){ const nx=px+dx, ny=py+dy; if(nx<0||ny<0||nx>=gridObj.w||ny>=gridObj.h) return; const val=gridObj.grid[ny][nx]; if(val===1) return; if(val===2){ const q = genArithmeticQuestion(randInt(1,40)); const ans = prompt('Gate: '+q.q+'\n'+q.choices.join(' | ')); if(ans===null) return; if(String(ans).trim()===String(q.answer)){ gridObj.grid[ny][nx]=0; solved++; addPoints(10); draw(); } else { alert('Wrong'); return; } } else { px=nx; py=ny; } draw(); if(px===gridObj.exit.x && py===gridObj.exit.y){ const pts = 100 + solved*10; addPoints(pts); celebrateAt(); alert('Reached center! +' + pts + ' pts'); document.removeEventListener('keydown', keyH); } }
-    function keyH(e){ if(e.key==='ArrowUp'||e.key==='w') move(0,-1); if(e.key==='ArrowDown'||e.key==='s') move(0,1); if(e.key==='ArrowLeft'||e.key==='a') move(-1,0); if(e.key==='ArrowRight'||e.key==='d') move(1,0); }
-    document.addEventListener('keydown', keyH);
-    function makeMazeGrid(cols, rows){ if(cols%2===0) cols++; if(rows%2===0) rows++; const grid = Array.from({length:rows}, ()=>Array(cols).fill(1)); for(let y=1;y<rows;y+=2) for(let x=1;x<cols;x+=2) grid[y][x]=0; function neigh(x,y){ const n=[]; if(y-2>0) n.push([x,y-2]); if(y+2<rows-1) n.push([x,y+2]); if(x-2>0) n.push([x-2,y]); if(x+2<cols-1) n.push([x+2,y]); return n; } const stack=[[1,1]], visited=new Set(['1,1']); while(stack.length){ const [cx,cy] = stack[stack.length-1]; const opts = neigh(cx,cy).filter(n=> !visited.has(n.join(','))); if(opts.length){ const n = opts[Math.floor(Math.random()*opts.length)]; const wx=(cx+n[0])/2, wy=(cy+n[1])/2; grid[wy][wx]=0; visited.add(n.join(',')); stack.push(n); } else stack.pop(); } for(let g=0;g<8;g++){ let placed=false; for(let t=0;t<300 && !placed;t++){ const gx=randInt(1,cols-2), gy=randInt(1,rows-2); if(grid[gy][gx]===1){ const dirs=[[1,0],[-1,0],[0,1],[0,-1]]; if(dirs.some(d=> grid[gy+d[1]][gx+d[0]]===0)){ grid[gy][gx]=2; placed=true; } } } } let ex=cols-2, ey=rows-2; while(grid[ey][ex]!==0){ ex--; if(ex<1){ ex=cols-2; ey--; if(ey<1) break; } } return {grid,w:cols,h:rows, exit:{x:ex,y:ey}}; }
-  });
-}
+  // Apply translations to all UI strings by id/class we control
+  function applyTranslations(){
+    // header / hub
+    const brand = document.getElementById('brandText'); if(brand) brand.textContent = tr('brand');
+    const tagline = document.getElementById('tagline'); if(tagline) tagline.textContent = tr('tagline');
+    const hubTitle = document.getElementById('hubTitle'); if(hubTitle) hubTitle.textContent = tr('hubTitle');
+    const hubDesc = document.getElementById('hubDesc'); if(hubDesc) hubDesc.textContent = tr('hubDesc');
 
-/* ---------- Full Pattern ---------- */
-function initFullPattern(area){
-  area.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><label>Level <select class="full-pattern-level"></select></label><button class="btn full-pattern-start">Start</button></div><div class="full-pattern-ui" style="margin-top:10px"></div>`;
-  const sel = area.querySelector('.full-pattern-level'); for(let i=1;i<=30;i++){ const o=document.createElement('option'); o.value=i; o.text=i; sel.appendChild(o); }
-  area.querySelector('.full-pattern-start').addEventListener('click', ()=> {
-    const level = Number(sel.value||1); const ui = area.querySelector('.full-pattern-ui'); let i=0, score=0;
-    function next(){ if(i>=5){ ui.innerHTML = `<div class="small">Round score: ${score}/5</div>`; addPoints(score*12); return; } const p = generatePattern(level + i); ui.innerHTML = `<div class="small">${p.type}</div><div class="question">${p.seq.join(', ')}, ...</div><input id="pAns" type="number" style="padding:8px;border-radius:6px"><button id="pOk" class="btn" style="margin-left:8px">Submit</button>`; ui.querySelector('#pOk').onclick = ()=>{ if(String(ui.querySelector('#pAns').value)===String(p.next)){ score++; addPoints(12); spawnConfetti(); } else alert('Wrong, answer: '+p.next); i++; next(); }; } next();
-  });
-}
-function generatePattern(level){ level=Math.max(1,Math.min(30,level)); const types=['arithmetic','geometric','fib-like','alternating','squares']; const t = types[level % types.length]; if(t==='arithmetic'){ const a=randInt(1,6), d=randInt(1,8); return {seq:[a,a+d,a+2*d,a+3*d,a+4*d], next:a+5*d, type:'Arithmetic +'+d}; } if(t==='geometric'){ const a=randInt(1,4), r=randInt(2,4); return {seq:[a,a*r,a*r*r,a*r*r*r,a*r*r*r*r], next:a*Math.pow(r,5), type:'Geometric x'+r}; } if(t==='fib-like'){ const a=randInt(1,5), b=randInt(1,6); const seq=[a,b,a+b,b+(a+b),(a+b)+(b+(a+b))]; return {seq, next: seq[3]+seq[4], type:'Fib-like'}; } if(t==='alternating'){ const a=randInt(1,6), b=randInt(7,12); return {seq:[a,b,a+b,a+2*b,a+3*b], next:a+4*b, type:'Alternating'}; } const s=randInt(1,6); return {seq:[s,s+1,s+4,s+9,s+16], next:s+25, type:'Squares'}; }
+    // profile
+    const profileTitle = document.getElementById('profileTitle'); if(profileTitle) profileTitle.textContent = tr('profileTitle');
+    const profileText = document.getElementById('profileText'); if(profileText) {
+      // if magical status reached, keep magician message
+      if(getPoints() >= 20000) profileText.textContent = tr('reachedMagician');
+      else profileText.textContent = tr('profileText');
+    }
+    const nameLabel = document.getElementById('nameLabel'); if(nameLabel) nameLabel.textContent = tr('nameLabel');
+    const saveNameBtn = document.getElementById('saveName'); if(saveNameBtn) saveNameBtn.textContent = tr('saveName');
 
-/* ---------- Full Probability ---------- */
-function initFullProb(area){
-  area.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><button class="btn full-prob-start">Start</button></div><div class="full-prob-ui" style="margin-top:10px"></div>`;
-  area.querySelector('.full-prob-start').addEventListener('click', ()=> renderProbUI(generateProbQuestion(), area.querySelector('.full-prob-ui')));
-}
-function generateProbQuestion(){ const base=randInt(5,30); const p1=Math.random()*0.6+0.1, p2=Math.random()*0.6+0.05, p3=Math.random()*0.6+0.02; const a1=base+randInt(0,base), a2=base+randInt(0,base+10), a3=base+randInt(0,base+20); return {cups:[{label:'A',p:+p1.toFixed(2),payout:a1,ev: +(p1*a1).toFixed(2)},{label:'B',p:+p2.toFixed(2),payout:a2,ev: +(p2*a2).toFixed(2)},{label:'C',p:+p3.toFixed(2),payout:a3,ev: +(p3*a3).toFixed(2)}]}; }
-function renderProbUI(q, container){
-  container.innerHTML = `<div class="question">${lang==='zh'?'选择最高期望值':'Choose highest expected value'}</div>`;
-  const row=document.createElement('div'); row.style.display='flex'; row.style.gap='8px';
-  q.cups.forEach(c=>{ const el=document.createElement('div'); el.style.flex='1'; el.style.padding='12px'; el.style.border='1px solid #eee'; el.style.borderRadius='8px'; el.style.textAlign='center'; el.style.background='#fff'; el.innerHTML = `<div style="font-weight:800">${c.label}</div><div class="small">Payout ${c.payout}</div><div class="small">Chance ${Math.round(c.p*100)}%</div>`; el.onclick = ()=>{ const best=q.cups.reduce((a,b)=> a.ev>b.ev?a:b); if(c.label===best.label){ addPoints(20); celebrateAt(); alert(lang==='zh'?'正确！ +20 积分':'Correct! +20 pts'); } else alert(lang==='zh'?'错误':'Incorrect'); renderProbUI(generateProbQuestion(), container); }; row.appendChild(el); });
-  container.appendChild(row);
-}
+    // buttons
+    const exportBtn = document.getElementById('exportBtn'); if(exportBtn) exportBtn.textContent = tr('export');
+    const resetBtn = document.getElementById('resetBtn'); if(resetBtn) resetBtn.textContent = tr('reset');
+    const exportPoints = document.getElementById('exportPoints'); if(exportPoints) exportPoints.textContent = tr('exportPoints');
+    const resetPoints = document.getElementById('resetPoints'); if(resetPoints) resetPoints.textContent = tr('resetPoints');
 
-/* ---------- Full Casino & Cups (reuse earlier logic) ---------- */
-function initFullCasino(area){ area.innerHTML = `<div class="casino-full"></div>`; /* fill with casino UI similar to previews */ initCasino(area.querySelector('.casino-full')); }
-function initCasino(area){
-  area.innerHTML = `
-    <div style="display:flex;gap:8px;align-items:center">
-      <div style="flex:1">
-        <div style="font-weight:800">Machine 1 — Slots</div>
-        <div style="margin-top:6px"><span class="reel" id="${area.id}-m1r1">🔔</span><span class="reel" id="${area.id}-m1r2">7</span><span class="reel" id="${area.id}-m1r3">❤️</span></div>
-        <div style="margin-top:8px"><label>Bet: <input class="m1bet" type="number" min="1" value="10" style="width:80px"></label> <button class="btn m1spin">Spin</button> <span class="m1msg small"></span></div>
+    // sidebar
+    const tierTitle = document.getElementById('tierTitle'); if(tierTitle) tierTitle.textContent = tr('tierTitle');
+    const recentTitle = document.getElementById('recentTitle'); if(recentTitle) recentTitle.textContent = tr('recentTitle');
+    const leaderboardTitle = document.getElementById('leaderboardTitle'); if(leaderboardTitle) leaderboardTitle.textContent = tr('leaderboardTitle');
+
+    // back buttons
+    Array.from(document.querySelectorAll('.backBtn')).forEach(b=> b.textContent = tr('back'));
+
+    // Play buttons in tiles (re-render tiles to update)
+    renderTiles(); // will set button text
+    // update leaderboard and points display to reflect translations where used
+    renderLeaderboard();
+    renderPoints();
+    renderRecent();
+  }
+
+  // ---------- Points/tier/leaderboard storage ----------
+  const POINTS_KEY = 'btl_points_combined';
+  const NAME_KEY = 'btl_player_name';
+  const LEADER_KEY = 'btl_leaderboard';
+  const RECENT_KEY = 'btl_recent_combined';
+
+  function getPoints(){
+    // read #points element first (if game code updates it)
+    const ptsEl = document.getElementById('points');
+    if(ptsEl){
+      const n = Number(ptsEl.textContent || ptsEl.innerText || 0);
+      if(!Number.isNaN(n)) return n;
+    }
+    const s = localStorage.getItem(POINTS_KEY);
+    return s ? Number(s) : 0;
+  }
+  function setPoints(n){
+    // set DOM and localStorage
+    const ptsEl = document.getElementById('points');
+    if(ptsEl) ptsEl.textContent = String(n);
+    localStorage.setItem(POINTS_KEY, String(n));
+    onPointsChanged(n);
+  }
+  function addPoints(delta){
+    const p = getPoints();
+    setPoints(Math.max(0, p + delta));
+    pushRecent(delta);
+  }
+  function pushRecent(delta){
+    const arr = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+    arr.unshift({t: Date.now(), pts: delta});
+    localStorage.setItem(RECENT_KEY, JSON.stringify(arr.slice(0,200)));
+    renderRecent();
+  }
+
+  // Player name get/set
+  function getPlayerName(){ return localStorage.getItem(NAME_KEY) || 'Player'; }
+  function setPlayerName(n){
+    localStorage.setItem(NAME_KEY, String(n || 'Player'));
+    renderPlayerName();
+    updateLeaderboardEntry();
+  }
+
+  // Leaderboard functions
+  function readLeaderboard(){ return JSON.parse(localStorage.getItem(LEADER_KEY) || '[]'); }
+  function saveLeaderboard(arr){ localStorage.setItem(LEADER_KEY, JSON.stringify(arr)); }
+  function updateLeaderboardEntry(){
+    const name = localStorage.getItem(NAME_KEY) || 'Player';
+    const points = getPoints();
+    const arr = readLeaderboard();
+    const found = arr.find(e => e.id === name);
+    if(found){
+      found.points = points;
+      found.ts = Date.now();
+    } else {
+      arr.push({id: name, name: name, points: points, ts: Date.now()});
+    }
+    arr.sort((a,b) => b.points - a.points || a.ts - b.ts);
+    saveLeaderboard(arr.slice(0,100));
+    renderLeaderboard();
+  }
+  function renderLeaderboard(){
+    const listEl = document.getElementById('leaderboardList');
+    if(!listEl) return;
+    const arr = readLeaderboard();
+    if(!arr.length){ listEl.textContent = tr('noPlayers'); return; }
+    const top = arr.slice(0,10);
+    const ol = document.createElement('ol');
+    top.forEach((p)=>{
+      const li = document.createElement('li');
+      const displayName = (p.points >= 20000) ? tr('magicianTitle') : p.name;
+      li.innerHTML = `<strong>${escapeHtml(displayName)}</strong> — ${p.points} pts${p.points >= 20000 ? ` <em>(${escapeHtml(tr('magicianTitle'))})</em>` : ''}`;
+      ol.appendChild(li);
+    });
+    listEl.innerHTML = '';
+    listEl.appendChild(ol);
+  }
+
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, (c)=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  // called whenever points change (either by game or our UI)
+  function onPointsChanged(newPoints){
+    renderPoints();
+    updateLeaderboardEntry();
+    // if reached magical threshold, change background and set display name
+    if(newPoints >= 20000){
+      document.body.classList.add('magical-bg');
+      // show magician message in profileText
+      const prof = document.getElementById('profileText'); if(prof) prof.textContent = tr('reachedMagician');
+      // rename current player's display in leaderboard (but keep stored id)
+      renderLeaderboard();
+    } else {
+      document.body.classList.remove('magical-bg');
+      renderPlayerName();
+    }
+  }
+
+  // render points/tier/recent similar to earlier code
+  const TIERS = [
+    {name:{en:'Chill',zh:'Chill',da:'Chill',fr:'Cool',ja:'チル'}, min:0},
+    {name:{en:'Bronze',zh:'Bronze',da:'Bronze',fr:'Bronze',ja:'ブロンズ'}, min:1000},
+    {name:{en:'Silver',zh:'Silver',da:'Sølv',fr:'Argent',ja:'シルバー'}, min:1500},
+    {name:{en:'Gold',zh:'Gold',da:'Guld',fr:'Or',ja:'ゴールド'}, min:2000},
+    {name:{en:'Diamond',zh:'Diamond',da:'Diamant',fr:'Diamant',ja:'ダイヤモンド'}, min:2500},
+    {name:{en:'Legendary',zh:'Legendary',da:'Legendarisk',fr:'Légendaire',ja:'伝説'}, min:3000},
+    {name:{en:'Wizard',zh:'Wizard',da:'Troldmand',fr:'Sorcier',ja:'ウィザード'}, min:3500},
+    {name:{en:'King',zh:'King',da:'Konge',fr:'Roi',ja:'キング'}, min:5000},
+    {name:{en:'Master',zh:'Master',da:'Mester',fr:'Maître',ja:'マスター'}, min:8000},
+    {name:{en:'Hero',zh:'Hero',da:'Helt',fr:'Héros',ja:'ヒーロー'}, min:12000},
+    {name:{en:'Titan',zh:'Titan',da:'Titan',fr:'Titan',ja:'タイタン'}, min:16000},
+    {name:{en:'Magical Mathematician',zh:'数学魔术师',da:'Magisk matematiker',fr:'Mathématicien magique',ja:'数学の魔術師'}, min:20000}
+  ];
+  function getTier(points){
+    let cur = TIERS[0];
+    for(const t of TIERS) if(points >= t.min) cur = t;
+    const next = TIERS.find(t => t.min > points) || null;
+    return {current: cur, next};
+  }
+
+  function renderPoints(){
+    const pts = getPoints();
+    const ptsEl = document.getElementById('points'); if(ptsEl) ptsEl.textContent = String(pts);
+    const info = getTier(pts);
+    const curName = (info.current.name && info.current.name[currentLang]) ? info.current.name[currentLang] : (info.current.name.en || info.current.name);
+    const tierText = document.getElementById('tierText'); if(tierText) tierText.textContent = `${curName} (${info.current.min}+)`;
+    const fill = info.next ? Math.min(1, (pts - info.current.min) / (info.next.min - info.current.min)) : 1;
+    const tierFill = document.getElementById('tierFill'); if(tierFill) tierFill.style.width = `${Math.round(fill*100)}%`;
+    // profile text handling (if not magical)
+    const prof = document.getElementById('profileText'); if(prof && pts < 20000) prof.textContent = tr('profileText');
+  }
+  function renderRecent(){
+    const arr = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]').slice(0,6);
+    const el = document.getElementById('recentList');
+    if(!arr.length){ el.textContent = tr('noPlayers'); return; }
+    el.innerHTML = arr.map(r=> `${new Date(r.t).toLocaleString()}: ${r.pts>0?'+':''}${r.pts} pts`).join('<br>');
+  }
+
+  // render player name input from storage
+  function renderPlayerName(){
+    const nameInput = document.getElementById('playerName');
+    if(nameInput){
+      if(getPoints() >= 20000){
+        nameInput.value = tr('magicianTitle');
+      } else {
+        nameInput.value = localStorage.getItem(NAME_KEY) || 'Player';
+      }
+    }
+  }
+
+  // Save name button
+  const saveBtn = document.getElementById('saveName');
+  if(saveBtn){
+    saveBtn.addEventListener('click', ()=>{
+      const nameInput = document.getElementById('playerName');
+      const v = (nameInput && nameInput.value) ? nameInput.value.trim() : '';
+      if(!v){
+        alert(tr('setNameRequired'));
+        return;
+      }
+      localStorage.setItem(NAME_KEY, v);
+      updateLeaderboardEntry();
+      renderPlayerName();
+    });
+  }
+
+  // Observe #points changes in DOM (if game code updates it directly)
+  const ptsEl = document.getElementById('points');
+  if(ptsEl){
+    const mo = new MutationObserver(()=> {
+      const val = Number(ptsEl.textContent || 0);
+      if(!Number.isNaN(val)) onPointsChanged(val);
+    });
+    mo.observe(ptsEl, {childList:true, characterData:true, subtree:true});
+  }
+
+  // Also poll localStorage 'btl_points_combined' in case games update it directly
+  let lastKnownPoints = getPoints();
+  setInterval(()=>{
+    const p = Number(localStorage.getItem(POINTS_KEY) || 0);
+    if(p !== lastKnownPoints){
+      lastKnownPoints = p;
+      // update DOM and trigger handlers
+      const el = document.getElementById('points'); if(el) el.textContent = String(p);
+      onPointsChanged(p);
+    }
+  }, 1000);
+
+  // ---------- Override Air Hockey initializer to remove quizzes and require 5000+ ----------
+  // If functions.js defines initFullAir, override it here. If it doesn't exist, define it.
+  window.initFullAir = function(area){
+    // area is the element where full air game should initialize
+    // Build an air hockey UI with no quiz questions; enforce points >= 5000
+    if(!area) return;
+    area.innerHTML = ''; // clear
+    const container = document.createElement('div');
+    container.innerHTML = `
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn air-start">${escapeHtml(tr('start'))}</button>
+        <button class="btn secondary air-stop">${escapeHtml(tr('back'))}</button>
+        <div style="flex:1"></div>
+        <div class="small air-note">${escapeHtml(tr('airLocked'))}</div>
       </div>
-      <div style="flex:1">
-        <div style="font-weight:800">Machine 2 — Secret Cups</div>
-        <div class="small" style="margin-top:6px">Open the red-cup shuffle challenge</div>
-        <div style="margin-top:8px"><button class="btn m2open">Open</button></div>
-      </div>
-      <div style="flex:1">
-        <div style="font-weight:800">Machine 3 — Jackpot</div>
-        <div style="margin-top:6px"><span class="reel" id="${area.id}-m3r1">💎</span><span class="reel" id="${area.id}-m3r2">🔔</span><span class="reel" id="${area.id}-m3r3">7</span></div>
-        <div style="margin-top:8px"><label>Bet: <input class="m3bet" type="number" min="5" value="25" style="width:80px"></label> <button class="btn m3spin">Spin</button> <span class="m3msg small"></span></div>
-      </div>
-    </div>
-    <div class="casino-cups" style="margin-top:10px"></div>
-  `;
-  const sy=['🔔','7','❤️','♦','⭐'];
-  area.querySelector('.m1spin').addEventListener('click', ()=>{
-    const bet = Math.max(1, Number(area.querySelector('.m1bet').value||10));
-    if(getPoints() < bet){ area.querySelector('.m1msg').textContent = (lang==='zh'?'积分不足':'Not enough points'); return; }
-    addPoints(-bet); area.querySelector('.m1msg').textContent = (lang==='zh'?'旋转中...':'Spinning...');
-    const finals=[sy[randInt(0,sy.length-1)], sy[randInt(0,sy.length-1)], sy[randInt(0,sy.length-1)]];
-    const els=[area.querySelector(`#${area.id}-m1r1`), area.querySelector(`#${area.id}-m1r2`), area.querySelector(`#${area.id}-m1r3`)];
-    els.forEach((el,idx)=>{ let ticks=18+idx*6; const iv=setInterval(()=> el.textContent = sy[randInt(0,sy.length-1)], 50); setTimeout(()=>{ clearInterval(iv); el.textContent = finals[idx]; }, ticks*50); });
-    setTimeout(()=>{ const [a,b,c]=finals; let payout=0; if(a===b && b===c) payout=bet*10; else if(a===b||b===c||a===c) payout=bet*2; if(payout>0){ addPoints(payout); area.querySelector('.m1msg').textContent = (lang==='zh'?'赢得 ':'Won ')+payout+'!'; celebrateAt(); } else area.querySelector('.m1msg').textContent = (lang==='zh'?'输掉 ':'Lost ')+bet+'.'; },1400);
-  });
-  area.querySelector('.m2open').addEventListener('click', ()=> openCupsEmbedded(area.querySelector('.casino-cups')));
-  area.querySelector('.m3spin').addEventListener('click', ()=>{
-    const bet = Math.max(5, Number(area.querySelector('.m3bet').value||25));
-    if(getPoints() < bet){ area.querySelector('.m3msg').textContent = (lang==='zh'?'积分不足':'Not enough points'); return; }
-    addPoints(-bet); area.querySelector('.m3msg').textContent = (lang==='zh'?'旋转中...':'Spinning...');
-    const sy3=['💎','🔔','7','⭐','♦'];
-    const finals=[sy3[randInt(0,sy3.length-1)], sy3[randInt(0,sy3.length-1)], sy3[randInt(0,sy3.length-1)]];
-    const els=[area.querySelector(`#${area.id}-m3r1`), area.querySelector(`#${area.id}-m3r2`), area.querySelector(`#${area.id}-m3r3`)];
-    els.forEach((el,idx)=>{ let ticks=20+idx*6; const iv=setInterval(()=> el.textContent = sy3[randInt(0,sy3.length-1)], 50); setTimeout(()=>{ clearInterval(iv); el.textContent = finals[idx]; }, ticks*50); });
-    setTimeout(()=>{ const [a,b,c]=finals; const jackpot=(a==='💎' && a===b && b===c && Math.random()<0.08); if(jackpot){ const reward=Math.max(200, bet*12); addPoints(reward); area.querySelector('.m3msg').textContent = 'JACKPOT '+reward+'!'; celebrateAt(); alert('JACKPOT! Air Hockey unlocked! +' + reward + ' pts'); } else { let payout=0; if(a===b && b===c) payout = bet*8; else if(a===b || b===c || a===c) payout = bet*2; if(payout>0){ addPoints(payout); area.querySelector('.m3msg').textContent = 'Won '+payout; celebrateAt(); } else area.querySelector('.m3msg').textContent = 'Lost '+bet; } },1600);
-  });
-}
+      <div style="margin-top:10px"><canvas id="airCanvas" width="640" height="320" style="background:#f7fbff;border-radius:8px"></canvas></div>
+    `;
+    area.appendChild(container);
 
-/* ---------- Secret Cups (full) ---------- */
-function initFullCups(area){ area.innerHTML = `<div class="full-cups"></div>`; initCups(area.querySelector('.full-cups')); }
-function initCups(area){
-  area.innerHTML = `<div class="small">${lang==='zh'?'神秘杯 — 胜利可得 250 积分':'Secret Cups — beat 3 levels to win 250 pts'}</div><div style="margin-top:10px"><button class="btn cups-start">${L('start')}</button></div><div class="cups-ui" style="margin-top:8px"></div>`;
-  area.querySelector('.cups-start').addEventListener('click', ()=> openCupsEmbedded(area.querySelector('.cups-ui')));
-}
+    const startBtn = area.querySelector('.air-start');
+    const stopBtn = area.querySelector('.air-stop');
+    const canvas = area.querySelector('#airCanvas');
+    const ctx = canvas.getContext('2d');
 
-/* ---------- Air Hockey (NO questions, 5000+ only) ---------- */
-function initFullAir(area){
-  area.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><button class="btn air-start">${L('start')}</button><div style="flex:1"></div><div class="small">${L('airLocked')}</div></div><div style="margin-top:10px"><canvas id="airCanvasFull" width="640" height="320" style="background:#f7fbff;border-radius:8px"></canvas></div>`;
-  const startBtn = area.querySelector('.air-start');
-  const canvas = area.querySelector('#airCanvasFull'); const ctx = canvas.getContext('2d');
-  let state = null;
-  startBtn.addEventListener('click', ()=> {
-    if(getPoints() < 5000){ alert(L('airLocked')); return; } // block if insufficient points
-    if(!state) initMatch();
-    state.running = true;
-  });
-  function initMatch(){
-    state = {pY:canvas.height/2,aY:canvas.height/2,puck:{x:canvas.width/2,y:canvas.height/2,vx:3,vy:2,r:8},sP:0,sA:0,running:false};
-    canvas.onmousemove = (e)=>{ const r=canvas.getBoundingClientRect(); state.pY = Math.max(12, Math.min(canvas.height-12, e.clientY - r.top)); };
-    function loop(){ requestAnimationFrame(loop); if(!state) return; if(state.running){ state.puck.x += state.puck.vx; state.puck.y += state.puck.vy; if(state.puck.y <= state.puck.r || state.puck.y >= canvas.height - state.puck.r) state.puck.vy *= -1; const dx=state.puck.x-20, dy=state.puck.y-state.pY; if(Math.hypot(dx,dy) < state.puck.r+12 && state.puck.vx<0){ state.puck.vx = Math.abs(state.puck.vx)+0.8; state.puck.vy += dy*0.05; } const dx2=state.puck.x-(canvas.width-20), dy2=state.puck.y-state.aY; if(Math.hypot(dx2,dy2) < state.puck.r+12 && state.puck.vx>0){ state.puck.vx = -Math.abs(state.puck.vx)-0.8; state.puck.vy += dy2*0.05; } state.aY += (state.puck.y - state.aY)*0.05; if(state.puck.x < 0){ state.sA++; resetP(); // award points for goal
-        addPoints(10);
-      } if(state.puck.x > canvas.width){ state.sP++; resetP(); addPoints(10); } } draw(); } function resetP(){ state.puck.x = canvas.width/2; state.puck.y = canvas.height/2; state.puck.vx = (Math.random()>0.5?3:-3); state.puck.vy = (Math.random()-0.5)*3; } function draw(){ ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#e6fbff'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#1a73e8'; ctx.fillRect(12, state.pY-18, 8, 36); ctx.fillStyle='#ff6b6b'; ctx.fillRect(canvas.width-20, state.aY-18, 8, 36); ctx.fillStyle='#06263a'; ctx.beginPath(); ctx.arc(state.puck.x, state.puck.y, state.puck.r, 0, Math.PI*2); ctx.fill(); ctx.fillStyle='#072033'; ctx.font='18px Inter'; ctx.fillText(state.sP + ' - ' + state.sA, canvas.width/2 - 12, 22); } loop(); }
-}
+    let state = null;
 
-/* ---------- Shared arithmetic + prob helpers ---------- */
-function genArithmeticQuestion(level){
-  level = Math.max(1, Math.min(100, Math.round(level)));
-  if(level <= 10){ const a=randInt(1,10), b=randInt(1,10); return {q:`${a} + ${b} = ?`, choices: shuffle([String(a+b), String(a+b+1), String(Math.abs(a-b)), String(a*b)]), answer:String(a+b)}; }
-  if(level <= 30){ const a=randInt(2,15), b=randInt(2,12); return {q:`${a} × ${b} = ?`, choices: shuffle([String(a*b), String(a*b+randInt(1,5)), String(a*b-randInt(1,5)), String(a+b)]), answer:String(a*b)}; }
-  if(level <= 55){ const a=randInt(10,200), b=randInt(2,12); return {q:`${a} ÷ ${b} = ? (nearest int)`, choices: shuffle([String(Math.round(a/b)), String(Math.floor(a/b)), String(Math.ceil(a/b)), String(Math.round((a+b)/b))]), answer:String(Math.round(a/b))}; }
-  if(level <= 75){ const a=randInt(2,9), b=randInt(2,6); return {q:`What is ${a}^${b}?`, choices: shuffle([String(Math.pow(a,b)), String(Math.pow(a,b)+randInt(1,20)), String(Math.pow(a,b)-randInt(1,20)), String(Math.pow(a+1,b))]), answer:String(Math.pow(a,b))}; }
-  if(level <= 90){ const a=randInt(10,80), b=randInt(2,12), c=randInt(1,10); const val=a + b*c; return {q:`${a} + ${b} × ${c} = ?`, choices: shuffle([String(val), String(val+1), String(val-1), String(a*b+c)]), answer:String(val)}; }
-  const a=randInt(1,12), b=randInt(1,12), c=randInt(1,10); const val=(a*b + c)/a; return {q:`Solve: ${a}x - ${c} = ${a*b}. x = ?`, choices: shuffle([String(val), String(Math.floor(val)), String(Math.ceil(val)), String(b)]), answer:String(val)};
-}
-function generateProbQuestion(){ const base=randInt(5,30); const p1=Math.random()*0.6+0.1, p2=Math.random()*0.6+0.05, p3=Math.random()*0.6+0.02; const a1=base+randInt(0,base), a2=base+randInt(0,base+10), a3=base+randInt(0,base+20); return {cups:[{label:'A',p:+p1.toFixed(2),payout:a1,ev: +(p1*a1).toFixed(2)},{label:'B',p:+p2.toFixed(2),payout:a2,ev: +(p2*a2).toFixed(2)},{label:'C',p:+p3.toFixed(2),payout:a3,ev: +(p3*a3).toFixed(2)}]}; }
+    startBtn.addEventListener('click', ()=>{
+      const pts = getPoints();
+      if(pts < 5000){
+        alert(tr('airLocked'));
+        return;
+      }
+      if(!state) initMatch();
+      state.running = true;
+    });
 
-/* ---------- Utility: update leaderboard when page loads or name changes ---------- */
-function initializeApp(){
-  // ensure stored name preserved
-  if(!localStorage.getItem(NAME_KEY)) localStorage.setItem(NAME_KEY, 'Player');
-  renderName();
-  renderPoints();
-  renderRecent();
-  renderLeaderboard();
-  // update leaderboard entry once at start
-  updateLeaderboardEntry();
-}
-initializeApp();
+    stopBtn.addEventListener('click', ()=> { if(state) state.running = false; });
 
-/* ---------- Small HTML escape ---------- */
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function initMatch(){
+      state = {pY: canvas.height/2, aY: canvas.height/2, puck:{x:canvas.width/2,y:canvas.height/2,vx:3,vy:2,r:8}, sP:0, sA:0, running:false};
+      canvas.onmousemove = (e)=>{ const r=canvas.getBoundingClientRect(); state.pY = Math.max(12, Math.min(canvas.height-12, e.clientY - r.top)); };
+      function loop(){
+        requestAnimationFrame(loop);
+        if(!state) return;
+        if(state.running){
+          state.puck.x += state.puck.vx;
+          state.puck.y += state.puck.vy;
+          if(state.puck.y <= state.puck.r || state.puck.y >= canvas.height - state.puck.r) state.puck.vy *= -1;
+          const dx = state.puck.x - 20, dy = state.puck.y - state.pY;
+          if(Math.hypot(dx,dy) < state.puck.r + 12 && state.puck.vx < 0){
+            state.puck.vx = Math.abs(state.puck.vx) + 0.8;
+            state.puck.vy += dy * 0.05;
+          }
+          const dx2 = state.puck.x - (canvas.width - 20), dy2 = state.puck.y - state.aY;
+          if(Math.hypot(dx2,dy2) < state.puck.r + 12 && state.puck.vx > 0){
+            state.puck.vx = -Math.abs(state.puck.vx) - 0.8;
+            state.puck.vy += dy2 * 0.05;
+          }
+          state.aY += (state.puck.y - state.aY) * 0.05;
+          // scoring: award points on goal
+          if(state.puck.x < 0){
+            state.sA++;
+            resetP();
+            addPoints(10); // award points for goal
+          }
+          if(state.puck.x > canvas.width){
+            state.sP++;
+            resetP();
+            addPoints(10);
+          }
+        }
+        draw();
+      }
+      function resetP(){
+        state.puck.x = canvas.width/2; state.puck.y = canvas.height/2;
+        state.puck.vx = (Math.random() > 0.5 ? 3 : -3); state.puck.vy = (Math.random() - 0.5) * 3;
+      }
+      function draw(){
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = '#e6fbff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = '#1a73e8'; ctx.fillRect(12, state.pY-18, 8, 36);
+        ctx.fillStyle = '#ff6b6b'; ctx.fillRect(canvas.width-20, state.aY-18, 8, 36);
+        ctx.fillStyle = '#06263a'; ctx.beginPath(); ctx.arc(state.puck.x, state.puck.y, state.puck.r, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#072033'; ctx.font = '18px Inter'; ctx.fillText(state.sP + ' - ' + state.sA, canvas.width/2 - 12, 22);
+      }
+      loop();
+    }
+  };
 
-/* ---------- End of script ---------- */
+  // ---------- Render tiles (ensure Play labels use translations) ----------
+  function renderTiles(){
+    const container = document.getElementById('tilesContainer');
+    if(!container) return;
+    container.innerHTML = '';
+    const tiles = [
+      {id:'trivia', titleKey:'Trivia (100 levels)'},
+      {id:'rapid', titleKey:'Rapid Fire'},
+      {id:'maze', titleKey:'Math Maze'},
+      {id:'pattern', titleKey:'Pattern Builder'},
+      {id:'prob', titleKey:'Probability Cups'},
+      {id:'casino', titleKey:'Casino'},
+      {id:'cups', titleKey:'Secret Cups'},
+      {id:'air', titleKey:'Air Hockey'}
+    ];
+    tiles.forEach(t=>{
+      const tile = document.createElement('div'); tile.className = 'tile'; tile.id = 'tile-'+t.id;
+      tile.innerHTML = `<h3>${escapeHtml(t.titleKey)}</h3>
+        <div class="preview" id="preview-${t.id}"></div>
+        <div class="playRow">
+          <button class="btn play-btn" data-game="${t.id}">${escapeHtml(tr('play'))}</button>
+          <div style="flex:1"></div>
+          <div class="small" id="status-${t.id}">${escapeHtml(tr('ready'))}</div>
+        </div>`;
+      container.appendChild(tile);
+    });
+
+    // populate small previews so visible
+    ['trivia','rapid','maze','pattern','prob','casino','cups','air'].forEach(id=>{
+      const pv = document.getElementById('preview-'+id);
+      if(!pv) return;
+      if(id==='trivia'){ const q = { q: '5 + 3 = ?', choices: ['8','9','2','15'] }; pv.innerHTML = `<div class="question">${q.q}</div><div class="small">${q.choices.slice(0,2).join(' | ')} ...</div>`; }
+      else pv.innerHTML = `<div class="small">${escapeHtml({maze: tr('hubDesc')}[id] || '')}</div>`;
+    });
+  }
+
+  // ---------- Initialize basic app state, translations, leaderboard wiring ----------
+  function initialize(){
+    renderLangUI();
+    applyTranslations();
+    // ensure player name saved (keep existing)
+    if(!localStorage.getItem(NAME_KEY)) localStorage.setItem(NAME_KEY, 'Player');
+    renderPlayerName();
+    renderPoints();
+    renderRecent();
+    renderLeaderboard();
+    // save initial leaderboard entry
+    updateLeaderboardEntry();
+
+    // wire play button opening pages (already present in original page, but ensure translations reflect)
+    document.addEventListener('click', function(e){
+      const play = e.target.closest('.play-btn');
+      if(play){
+        const game = play.dataset.game;
+        // open page (reuse existing SPA behavior if present)
+        const hubCard = document.getElementById('hubCard');
+        if(hubCard) hubCard.style.display = 'none';
+        document.querySelectorAll('.game-page').forEach(p=>p.classList.remove('active'));
+        const page = document.getElementById('page-'+game);
+        if(page) page.classList.add('active');
+        location.hash = 'game=' + game;
+        const area = document.getElementById('page-area-'+game);
+        if(area && !area.dataset.inited){
+          area.dataset.inited = '1';
+          // call initFullGame if defined by functions.js or local override
+          if(typeof window.initFullGame === 'function') {
+            try{ window.initFullGame(game, area); } catch(e){ /* ignore */ }
+          }
+        }
+        const status = document.getElementById('status-'+game);
+        if(status) status.textContent = tr('playing');
+      }
+    });
+
+    // back buttons
+    Array.from(document.querySelectorAll('.backBtn')).forEach(b=>{
+      b.addEventListener('click', ()=>{
+        document.querySelectorAll('.game-page').forEach(p=>p.classList.remove('active'));
+        const hubCard = document.getElementById('hubCard'); if(hubCard) hubCard.style.display = 'block';
+        if(location.hash.startsWith('#game=')) history.replaceState(null,'', location.pathname + location.search);
+        document.querySelectorAll('.tile .small[id^="status-"]').forEach(el=> el.textContent = tr('ready'));
+      });
+    });
+
+    // Save name button event already added above but ensure present
+    const saveBtn = document.getElementById('saveName');
+    if(saveBtn) saveBtn.addEventListener('click', ()=> {
+      const input = document.getElementById('playerName');
+      const name = input && input.value ? input.value.trim() : '';
+      if(!name){ alert(tr('setNameRequired')); return; }
+      localStorage.setItem(NAME_KEY, name);
+      updateLeaderboardEntry();
+      renderPlayerName();
+    });
+
+    // export/reset points / leaderboard wiring
+    const exportBtn = document.getElementById('exportPoints');
+    if(exportBtn) exportBtn.addEventListener('click', ()=> {
+      const data = {
+        name: localStorage.getItem(NAME_KEY) || 'Player',
+        points: getPoints(),
+        leaderboard: readLeaderboard(),
+        recent: JSON.parse(localStorage.getItem(RECENT_KEY) || '[]')
+      };
+      const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'btl_export.json'; a.click();
+    });
+    const resetBtn = document.getElementById('resetPoints');
+    if(resetBtn) resetBtn.addEventListener('click', ()=>{
+      if(confirm(tr('reset') + '?')){
+        localStorage.removeItem(POINTS_KEY);
+        localStorage.removeItem(LEADER_KEY);
+        localStorage.removeItem(RECENT_KEY);
+        renderPoints();
+        renderLeaderboard();
+        renderRecent();
+        alert(tr('reset') + ' ✓');
+      }
+    });
+
+    // watch DOM points element for external changes
+    const ptsEl = document.getElementById('points');
+    if(ptsEl){
+      const mo = new MutationObserver(()=> {
+        const v = Number(ptsEl.textContent || ptsEl.innerText || 0);
+        if(!Number.isNaN(v)) onPointsChanged(v);
+      });
+      mo.observe(ptsEl, {childList:true, characterData:true, subtree:true});
+    }
+
+    // periodic sync with localStorage points key in case functions.js writes it
+    setInterval(()=> {
+      const s = Number(localStorage.getItem(POINTS_KEY) || 0);
+      if(s !== getPoints()){
+        // update DOM and trigger
+        const el = document.getElementById('points'); if(el) el.textContent = String(s);
+        onPointsChanged(s);
+      }
+    }, 1000);
+  }
+
+  // helper: when points change via our system or external system
+  function onPointsChanged(newPoints){
+    renderPoints();
+    updateLeaderboardEntry();
+    if(newPoints >= 20000){
+      // apply magical background and rename display
+      document.body.classList.add('magical-bg');
+      const profileText = document.getElementById('profileText'); if(profileText) profileText.textContent = tr('reachedMagician');
+      // also set player name input visually to magician title
+      const nameInput = document.getElementById('playerName'); if(nameInput) nameInput.value = tr('magicianTitle');
+      renderLeaderboard();
+    } else {
+      document.body.classList.remove('magical-bg');
+      const profileText = document.getElementById('profileText'); if(profileText) profileText.textContent = tr('profileText');
+      renderPlayerName();
+    }
+  }
+
+  // small wrappers for functions that may exist in functions.js: only call them if defined
+  function tryCall(fnName, ...args){ try{ if(typeof window[fnName] === 'function') window[fnName](...args); }catch(e){ console.warn('call failed', fnName, e); } }
+
+  // expose some utilities on window for other scripts (optional)
+  window.btl = {
+    getPoints, setPoints, addPoints, updateLeaderboardEntry, renderLeaderboard
+  };
+
+  // Initialize
+  renderLangUI();
+  renderTiles();
+  applyTranslations();
+  initialize();
+
+  // done
+})();
 </script>
+
 </body>
 </html>
