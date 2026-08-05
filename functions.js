@@ -1,16 +1,412 @@
-// 1. POPULATE BACKGROUND CONTAINER STREAM
-const matrixContainer = document.getElementById('matrix-bg');
-let matrixString = "";
-for (let i = 0; i < 8000; i++) {
-    matrixString += Math.floor(Math.random() * 10) + (Math.random() > 0.95 ? " " : "");
+/* ---------- Localization: EN, ZH, DA, FR, JA ---------- */
+const LANG = {
+  en: {
+    brand:'BREAK THE LOGIC', tagline:'Math games hub — train logic, speed, and math knowledge',
+    hubTitle:'Game Hub — Math Edition', hubDesc:'All games are visible below. Click Play to open the full game page.',
+    profileTitle:'Profile', tierTitle:'Tier', recentTitle:'Recent',
+    export:'Export', reset:'Reset', play:'Play', close:'Close',
+    ready:'Ready', playing:'Playing',
+    triviaLevel:'Level', triviaStart:'Start Round', timerNote:'5s per question',
+    start:'Start', submit:'Submit', back:'Back'
+  },
+  zh: {
+    brand:'破除逻辑', tagline:'数学游戏中心 — 训练逻辑、速度和数学能力',
+    hubTitle:'游戏中心 — 数学版', hubDesc:'下方显示所有游戏预览。点击 Play 打开完整游戏页面。',
+    profileTitle:'个人', tierTitle:'段位', recentTitle:'近期',
+    export:'导出', reset:'重置', play:'开始', close:'关闭',
+    ready:'就绪', playing:'进行中',
+    triviaLevel:'等级', triviaStart:'开始回合', timerNote:'每题 5 秒',
+    start:'开始', submit:'提交', back:'返回'
+  },
+  da: {
+    brand:'BRYD LOGIKKEN', tagline:'Math-spil hub — træn logik, hastighed og matematisk viden',
+    hubTitle:'Spil Hub — Matematik', hubDesc:'Alle spil er synlige nedenfor. Klik Play for at åbne hele spillet.',
+    profileTitle:'Profil', tierTitle:'Rang', recentTitle:'Seneste',
+    export:'Eksport', reset:'Nulstil', play:'Spil', close:'Luk',
+    ready:'Klar', playing:'Spiller',
+    triviaLevel:'Niveau', triviaStart:'Start runde', timerNote:'5s pr. spørgsmål',
+    start:'Start', submit:'Indsend', back:'Tilbage'
+  },
+  fr: {
+    brand:'BRAIN THE LOGIC', tagline:'Hub de jeux math — entraînez logique, rapidité et mathématiques',
+    hubTitle:'Hub de jeux — Math', hubDesc:'Tous les jeux sont visibles ci-dessous. Cliquez sur Play pour ouvrir le jeu complet.',
+    profileTitle:'Profil', tierTitle:'Niveau', recentTitle:'Récent',
+    export:'Exporter', reset:'Réinitialiser', play:'Jouer', close:'Fermer',
+    ready:'Prêt', playing:'En jeu',
+    triviaLevel:'Niveau', triviaStart:'Démarrer', timerNote:'5s par question',
+    start:'Démarrer', submit:'Soumettre', back:'Retour'
+  },
+  ja: {
+    brand:'ロジックをやぶれ', tagline:'数学ゲームハブ — 論理、速度、数学力を鍛える',
+    hubTitle:'ゲームハブ — 数学版', hubDesc:'以下にすべてのゲームが表示されています。Playでフルページを開きます。',
+    profileTitle:'プロフィール', tierTitle:'ランク', recentTitle:'最近',
+    export:'エクスポート', reset:'リセット', play:'再生', close:'閉じる',
+    ready:'準備完了', playing:'プレイ中',
+    triviaLevel:'レベル', triviaStart:'ラウンド開始', timerNote:'各問5秒',
+    start:'開始', submit:'送信', back:'戻る'
+  }
+};
+let lang = localStorage.getItem('btl_lang') || 'en';
+function t(k){ return (LANG[lang] && LANG[lang][k]) || LANG.en[k] || k; }
+
+/* language selector buttons */
+const languages = ['en','zh','da','fr','ja'];
+function renderLangToggle(){
+  const el = document.getElementById('langToggle'); el.innerHTML = '';
+  languages.forEach(code=>{
+    const b = document.createElement('button'); b.className='langBtn'; b.textContent = code.toUpperCase(); b.dataset.lang=code;
+    if(code===lang) b.style.fontWeight='800';
+    b.addEventListener('click', ()=>{ lang = code; localStorage.setItem('btl_lang', code); applyLanguage(); renderLangToggle(); });
+    el.appendChild(b);
+  });
 }
-matrixContainer.innerText = matrixString;
-// 2. CONSOLIDATED SCREEN SYSTEM MANAGER
-function navigateTo(screenId) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    const targetScreen = document.getElementById(screenId);
-    if (targetScreen) {
-        targetScreen.classList.add('active');
-    }
-    window.scrollTo(0, 0);
+
+/* ---------- Tiles & Previews (front page) ---------- */
+const tiles = [
+  {id:'trivia', titles:{en:'Trivia (100 levels)',zh:'问答（100级）',da:'Quiz (100 niveauer)',fr:'Quiz (100 niveaux)',ja:'トリビア（100レベル）'}, desc:{en:'Arithmetic trivia — 10 Qs/round; 5s per Q',zh:'纯算术问答 — 每轮10题，每题5秒。',da:'Kun aritmetik — 10 spørgsmål/runde; 5s pr. spørgsmål',fr:'Questions arithmétiques — 10 par round; 5s/question',ja:'算数クイズ — ラウンド10問、各5秒'}},
+  {id:'rapid', titles:{en:'Rapid Fire',zh:'速答',da:'Hurtig',fr:'Rapide',ja:'ラピッド'}, desc:{en:'Timed quick rounds',zh:'限时快速答题。',da:'Tidsbegrænsede runder',fr:'Rounds chronométrés',ja:'制限時間の早押し'}},
+  {id:'maze', titles:{en:'Math Maze',zh:'数学迷宫',da:'Labyrint',fr:'Labyrinthe',ja:'数学迷路'}, desc:{en:'Solve gate puzzles to progress',zh:'通过答题打开迷宫路障。',da:'Løs porte med matematik',fr:'Résoudre des portes mathématiques',ja:'ゲートの謎を解いて進む'}},
+  {id:'pattern', titles:{en:'Pattern Builder',zh:'数列挑战',da:'Mønster',fr:'Suite',ja:'パターン'}, desc:{en:'Complete sequences',zh:'完成数列。',da:'Færdiggør sekvenser',fr:'Compléter les suites',ja:'数列を完成させる'}},
+  {id:'prob', titles:{en:'Probability Cups',zh:'概率杯子',da:'Sandsynlighedskopper',fr:'Coupes de probabilité',ja:'確率カップ'}, desc:{en:'Choose highest expected value',zh:'选择期望值最高的杯子。',da:'Vælg højeste forventede værdi',fr:'Choisissez la plus grande espérance',ja:'期待値が最も高いものを選ぶ'}},
+  {id:'casino', titles:{en:'Casino',zh:'赌场',da:'Casino',fr:'Casino',ja:'カジノ'}, desc:{en:'Slots, secret cups, jackpot',zh:'老虎机、神秘杯、累积奖金。',da:'Enarmet, kopper, jackpot',fr:'Machines, coupes secrètes, jackpot',ja:'スロット、カップ、ジャックポット'}},
+  {id:'cups', titles:{en:'Secret Cups',zh:'神秘杯',da:'Hemmelige kopper',fr:'Coupes secrètes',ja:'シークレットカップ'}, desc:{en:'Red-cup shuffle challenge',zh:'红杯洗牌挑战。',da:'Rød kop shuffle',fr:'Défi des coupes',ja:'カップシャッフル'}},
+  {id:'air', titles:{en:'Air Hockey',zh:'气垫球',da:'Airhockey',fr:'Air Hockey',ja:'エアホッケー'}, desc:{en:'Mini air hockey with treasure questions',zh:'迷你气垫球，进球触发宝藏题目。',da:'Mini airhockey med skatteopgaver',fr:'Mini air-hockey avec questions bonus',ja:'ミニエアホッケー（得点でクイズ）'}}
+];
+/* ---------- Points, tiers, recent ---------- */
+const POINTS_KEY = 'btl_points_combined_v1';
+const RECENT_KEY = 'btl_recent_combined_v1';
+
+const TIERS = [
+  {name:{en:'Chill',zh:'Chill',da:'Chill',fr:'Cool',ja:'チル'}, min:0},
+  {name:{en:'Bronze',zh:'Bronze',da:'Bronze',fr:'Bronze',ja:'ブロンズ'}, min:1000},
+  {name:{en:'Silver',zh:'Silver',da:'Sølv',fr:'Argent',ja:'シルバー'}, min:1500},
+  {name:{en:'Gold',zh:'Gold',da:'Guld',fr:'Or',ja:'ゴールド'}, min:2000},
+  {name:{en:'Diamond',zh:'Diamond',da:'Diamant',fr:'Diamant',ja:'ダイヤモンド'}, min:2500},
+  {name:{en:'Legendary',zh:'Legendary',da:'Legendarisk',fr:'Légendaire',ja:'伝説'}, min:3000},
+  {name:{en:'Wizard',zh:'Wizard',da:'Troldmand',fr:'Sorcier',ja:'ウィザード'}, min:3500},
+  {name:{en:'King',zh:'King',da:'Konge',fr:'Roi',ja:'キング'}, min:5000},
+  {name:{en:'Master',zh:'Master',da:'Mester',fr:'Maître',ja:'マスター'}, min:8000},
+  {name:{en:'Hero',zh:'Hero',da:'Helt',fr:'Héros',ja:'ヒーロー'}, min:12000},
+  {name:{en:'Titan',zh:'Titan',da:'Titan',fr:'Titan',ja:'タイタン'}, min:16000},
+  {name:{en:'Magical Mathematician',zh:'Magical Mathematician',da:'Magisk matematiker',fr:'Mathématicien magique',ja:'魔法の数学者'}, min:20000}
+];
+
+function applyLanguage(){
+  document.getElementById('brandText').textContent = t('brand');
+  document.getElementById('tagline').textContent = t('tagline');
+  document.getElementById('hubTitle').textContent = t('hubTitle');
+  document.getElementById('hubDesc').textContent = t('hubDesc');
+  document.getElementById('profileTitle').textContent = t('profileTitle');
+  document.getElementById('tierTitle').textContent = t('tierTitle');
+  document.getElementById('recentTitle').textContent = t('recentTitle');
+  document.getElementById('exportBtn').textContent = t('export');
+  document.getElementById('resetBtn').textContent = t('reset');
+  Array.from(document.querySelectorAll('.backBtn')).forEach(b=>b.textContent = t('back'));
+  renderTiles();
+  renderPoints();
+  renderRecent();
 }
+renderLangToggle();
+applyLanguage();
+
+if(!localStorage.getItem(POINTS_KEY)) localStorage.setItem(POINTS_KEY,'0');
+
+function getPoints(){ return Number(localStorage.getItem(POINTS_KEY) || 0); }
+function setPoints(n){ localStorage.setItem(POINTS_KEY, String(n)); renderPoints(); }
+function addPoints(n){ setPoints(Math.max(0, getPoints() + n)); if(n!==0) pushRecent(n); showFloatingPoints(n); }
+
+function pushRecent(n){ const arr = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); arr.unshift({t:Date.now(), pts:n}); localStorage.setItem(RECENT_KEY, JSON.stringify(arr.slice(0,200))); renderRecent(); }
+
+function renderPoints(){
+  document.getElementById('points').textContent = getPoints();
+  document.getElementById('profileText').textContent = `${t('profileTitle')}: ${getPoints()} pts`;
+  const info = getTier(getPoints());
+  const curName = typeof info.current.name === 'object' ? (info.current.name[lang] || info.current.name.en) : info.current.name;
+  document.getElementById('tierText').textContent = `${curName} (${info.current.min}+)`;
+  const fill = info.next ? Math.min(1, (getPoints() - info.current.min) / (info.next.min - info.current.min)) : 1;
+  document.getElementById('tierFill').style.width = `${Math.round(fill*100)}%`;
+}
+function getTier(points){
+  let cur = TIERS[0];
+  for(const t of TIERS) if(points >= t.min) cur = t;
+  const next = TIERS.find(t => t.min > points) || null;
+  return {current:cur, next};
+}
+function renderRecent(){
+  const arr = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]').slice(0,6);
+  const el = document.getElementById('recentList');
+  if(!arr.length){ el.textContent = (lang==='zh'? '暂无记录' : (lang==='da'?'Ingen resultater': (lang==='fr'?'Aucun récent':'No recent wins'))); return; }
+  el.innerHTML = arr.map(r=> `${new Date(r.t).toLocaleString()}: ${r.pts>0?'+':''}${r.pts} pts`).join('<br>');
+}
+
+document.getElementById('exportPoints').addEventListener('click', ()=>{
+  const data = {points:getPoints(), recent: JSON.parse(localStorage.getItem(RECENT_KEY)||'[]')};
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='btl_export.json'; a.click();
+});
+document.getElementById('resetPoints').addEventListener('click', ()=>{
+  if(confirm(lang==='zh'?'重置分数和记录？':(lang==='da'?'Nulstil point og historik?':(lang==='fr'?'Réinitialiser points et historique ?':'Reset points and recent?')))){ localStorage.removeItem(POINTS_KEY); localStorage.removeItem(RECENT_KEY); setPoints(0); renderRecent(); alert(lang==='zh'?'已重置':(lang==='da'?'Nulstillet':(lang==='fr'?'Réinitialisé':'Reset done'))); }
+});
+renderPoints(); renderRecent();
+
+/* ---------- Visual FX (fireworks/confetti) ---------- */
+const fxCanvas = document.getElementById('fxCanvas'); fxCanvas.width = innerWidth; fxCanvas.height = innerHeight; const fxCtx = fxCanvas.getContext('2d');
+window.addEventListener('resize', ()=>{ fxCanvas.width = innerWidth; fxCanvas.height = innerHeight; });
+let particles = [];
+function spawnFirework(cx,cy,count=80){ const hue=Math.floor(Math.random()*360); for(let i=0;i<count;i++){ const ang=Math.random()*Math.PI*2, sp=1+Math.random()*6; particles.push({x:cx,y:cy,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp,life:60+Math.random()*60,size:1+Math.random()*3,hue}); } }
+function spawnConfetti(x=window.innerWidth/2,y=window.innerHeight/3,count=60){ for(let i=0;i<count;i++) particles.push({x,y,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.8)*6,life:80+Math.random()*40,size:3+Math.random()*8,hue:Math.random()*360}); }
+function celebrateAt(cx=window.innerWidth/2,cy=window.innerHeight/3){ for(let i=0;i<5;i++) setTimeout(()=> spawnFirework(cx+(Math.random()-0.5)*220, cy+(Math.random()-0.5)*140, 90), i*280); spawnConfetti(); }
+function fxLoop(){ fxCtx.clearRect(0,0,fxCanvas.width, fxCanvas.height); for(let i=particles.length-1;i>=0;i--){ const p=particles[i]; p.x+=p.vx; p.y+=p.vy; p.vy+=0.06; p.life--; fxCtx.beginPath(); fxCtx.fillStyle = `hsl(${p.hue} 80% 60% / ${Math.max(0,p.life/120)})`; fxCtx.arc(p.x,p.y,p.size,0,Math.PI*2); fxCtx.fill(); if(p.life<=0) particles.splice(i,1); } requestAnimationFrame(fxLoop); } fxLoop();
+function showFloatingPoints(n){ const el=document.createElement('div'); el.textContent=(n>0? '+'+n: String(n)); el.style.position='fixed'; el.style.left=(innerWidth/2)+'px'; el.style.top=(innerHeight/3)+'px'; el.style.padding='6px 10px'; el.style.borderRadius='999px'; el.style.background='#ffd27a'; el.style.fontWeight='800'; el.style.transition='transform 900ms,opacity 900ms'; el.style.zIndex=2000; document.body.appendChild(el); requestAnimationFrame(()=> el.style.transform='translate(-50%,-120%) scale(1.05)'); setTimeout(()=>{ const tgt=document.querySelector('.points').getBoundingClientRect(); const dx=(tgt.left+tgt.width/2)-innerWidth/2; const dy=(tgt.top+tgt.height/2)-innerHeight/3; el.style.transform=`translate(${dx}px, ${dy}px) scale(.36)`; el.style.opacity='0'; setTimeout(()=>el.remove(),950); },600); }
+
+/* ---------- Helpers ---------- */
+function randInt(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
+function shuffle(arr){ const r=arr.slice(); for(let i=r.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [r[i], r[j]]=[r[j], r[i]]; } return r; }
+
+function renderTiles(){
+  const container = document.getElementById('tilesContainer'); container.innerHTML='';
+  tiles.forEach(tile=>{
+    const title = tile.titles[lang] || tile.titles.en;
+    const desc = tile.desc[lang] || tile.desc.en;
+    const el = document.createElement('div'); el.className='tile'; el.id='tile-'+tile.id;
+    el.innerHTML = `<h3>${title}</h3><div class="small">${desc}</div>
+      <div class="preview" id="preview-${tile.id}"></div>
+      <div class="playRow">
+        <button class="btn play-btn" data-game="${tile.id}">${t('play')}</button>
+        <div style="flex:1"></div>
+        <div class="small" id="status-${tile.id}">${t('ready')}</div>
+      </div>
+    `;
+    container.appendChild(el);
+  });
+  populatePreviews();
+}
+renderTiles();
+
+function populatePreviews(){
+  // Trivia preview: sample Q (small)
+  const pvTri = document.getElementById('preview-trivia');
+  if(pvTri){
+    const q = genArithmeticQuestion(3);
+    pvTri.innerHTML = `<div class="question">${q.q}</div><div class="small">${q.choices.slice(0,2).join(' | ')} ...</div>`;
+  }
+  // Rapid: sample
+  const pvR = document.getElementById('preview-rapid');
+  if(pvR){ const q = genArithmeticQuestion(8); pvR.innerHTML = `<div class="question">${q.q}</div><div class="small">${lang==='zh'?'示例题':'Sample question'}</div>`; }
+  // Maze preview label
+  const pvM = document.getElementById('preview-maze'); if(pvM) pvM.innerHTML = `<div class="small">${lang==='zh'?'迷宫预览 — 点击 Play 打开完整页面':'Maze preview — click Play to open full page'}</div>`;
+  // Pattern
+  const pvP = document.getElementById('preview-pattern'); if(pvP){ const p = generatePattern(2); pvP.innerHTML = `<div class="small">${p.type}</div><div class="question">${p.seq.join(', ')}, ...</div>`; }
+  // Prob
+  const pvProb = document.getElementById('preview-prob'); if(pvProb){ const q = generateProbQuestion(); pvProb.innerHTML = `<div style="display:flex;gap:6px">${q.cups.map(c=>`<div style="flex:1;padding:6px;border:1px solid #eee;border-radius:8px;background:#fff;text-align:center"><div style="font-weight:700">${c.label}</div><div class="small">P ${c.payout}</div></div>`).join('')}</div>`; }
+  // Casino
+  const pvC = document.getElementById('preview-casino'); if(pvC){ pvC.innerHTML = `<div><span class="reel" id="pv-m1r1">🔔</span><span class="reel" id="pv-m1r2">7</span><span class="reel" id="pv-m1r3">❤️</span></div><div style="margin-top:6px"><button class="btn pv-spin">Spin preview</button></div>`; const btn = pvC.querySelector('.pv-spin'); if(btn) btn.onclick = ()=>{ const sy=['🔔','7','❤️','♦','⭐']; const els=[document.getElementById('pv-m1r1'),document.getElementById('pv-m1r2'),document.getElementById('pv-m1r3')]; for(let i=0;i<3;i++){ const el=els[i]; let ticks=12+i*6; const iv=setInterval(()=> el.textContent = sy[randInt(0,sy.length-1)], 50); setTimeout(()=>{ clearInterval(iv); el.textContent = sy[randInt(0,sy.length-1)]; }, ticks*50); } }; }
+  // Cups preview
+  const pvCu = document.getElementById('preview-cups'); if(pvCu) pvCu.innerHTML = `<div style="display:flex;gap:6px"><div style="flex:1;padding:8px;background:#d33;border-radius:6px"></div><div style="flex:1;padding:8px;background:#d33;border-radius:6px"></div><div style="flex:1;padding:8px;background:#d33;border-radius:6px"></div></div><div class="small" style="margin-top:6px">${lang==='zh'?'点击 Play 进入完整挑战':'Click Play for full challenge'}</div>`;
+  // Air preview
+  const pvA = document.getElementById('preview-air'); if(pvA) pvA.innerHTML = `<canvas width="220" height="120" style="background:#f7fbff;border-radius:6px"></canvas><div class="small" style="margin-top:6px">${lang==='zh'?'点击 Play 玩完整游戏':'Click Play to play full'}</div>`;
+}
+
+/* ---------- Navigation: Play opens full page (hash) ---------- */
+document.addEventListener('click', (e)=>{
+  const p = e.target.closest('.play-btn'); if(p){ openGamePage(p.dataset.game); return; }
+});
+function openGamePage(id){
+  document.getElementById('hubCard').style.display = 'none';
+  document.querySelectorAll('.game-page').forEach(p=>p.classList.remove('active'));
+  const page = document.getElementById('page-'+id); if(!page) return;
+  page.classList.add('active');
+  location.hash = 'game=' + id;
+  const area = document.getElementById('page-area-'+id);
+  if(area && !area.dataset.inited){ area.dataset.inited='1'; initFullGame(id, area); }
+  const status = document.getElementById('status-'+id); if(status) status.textContent = t('playing');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+Array.from(document.querySelectorAll('.backBtn')).forEach(b=> b.addEventListener('click', ()=> {
+  document.querySelectorAll('.game-page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('hubCard').style.display = 'block';
+  if(location.hash.startsWith('#game=')) history.replaceState(null,'', location.pathname + location.search);
+  tiles.forEach(t=>{ const s=document.getElementById('status-'+t.id); if(s) s.textContent = t('ready'); });
+  window.scrollTo({top:0,behavior:'smooth'});
+}));
+(function initFromHash(){ const h = location.hash.slice(1); if(!h) return; const m = h.match(/game=([a-z0-9_-]+)/i); if(m) setTimeout(()=> openGamePage(m[1]), 120); })();
+
+/* ---------- Full-page initializers dispatcher ---------- */
+function initFullGame(id, area){
+  if(id==='trivia') initFullTrivia(area);
+  if(id==='rapid') initFullRapid(area);
+  if(id==='maze') initFullMaze(area);
+  if(id==='pattern') initFullPattern(area);
+  if(id==='prob') initFullProb(area);
+  if(id==='casino') initFullCasino(area);
+  if(id==='cups') initFullCups(area);
+  if(id==='air') initFullAir(area);
+}
+
+/* ---------- Full: Trivia ---------- */
+let fullTriviaTimer=null;
+function initFullTrivia(area){
+  area.innerHTML = `
+    <div style="display:flex;gap:8px;align-items:center">
+      <label>${t('triviaLevel')} <select class="full-tri-level"></select></label>
+      <button class="btn full-tri-start">${t('triviaStart')}</button>
+      <div style="flex:1"></div>
+      <div class="small">${t('timerNote')}</div>
+    </div>
+    <div class="full-tri-ui" style="margin-top:10px"></div>
+  `;
+  const sel = area.querySelector('.full-tri-level'); for(let i=1;i<=100;i++){ const o=document.createElement('option'); o.value=i; o.text=(lang==='zh'?'等级 ':'Level ')+i; sel.appendChild(o); }
+  area.querySelector('.full-tri-start').addEventListener('click', ()=> startFullTrivia(Number(sel.value), area.querySelector('.full-tri-ui')));
+}
+function startFullTrivia(level, container){
+  clearInterval(fullTriviaTimer);
+  const qs = Array.from({length:10}, (_,i)=> genArithmeticQuestion(level + Math.floor(i/3)));
+  let idx=0, score=0;
+  function render(){ clearInterval(fullTriviaTimer); container.innerHTML=''; if(idx>=qs.length){ const wrap=document.createElement('div'); wrap.innerHTML=`<div style="font-weight:800">${lang==='zh'?'回合完成':'Round complete'}</div><div class="small">${lang==='zh'?'得分':'Score'}: ${score}/${qs.length}</div>`; container.appendChild(wrap); if(score>=7){ const pts=Math.max(25, Math.round(30+level*1.2)); addPoints(pts); celebrateAt(); container.appendChild(Object.assign(document.createElement('div'),{className:'small', textContent:(lang==='zh'?'奖励 ':'Awarded ')+pts+' pts'})); } else container.appendChild(Object.assign(document.createElement('div'),{className:'small', textContent:lang==='zh'?'未通过 — 请重试':'Failed — try again'})); return; } const q=qs[idx]; const qdiv=document.createElement('div'); qdiv.innerHTML=`<div class="question">${lang==='zh'?'题 ':'Q'}${idx+1}: ${q.q}</div>`; const answrap=document.createElement('div'); answrap.className='answers'; q.choices.forEach(choice=>{ const b=document.createElement('button'); b.className='ans-btn'; b.textContent=choice; b.onclick=()=>{ clearInterval(fullTriviaTimer); finalize(choice); }; answrap.appendChild(b); }); const timerEl=document.createElement('div'); timerEl.className='small'; timerEl.textContent=(lang==='zh'?'剩余时间: 5.0s':'Time left: 5.0s'); qdiv.appendChild(answrap); container.appendChild(qdiv); container.appendChild(timerEl); let t=5.0; fullTriviaTimer=setInterval(()=>{ t=Math.max(0,t-0.1); timerEl.textContent=(lang==='zh'?'剩余时间: ':'Time left: ')+t.toFixed(1)+'s'; if(t<=0){ clearInterval(fullTriviaTimer); finalize(null,true); } },100); function finalize(choice,timedOut=false){ Array.from(answrap.children).forEach(ch=>{ ch.disabled=true; if(ch.textContent==String(q.answer)) ch.classList.add('correct'); }); if(!timedOut && choice && String(choice)===String(q.answer)){ score++; addPoints(8); spawnConfetti(); } setTimeout(()=>{ idx++; render(); },700); } } render(); }
+
+/* ---------- Full: Rapid ---------- */
+function initFullRapid(area){
+  area.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><label>${lang==='zh'?'难度':'Difficulty'}: <select class="full-rapid-diff"><option value="easy">${lang==='zh'?'简单':'Easy'}</option><option value="medium">${lang==='zh'?'中等':'Medium'}</option><option value="hard">${lang==='zh'?'困难':'Hard'}</option></select></label><button class="btn full-rapid-start">${t('start')}</button></div><div class="full-rapid-ui" style="margin-top:10px"></div>`;
+  area.querySelector('.full-rapid-start').addEventListener('click', ()=> { const diff = area.querySelector('.full-rapid-diff').value; startFullRapid(area.querySelector('.full-rapid-ui'), diff); });
+}
+function startFullRapid(container, diff){
+  const timePer = diff==='easy'?6 : diff==='medium'?4 : 2.5;
+  const qs = Array.from({length:15}, ()=> genArithmeticQuestion(randInt(1,80)));
+  let idx=0, score=0, timer=null;
+  function render(){ clearInterval(timer); container.innerHTML=''; if(idx>=qs.length){ const pts = score*8; addPoints(pts); container.innerHTML = `<div class="small">${lang==='zh'?'完成':'Done'} ${score}/${qs.length} +${pts} pts</div>`; if(score>=Math.ceil(qs.length*0.6)) celebrateAt(); return; } const q=qs[idx]; const div=document.createElement('div'); div.innerHTML=`<div class="question">${lang==='zh'?'题 ':'Q'}${idx+1}: ${q.q}</div><div class="small">${lang==='zh'?'时间':'Time'}: <span id="frTime">${timePer.toFixed(1)}</span>s</div>`; const answrap=document.createElement('div'); answrap.className='answers'; q.choices.forEach(choice=>{ const b=document.createElement('button'); b.className='ans-btn'; b.textContent=choice; b.onclick=()=>{ clearInterval(timer); if(String(choice)===String(q.answer)) score++; idx++; render(); }; answrap.appendChild(b); }); div.appendChild(answrap); container.appendChild(div); let t=timePer; const te = container.querySelector('#frTime'); if(te) te.textContent = t.toFixed(1); timer=setInterval(()=>{ t=Math.max(0,t-0.1); if(te) te.textContent=t.toFixed(1); if(t<=0){ clearInterval(timer); idx++; render(); } },100); } render(); }
+
+/* ---------- Full: Maze ---------- */
+function initFullMaze(area){
+  area.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><button class="btn full-maze-gen">${lang==='zh'?'生成迷宫':'Generate Maze'}</button><div style="flex:1"></div><div class="small">${lang==='zh'?'使用方向键移动':'Use arrow keys to move'}</div></div><div class="full-maze-ui" style="margin-top:10px"></div>`;
+  area.querySelector('.full-maze-gen').addEventListener('click', ()=> {
+    const container = area.querySelector('.full-maze-ui'); container.innerHTML=''; const size=520; const canvas=document.createElement('canvas'); canvas.width=size; canvas.height=size; container.appendChild(canvas); const ctx = canvas.getContext('2d');
+    const gridObj = makeMazeGrid(19,19); let cell = Math.floor(size/gridObj.w), px=1, py=1, solved=0;
+    draw();
+    function draw(){ ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#eef6ff'; ctx.fillRect(0,0,canvas.width,canvas.height); for(let y=0;y<gridObj.h;y++) for(let x=0;x<gridObj.w;x++){ const v=gridObj.grid[y][x], sx=x*cell, sy=y*cell; if(v===1){ ctx.fillStyle='#133'; ctx.fillRect(sx,sy,cell,cell); } else if(v===2){ ctx.fillStyle='#ffd'; ctx.fillRect(sx,sy,cell,cell); ctx.fillStyle='#6a3bdb'; ctx.fillRect(sx+cell*0.2,sy+cell*0.2,cell*0.6,cell*0.6);} else ctx.fillStyle='#f7fff7', ctx.fillRect(sx,sy,cell,cell); } ctx.fillStyle='#1a73e8'; ctx.beginPath(); ctx.arc((px+0.5)*cell,(py+0.5)*cell,cell*0.28,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#ff9'; ctx.fillRect(gridObj.exit.x*cell+cell*0.15, gridObj.exit.y*cell+cell*0.15, cell*0.7, cell*0.7); }
+    function move(dx,dy){ const nx=px+dx, ny=py+dy; if(nx<0||ny<0||nx>=gridObj.w||ny>=gridObj.h) return; const val = gridObj.grid[ny][nx]; if(val===1) return; if(val===2){ const q = genArithmeticQuestion(randInt(1,40)); const ans = prompt((lang==='zh'?'闸门题：':(lang==='fr'?'Question porte: ':'Gate: '))+q.q+'\n'+q.choices.join(' | ')); if(ans===null) return; if(String(ans).trim()===String(q.answer)){ gridObj.grid[ny][nx]=0; solved++; addPoints(10); draw(); } else { alert(lang==='zh'?'错误':(lang==='fr'?'Incorrect':'Wrong')); return; } } else { px=nx; py=ny; } draw(); if(px===gridObj.exit.x && py===gridObj.exit.y){ const pts = 140 + solved*10; addPoints(pts); celebrateAt(); alert((lang==='zh'?'到达中心! +':'Reached center! +')+pts+' pts'); document.removeEventListener('keydown', keyH); } }
+    function keyH(e){ if(e.key==='ArrowUp'||e.key==='w') move(0,-1); if(e.key==='ArrowDown'||e.key==='s') move(0,1); if(e.key==='ArrowLeft'||e.key==='a') move(-1,0); if(e.key==='ArrowRight'||e.key==='d') move(1,0); }
+    document.addEventListener('keydown', keyH);
+    function makeMazeGrid(cols, rows){ if(cols%2===0) cols++; if(rows%2===0) rows++; const grid = Array.from({length:rows}, ()=>Array(cols).fill(1)); for(let y=1;y<rows;y+=2) for(let x=1;x<cols;x+=2) grid[y][x]=0; function neigh(x,y){ const n=[]; if(y-2>0) n.push([x,y-2]); if(y+2<rows-1) n.push([x,y+2]); if(x-2>0) n.push([x-2,y]); if(x+2<cols-1) n.push([x+2,y]); return n; } const stack=[[1,1]], visited=new Set(['1,1']); while(stack.length){ const [cx,cy]=stack[stack.length-1]; const opts=neigh(cx,cy).filter(n=>!visited.has(n.join(','))); if(opts.length){ const n=opts[Math.floor(Math.random()*opts.length)]; const wx=(cx+n[0])/2, wy=(cy+n[1])/2; grid[wy][wx]=0; visited.add(n.join(',')); stack.push(n);} else stack.pop(); } for(let g=0;g<10;g++){ let placed=false; for(let t=0;t<300 && !placed;t++){ const gx=randInt(1,cols-2), gy=randInt(1,rows-2); if(grid[gy][gx]===1){ const dirs=[[1,0],[-1,0],[0,1],[0,-1]]; if(dirs.some(d=> grid[gy+d[1]][gx+d[0]]===0)){ grid[gy][gx]=2; placed=true; } } } } let ex=cols-2, ey=rows-2; while(grid[ey][ex]!==0){ ex--; if(ex<1){ ex=cols-2; ey--; if(ey<1) break; } } return {grid,w:cols,h:rows,exit:{x:ex,y:ey}}; }
+  });
+}
+
+/* ---------- Full Pattern ---------- */
+function initFullPattern(area){
+  area.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><label>${t('triviaLevel')} <select class="full-pat-level"></select></label><button class="btn full-pat-start">${t('start')}</button></div><div class="full-pat-ui" style="margin-top:10px"></div>`;
+  const sel = area.querySelector('.full-pat-level'); for(let i=1;i<=30;i++){ const o=document.createElement('option'); o.value=i; o.text=i; sel.appendChild(o); }
+  area.querySelector('.full-pat-start').addEventListener('click', ()=> {
+    const level = Number(sel.value||1); const ui = area.querySelector('.full-pat-ui'); let i=0, score=0;
+    function next(){ if(i>=5){ ui.innerHTML = `<div class="small">${lang==='zh'?'完成得分':'Round score'}: ${score}/5</div>`; addPoints(score*12); return; } const p = generatePattern(level + i); ui.innerHTML = `<div class="small">${p.type}</div><div class="question">${p.seq.join(', ')}, ...</div><input id="pAns" type="number" style="padding:8px;border-radius:6px"><button id="pOk" class="btn" style="margin-left:8px">${t('submit')}</button>`; ui.querySelector('#pOk').onclick = ()=>{ if(String(ui.querySelector('#pAns').value)===String(p.next)){ score++; addPoints(12); spawnConfetti(); } else alert((lang==='zh'?'错误，答案：':'Wrong, answer: ')+p.next); i++; next(); }; } next();
+  });
+}
+
+/* ---------- Full Probability ---------- */
+function initFullProb(area){
+  area.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><button class="btn full-prob-start">${t('start')}</button></div><div class="full-prob-ui" style="margin-top:10px"></div>`;
+  area.querySelector('.full-prob-start').addEventListener('click', ()=> renderProbUI(generateProbQuestion(), area.querySelector('.full-prob-ui')));
+}
+function generateProbQuestion(){ const base=randInt(5,30); const p1=Math.random()*0.6+0.1, p2=Math.random()*0.6+0.05, p3=Math.random()*0.6+0.02; const a1=base+randInt(0,base), a2=base+randInt(0,base+10), a3=base+randInt(0,base+20); return {cups:[{label:'A',p:+p1.toFixed(2),payout:a1,ev: +(p1*a1).toFixed(2)},{label:'B',p:+p2.toFixed(2),payout:a2,ev: +(p2*a2).toFixed(2)},{label:'C',p:+p3.toFixed(2),payout:a3,ev: +(p3*a3).toFixed(2)}]}; }
+function renderProbUI(q, container){
+  container.innerHTML = `<div class="question">${lang==='zh'?'选择最高期望值':(lang==='fr'?'Choisissez la plus grande espérance':(lang==='ja'?'期待値が最も高いものを選ぶ':'Choose highest expected value'))}</div>`;
+  const row=document.createElement('div'); row.style.display='flex'; row.style.gap='8px';
+  q.cups.forEach(c=>{ const el=document.createElement('div'); el.style.flex='1'; el.style.padding='12px'; el.style.border='1px solid #eee'; el.style.borderRadius='8px'; el.style.textAlign='center'; el.style.background='#fff'; el.innerHTML = `<div style="font-weight:800">${c.label}</div><div class="small">Payout ${c.payout}</div><div class="small">Chance ${Math.round(c.p*100)}%</div>`; el.onclick = ()=>{ const best=q.cups.reduce((a,b)=> a.ev>b.ev?a:b); if(c.label===best.label){ addPoints(20); celebrateAt(); alert(lang==='zh'?'正确！ +20 积分':(lang==='fr'?'Correct ! +20 pts':(lang==='ja'?'正解！+20pt':'Correct! +20 pts'))); } else alert(lang==='zh'?'错误':(lang==='fr'?'Incorrect':'Incorrect')); renderProbUI(generateProbQuestion(), container); }; row.appendChild(el); });
+  container.appendChild(row);
+}
+
+/* ---------- Full Casino ---------- */
+function initFullCasino(area){ area.innerHTML = `<div class="casino-full"></div>`; initCasino(area.querySelector('.casino-full')); }
+function initCasino(area){
+  area.innerHTML = `
+    <div style="display:flex;gap:8px;align-items:center">
+      <div style="flex:1">
+        <div style="font-weight:800">Machine 1 — Slots</div>
+        <div style="margin-top:6px"><span class="reel" id="${area.id}-m1r1">🔔</span><span class="reel" id="${area.id}-m1r2">7</span><span class="reel" id="${area.id}-m1r3">❤️</span></div>
+        <div style="margin-top:8px"><label>Bet: <input class="m1bet" type="number" min="1" value="10" style="width:80px"></label> <button class="btn m1spin">Spin</button> <span class="m1msg small" style="margin-left:8px"></span></div>
+      </div>
+      <div style="flex:1">
+        <div style="font-weight:800">Machine 2 — Secret Cups</div>
+        <div class="small" style="margin-top:6px">Open the secret cups challenge</div>
+        <div style="margin-top:8px"><button class="btn m2open">Open</button> <span class="m2msg small" style="margin-left:8px"></span></div>
+      </div>
+      <div style="flex:1">
+        <div style="font-weight:800">Machine 3 — Jackpot</div>
+        <div style="margin-top:6px"><span class="reel" id="${area.id}-m3r1">💎</span><span class="reel" id="${area.id}-m3r2">🔔</span><span class="reel" id="${area.id}-m3r3">7</span></div>
+        <div style="margin-top:8px"><label>Bet: <input class="m3bet" type="number" min="5" value="25" style="width:80px"></label> <button class="btn m3spin">Spin</button> <span class="m3msg small" style="margin-left:8px"></span></div>
+      </div>
+    </div>
+    <div class="casino-cups" style="margin-top:10px"></div>
+  `;
+  const sy=['🔔','7','❤️','♦','⭐'];
+  area.querySelector('.m1spin').addEventListener('click', ()=>{
+    const bet = Math.max(1, Number(area.querySelector('.m1bet').value||10));
+    if(getPoints()<bet){ area.querySelector('.m1msg').textContent = (lang==='zh'?'积分不足':'Not enough points'); return; }
+    addPoints(-bet); area.querySelector('.m1msg').textContent = (lang==='zh'?'旋转中...':'Spinning...');
+    const finals=[sy[randInt(0,sy.length-1)], sy[randInt(0,sy.length-1)], sy[randInt(0,sy.length-1)]];
+    const els=[area.querySelector(`#${area.id}-m1r1`), area.querySelector(`#${area.id}-m1r2`), area.querySelector(`#${area.id}-m1r3`)];
+    els.forEach((el,idx)=>{ let ticks=18+idx*6; const iv=setInterval(()=> el.textContent = sy[randInt(0,sy.length-1)], 50); setTimeout(()=>{ clearInterval(iv); el.textContent = finals[idx]; }, ticks*50); });
+    setTimeout(()=>{ const [a,b,c]=finals; let payout=0; if(a===b && b===c) payout=bet*10; else if(a===b||b===c||a===c) payout=bet*2; if(payout>0){ addPoints(payout); area.querySelector('.m1msg').textContent = (lang==='zh'?'赢得 ':'Won ')+payout+'!'; celebrateAt(); } else area.querySelector('.m1msg').textContent = (lang==='zh'?'输掉 ':'Lost ')+bet+'.'; },1400);
+  });
+  area.querySelector('.m2open').addEventListener('click', ()=> openCupsEmbedded(area.querySelector('.casino-cups')));
+  area.querySelector('.m3spin').addEventListener('click', ()=>{
+    const bet = Math.max(5, Number(area.querySelector('.m3bet').value||25));
+    if(getPoints()<bet){ area.querySelector('.m3msg').textContent = (lang==='zh'?'积分不足':'Not enough points'); return; }
+    addPoints(-bet); area.querySelector('.m3msg').textContent = (lang==='zh'?'旋转中...':'Spinning...');
+    const sy3=['💎','🔔','7','⭐','♦']; const finals=[sy3[randInt(0,sy3.length-1)], sy3[randInt(0,sy3.length-1)], sy3[randInt(0,sy3.length-1)]];
+    const els=[area.querySelector(`#${area.id}-m3r1`), area.querySelector(`#${area.id}-m3r2`), area.querySelector(`#${area.id}-m3r3`)];
+    els.forEach((el,idx)=>{ let ticks=20+idx*6; const iv=setInterval(()=> el.textContent = sy3[randInt(0,sy3.length-1)], 50); setTimeout(()=>{ clearInterval(iv); el.textContent = finals[idx]; }, ticks*50); });
+    setTimeout(()=>{ const [a,b,c]=finals; const jackpot=(a==='💎' && a===b && b===c && Math.random()<0.08); if(jackpot){ const reward=Math.max(200, bet*12); addPoints(reward); area.querySelector('.m3msg').textContent = (lang==='zh'?'大奖 ':'JACKPOT ')+reward+'!'; celebrateAt(); alert((lang==='zh'?'大奖！已解锁气垫球':'JACKPOT! Air Hockey unlocked!')+' +'+reward+' pts'); } else { let payout=0; if(a===b && b===c) payout = bet*8; else if(a===b || b===c || a===c) payout=bet*2; if(payout>0){ addPoints(payout); area.querySelector('.m3msg').textContent = (lang==='zh'?'赢得 ':'Won ')+payout; celebrateAt(); } else area.querySelector('.m3msg').textContent = (lang==='zh'?'输掉 ':'Lost ')+bet; } },1600);
+  });
+}
+
+/* ---------- Full Cups ---------- */
+function initFullCups(area){ area.innerHTML = `<div class="fc"></div>`; initCups(area.querySelector('.fc')); }
+function initCups(area){
+  area.innerHTML = `<div class="small">${lang==='zh'?'神秘杯 — 胜利可得 250 积分':'Secret Cups — beat 3 levels to win 250 pts'}</div><div style="margin-top:10px"><button class="btn fc-start">${t('start')}</button></div><div class="fc-ui" style="margin-top:8px"></div>`;
+  area.querySelector('.fc-start').addEventListener('click', ()=> startCupsLevel(area.querySelector('.fc-ui'),1));
+}
+function openCupsEmbedded(container){
+  if(!container) return;
+  container.innerHTML=''; const status=document.createElement('div'); status.className='small'; status.textContent = lang==='zh'?'神秘杯 — 胜利可得 250 积分':'Secret Cups — beat 3 levels to win 250 pts'; container.appendChild(status);
+  startCupsLevel(container,1);
+}
+function startCupsLevel(container, level){
+  container.innerHTML=''; const lvl=document.createElement('div'); lvl.style.marginTop='8px'; container.appendChild(lvl);
+  const cups=[]; const ballIndex=randInt(0,2);
+  for(let i=0;i<3;i++){ const cup=document.createElement('div'); cup.style.display='inline-block'; cup.style.width='90px'; cup.style.height='90px'; cup.style.background='#d33'; cup.style.marginRight='8px'; cup.style.borderRadius='8px'; cup.style.position='relative'; cup.style.cursor='pointer'; const ball=document.createElement('div'); ball.style.position='absolute'; ball.style.left='50%'; ball.style.bottom='14px'; ball.style.transform='translateX(-50%)'; ball.style.width='22px'; ball.style.height='22px'; ball.style.borderRadius='50%'; ball.style.background='#ffd'; ball.style.opacity=(i===ballIndex)?'1':'0'; cup.appendChild(ball); lvl.appendChild(cup); cups.push(cup); }
+  setTimeout(()=> cups.forEach(c=> c.querySelector('div').style.opacity='0'),700);
+  const cfg = level===1?{sh:6,spd:200}: level===2?{sh:12,spd:150}:{sh:20,spd:100};
+  (async ()=>{ await new Promise(r=>setTimeout(r,700)); for(let s=0;s<cfg.sh;s++){ const a=randInt(0,2), b=(a+randInt(1,2))%3; const ca=cups[a], cb=cups[b]; const cloneA=ca.cloneNode(true), cloneB=cb.cloneNode(true); ca.replaceWith(cloneB); cb.replaceWith(cloneA); cups[a]=cloneB; cups[b]=cloneA; await new Promise(r=>setTimeout(r,cfg.spd)); } const info=document.createElement('div'); info.className='small'; info.textContent = lang==='zh'?'请选择杯子！':'Pick a cup!'; lvl.appendChild(info); cups.forEach((cup,idx)=>{ cup.onclick = ()=>{ cups.forEach(c=> c.querySelector('div').style.opacity='0'); cup.querySelector('div').style.opacity='1'; const revealed=cups.findIndex(c=> c.querySelector('div').style.opacity==='1'); if(revealed===idx){ if(level<3){ addPoints(15); spawnConfetti(); setTimeout(()=> startCupsLevel(container, level+1), 800); } else { addPoints(250); celebrateAt(); alert(lang==='zh'?'你通过了第3级！ +250 积分':'You beat Level 3! +250 pts'); container.innerHTML = `<div class="small">${lang==='zh'?'完成 — 做得好！':'Completed — well done!'}</div>`; } } else alert(lang==='zh'?'错误 — 回到赌场再试':'Wrong — try again from the casino'); }; }); })();
+}
+
+/* ---------- Full Air ---------- */
+function initFullAir(area){ area.innerHTML = `<div class="fa"></div>`; initAir(area.querySelector('.fa')); }
+function initAir(area){
+  area.innerHTML = `<canvas class="air-canvas" width="640" height="320" style="background:#f7fbff;border-radius:8px"></canvas><div style="margin-top:8px"><button class="btn air-start">${t('start')}</button><button class="btn secondary air-stop" style="margin-left:8px">${t('back')}</button></div>`;
+  const canvas = area.querySelector('.air-canvas'); const ctx = canvas.getContext('2d'); let state = null;
+  area.querySelector('.air-start').addEventListener('click', ()=> { if(!state) initMatch(); state.running=true; });
+  area.querySelector('.air-stop').addEventListener('click', ()=> { if(state) state.running=false; });
+  function initMatch(){ state={pY:canvas.height/2,aY:canvas.height/2,puck:{x:canvas.width/2,y:canvas.height/2,vx:3,vy:2,r:8},sP:0,sA:0, running:false}; canvas.onmousemove=(e)=>{ const r=canvas.getBoundingClientRect(); state.pY=Math.max(12, Math.min(canvas.height-12, e.clientY - r.top)); }; function loop(){ requestAnimationFrame(loop); if(!state) return; if(state.running){ state.puck.x += state.puck.vx; state.puck.y += state.puck.vy; if(state.puck.y <= state.puck.r || state.puck.y >= canvas.height - state.puck.r) state.puck.vy *= -1; const dx=state.puck.x-20, dy=state.puck.y-state.pY; if(Math.hypot(dx,dy) < state.puck.r+12 && state.puck.vx<0){ state.puck.vx=Math.abs(state.puck.vx)+0.8; state.puck.vy += dy*0.05; } const dx2=state.puck.x-(canvas.width-20), dy2=state.puck.y-state.aY; if(Math.hypot(dx2,dy2) < state.puck.r+12 && state.puck.vx>0){ state.puck.vx=-Math.abs(state.puck.vx)-0.8; state.puck.vy += dy2*0.05; } state.aY += (state.puck.y - state.aY)*0.05; if(state.puck.x < 0){ state.sA++; resetP(); sonar(); } if(state.puck.x > canvas.width){ state.sP++; resetP(); sonar(); } } draw(); } function resetP(){ state.puck.x = canvas.width/2; state.puck.y = canvas.height/2; state.puck.vx = (Math.random()>0.5?3:-3); state.puck.vy = (Math.random()-0.5)*3; } function sonar(){ const q = genArithmeticQuestion(randInt(10,60)); setTimeout(()=>{ const ans = prompt((lang==='zh'?'宝藏题：':(lang==='fr'?'Trésor : ':'Treasure: ')) + q.q + '\n' + q.choices.join(' | ')); if(ans !== null && String(ans).trim()===String(q.answer)){ addPoints(40); celebrateAt(); alert(lang==='zh'?'正确！ +40 积分':(lang==='fr'?'Correct ! +40 pts':'Correct! +40 pts')); } else alert(lang==='zh'?'错误或已取消':(lang==='fr'?'Incorrect ou annulé':'Incorrect or cancelled')); },900); } function draw(){ ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#e6fbff'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#1a73e8'; ctx.fillRect(12,state.pY-18,8,36); ctx.fillStyle='#ff6b6b'; ctx.fillRect(canvas.width-20,state.aY-18,8,36); ctx.fillStyle='#06263a'; ctx.beginPath(); ctx.arc(state.puck.x,state.puck.y,state.puck.r,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#072033'; ctx.font='18px Inter'; ctx.fillText(state.sP + ' - ' + state.sA, canvas.width/2 - 12, 22); } loop(); }
+}
+
+/* ---------- Shared helpers ---------- */
+function genArithmeticQuestion(level){
+  level = Math.max(1, Math.min(100, Math.round(level)));
+  if(level <= 10){ const a=randInt(1,10), b=randInt(1,10); return {q:`${a} + ${b} = ?`, choices: shuffle([String(a+b), String(a+b+1), String(Math.abs(a-b)), String(a*b)]), answer:String(a+b)}; }
+  if(level <= 30){ const a=randInt(2,15), b=randInt(2,12); return {q:`${a} × ${b} = ?`, choices: shuffle([String(a*b), String(a*b+randInt(1,5)), String(a*b-randInt(1,5)), String(a+b)]), answer:String(a*b)}; }
+  if(level <= 55){ const a=randInt(10,200), b=randInt(2,12); return {q:`${a} ÷ ${b} = ? (nearest int)`, choices: shuffle([String(Math.round(a/b)), String(Math.floor(a/b)), String(Math.ceil(a/b)), String(Math.round((a+b)/b))]), answer:String(Math.round(a/b))}; }
+  if(level <= 75){ const a=randInt(2,9), b=randInt(2,6); return {q:`What is ${a}^${b}?`, choices: shuffle([String(Math.pow(a,b)), String(Math.pow(a,b)+randInt(1,20)), String(Math.pow(a,b)-randInt(1,20)), String(Math.pow(a+1,b))]), answer:String(Math.pow(a,b))}; }
+  if(level <= 90){ const a=randInt(10,80), b=randInt(2,12), c=randInt(1,10); const val=a + b*c; return {q:`${a} + ${b} × ${c} = ?`, choices: shuffle([String(val), String(val+1), String(val-1), String(a*b+c)]), answer:String(val)}; }
+  const a=randInt(1,12), b=randInt(1,12), c=randInt(1,10); const val=(a*b + c)/a; return {q:`Solve: ${a}x - ${c} = ${a*b}. x = ?`, choices: shuffle([String(val), String(Math.floor(val)), String(Math.ceil(val)), String(b)]), answer:String(val)};
+}
+function generatePattern(level){ level = Math.max(1, Math.min(30, level)); const types=['arithmetic','geometric','fib-like','alternating','squares']; const t = types[level % types.length]; if(t==='arithmetic'){ const a=randInt(1,6), d=randInt(1,8); return {seq:[a,a+d,a+2*d,a+3*d,a+4*d], next:a+5*d, type:'Arithmetic +'+d}; } if(t==='geometric'){ const a=randInt(1,4), r=randInt(2,4); return {seq:[a,a*r,a*r*r,a*r*r*r,a*r*r*r*r], next:a*Math.pow(r,5), type:'Geometric x'+r}; } if(t==='fib-like'){ const a=randInt(1,5), b=randInt(1,6); const seq=[a,b,a+b,b+(a+b),(a+b)+(b+(a+b))]; return {seq, next: seq[3]+seq[4], type:'Fib-like'}; } if(t==='alternating'){ const a=randInt(1,6), b=randInt(7,12); return {seq:[a,b,a+b,a+2*b,a+3*b], next:a+4*b, type:'Alternating'}; } const s=randInt(1,6); return {seq:[s,s+1,s+4,s+9,s+16], next:s+25, type:'Squares'}; }
+function generateProbQuestion(){ const base=randInt(5,30); const p1=Math.random()*0.6+0.1, p2=Math.random()*0.6+0.05, p3=Math.random()*0.6+0.02; const a1=base+randInt(0,base), a2=base+randInt(0,base+10), a3=base+randInt(0,base+20); return {cups:[{label:'A',p:+p1.toFixed(2),payout:a1,ev: +(p1*a1).toFixed(2)},{label:'B',p:+p2.toFixed(2),payout:a2,ev: +(p2*a2).toFixed(2)},{label:'C',p:+p3.toFixed(2),payout:a3,ev: +(p3*a3).toFixed(2)}]}; }
+
+/* ---------- Open in-tile game initializers (for hub previews where user can expand) ---------- */
+document.getElementById('tilesContainer').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.toggle-expand'); if(!btn) return;
+});
+
+/* ---------- Minimal compatibility and init ---------- */
+renderTiles();
+applyLanguage();
+renderPoints();
+renderRecent();
