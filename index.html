@@ -39,22 +39,7 @@
   .game-page{display:none;padding:16px}
   .game-page.active{display:block}
   .page-header{display:flex;gap:8px;align-items:center;margin-bottom:8px}
-  /* magical background applied when player reaches magical threshold */
-  .magical-bg {
-    animation: hueShift 6s linear infinite;
-    background: linear-gradient(45deg, #ff6b6b, #fbc531, #7efff5, #8e44ad);
-    background-size: 400% 400%;
-    color: #001;
-  }
-  @keyframes hueShift {
-    0%{background-position:0% 50%}
-    50%{background-position:100% 50%}
-    100%{background-position:0% 50%}
-  }
   @media(max-width:980px){ .layout{grid-template-columns:1fr} .game-grid{grid-template-columns:1fr} }
-  /* leaderboard small styles */
-  .leaderboard-list { margin-top:8px; font-size:14px }
-  .leaderboard-list ol { padding-left:18px; margin:6px 0; }
 </style>
 </head>
 <body>
@@ -129,18 +114,9 @@
     </section>
 
     <aside>
-      <div class="card" id="profileCard">
+      <div class="card">
         <h3 id="profileTitle">Profile</h3>
         <div class="small" id="profileText">Earn points to climb tiers.</div>
-
-        <div style="margin-top:10px">
-          <label class="small" id="nameLabel">Name:</label>
-          <div style="display:flex;gap:8px;margin-top:6px">
-            <input id="playerName" style="flex:1;padding:8px;border-radius:6px;border:1px solid #eee" placeholder="Player"/>
-            <button class="btn" id="saveName">Save</button>
-          </div>
-        </div>
-
         <div style="margin-top:10px;display:flex;gap:8px">
           <button class="btn secondary" id="exportPoints">Export</button>
           <button class="btn secondary" id="resetPoints">Reset</button>
@@ -155,11 +131,6 @@
         </div>
       </div>
 
-      <div class="card leaderboard-card" style="margin-top:12px">
-        <h4 id="leaderboardTitle">Leaderboard</h4>
-        <div class="leaderboard-list" id="leaderboardList">No players yet.</div>
-      </div>
-
       <div class="card" style="margin-top:12px">
         <h4 id="recentTitle">Recent</h4>
         <div class="small" id="recentList" style="margin-top:8px">No recent wins.</div>
@@ -170,679 +141,403 @@
 
 <canvas id="fxCanvas"></canvas>
 
-<!-- Additional script appended onto page; it augments existing game code (functions.js) without removing it -->
+<!-- Appended script: only adds functionality (language switching, leaderboard, air-hockey override, etc.) -->
 <script>
 (function(){
-  // ---------- Translation strings (every UI label used) ----------
-  const TRANSLATIONS = {
-    en: {
-      brand: 'BREAK THE LOGIC',
-      tagline: 'Math games hub — train logic, speed, and math knowledge',
-      hubTitle: 'Game Hub — Math Edition',
-      hubDesc: 'All games are visible below. Click Play to open the full game page.',
-      profileTitle: 'Profile',
-      profileText: 'Earn points to climb tiers.',
-      nameLabel: 'Name:',
-      saveName: 'Save',
-      export: 'Export',
-      reset: 'Reset',
-      exportPoints: 'Export',
-      resetPoints: 'Reset',
-      tierTitle: 'Tier',
-      recentTitle: 'Recent',
-      leaderboardTitle: 'Leaderboard',
-      play: 'Play',
-      ready: 'Ready',
-      playing: 'Playing',
-      start: 'Start',
-      submit: 'Submit',
-      back: 'Back',
-      timerNote: '5s per question',
-      airLocked: 'Air Hockey requires at least 5000 points to play.',
-      magicianTitle: 'Mathematical Magician',
-      reachedMagician: 'Congratulations — you reached Mathematical Magician!',
-      setNameRequired: 'Name cannot be empty.',
-      noPlayers: 'No players yet.',
-      leaderboardUpdated: 'Leaderboard updated'
-    },
-    zh: {
-      brand: '破除逻辑',
-      tagline: '数学游戏中心 — 训练逻辑、速度和数学能力',
-      hubTitle: '游戏中心 — 数学版',
-      hubDesc: '下方显示所有游戏。点击 Play 打开完整游戏页面。',
-      profileTitle: '个人',
-      profileText: '赚取积分以提升段位。',
-      nameLabel: '名称：',
-      saveName: '保存',
-      export: '导出',
-      reset: '重置',
-      exportPoints: '导出',
-      resetPoints: '重置',
-      tierTitle: '段位',
-      recentTitle: '近期',
-      leaderboardTitle: '排行榜',
-      play: '开始',
-      ready: '就绪',
-      playing: '进行中',
-      start: '开始',
-      submit: '提交',
-      back: '返回',
-      timerNote: '每题 5 秒',
-      airLocked: '气垫球需要至少 5000 积分才能游玩。',
-      magicianTitle: '数学魔术师',
-      reachedMagician: '恭喜 — 你已成为数学魔术师！',
-      setNameRequired: '名称不能为空。',
-      noPlayers: '暂无玩家。',
-      leaderboardUpdated: '排行榜已更新'
-    },
-    da: {
-      brand: 'BRYD LOGIKKEN',
-      tagline: 'Math-spil hub — træn logik, hastighed og matematisk viden',
-      hubTitle: 'Spil Hub — Matematik',
-      hubDesc: 'Alle spil er synlige nedenfor. Klik Play for at åbne hele spillet.',
-      profileTitle: 'Profil',
-      profileText: 'Tjen point for at stige i rang.',
-      nameLabel: 'Navn:',
-      saveName: 'Gem',
-      export: 'Eksport',
-      reset: 'Nulstil',
-      exportPoints: 'Eksport',
-      resetPoints: 'Nulstil',
-      tierTitle: 'Rang',
-      recentTitle: 'Seneste',
-      leaderboardTitle: 'Highscore',
-      play: 'Spil',
-      ready: 'Klar',
-      playing: 'Spiller',
-      start: 'Start',
-      submit: 'Indsend',
-      back: 'Tilbage',
-      timerNote: '5s pr. spørgsmål',
-      airLocked: 'Air Hockey kræver mindst 5000 point for at spille.',
-      magicianTitle: 'Matematisk Magiker',
-      reachedMagician: 'Tillykke — du nåede Matematisk Magiker!',
-      setNameRequired: 'Navn må ikke være tomt.',
-      noPlayers: 'Ingen spillere endnu.',
-      leaderboardUpdated: 'Highscore opdateret'
-    },
-    fr: {
-      brand: 'BRAIN THE LOGIC',
-      tagline: 'Hub de jeux math — entraînez logique, rapidité et mathématiques',
-      hubTitle: 'Hub de jeux — Math',
-      hubDesc: 'Tous les jeux sont visibles ci-dessous. Cliquez Play pour ouvrir le jeu complet.',
-      profileTitle: 'Profil',
-      profileText: 'Gagnez des points pour monter en niveau.',
-      nameLabel: 'Nom :',
-      saveName: 'Enregistrer',
-      export: 'Exporter',
-      reset: 'Réinitialiser',
-      exportPoints: 'Exporter',
-      resetPoints: 'Réinitialiser',
-      tierTitle: 'Niveau',
-      recentTitle: 'Récent',
-      leaderboardTitle: 'Classement',
-      play: 'Jouer',
-      ready: 'Prêt',
-      playing: 'En jeu',
-      start: 'Démarrer',
-      submit: 'Soumettre',
-      back: 'Retour',
-      timerNote: '5s par question',
-      airLocked: 'Air Hockey nécessite au moins 5000 points pour jouer.',
-      magicianTitle: 'Magicien Mathématique',
-      reachedMagician: 'Félicitations — vous êtes Magicien Mathématique !',
-      setNameRequired: 'Le nom ne peut pas être vide.',
-      noPlayers: 'Pas encore de joueurs.',
-      leaderboardUpdated: 'Classement mis à jour'
-    },
-    ja: {
-      brand: 'ロジックをやぶれ',
-      tagline: '数学ゲームハブ — 論理、速度、数学力を鍛える',
-      hubTitle: 'ゲームハブ — 数学版',
-      hubDesc: '以下にすべてのゲームが表示されています。Playでフルページを開きます。',
-      profileTitle: 'プロフィール',
-      profileText: 'ポイントを獲得してランクアップしましょう。',
-      nameLabel: '名前：',
-      saveName: '保存',
-      export: 'エクスポート',
-      reset: 'リセット',
-      exportPoints: 'エクスポート',
-      resetPoints: 'リセット',
-      tierTitle: 'ランク',
-      recentTitle: '最近',
-      leaderboardTitle: 'ランキング',
-      play: '再生',
-      ready: '準備完了',
-      playing: 'プレイ中',
-      start: '開始',
-      submit: '送信',
-      back: '戻る',
-      timerNote: '各問5秒',
-      airLocked: 'エアホッケーは5000ポイント以上でのみ遊べます。',
-      magicianTitle: '数学の魔術師',
-      reachedMagician: 'おめでとう — あなたは数学の魔術師になりました！',
-      setNameRequired: '名前を入力してください。',
-      noPlayers: 'まだプレイヤーはいません。',
-      leaderboardUpdated: 'ランキングを更新しました'
-    }
+  /* ---------- Config / translations ---------- */
+  const LANGS = {
+    en:{brand:'BREAK THE LOGIC',tagline:'Math games hub — train logic, speed, and math knowledge',hubTitle:'Game Hub — Math Edition',hubDesc:'All games are visible below. Click Play to open the full game page.',profileTitle:'Profile',profileText:'Earn points to climb tiers.',nameLabel:'Name:',saveName:'Save',export:'Export',reset:'Reset',exportPoints:'Export',resetPoints:'Reset',tierTitle:'Tier',recentTitle:'Recent',leaderboardTitle:'Leaderboard',play:'Play',ready:'Ready',playing:'Playing',start:'Start',submit:'Submit',back:'Back',timerNote:'5s per question',airLocked:'Air Hockey requires at least 5000 points to play.',magicianTitle:'Mathematical Magician',reachedMagician:'Congratulations — you reached Mathematical Magician!',noPlayers:'No players yet.'},
+    zh:{brand:'破除逻辑',tagline:'数学游戏中心 — 训练逻辑、速度和数学能力',hubTitle:'游戏中心 — 数学版',hubDesc:'下方显示所有游戏。点击 Play 打开完整游戏页面。',profileTitle:'个人',profileText:'赚取积分以提升段位。',nameLabel:'名称：',saveName:'保存',export:'导出',reset:'重置',exportPoints:'导出',resetPoints:'重置',tierTitle:'段位',recentTitle:'近期',leaderboardTitle:'排行榜',play:'开始',ready:'就绪',playing:'进行中',start:'开始',submit:'提交',back:'返回',timerNote:'每题 5 秒',airLocked:'气垫球需要至少 5000 积分才能游玩。',magicianTitle:'数学魔术师',reachedMagician:'恭喜 — 你已成为数学魔术师！',noPlayers:'暂无玩家。'},
+    da:{brand:'BRYD LOGIKKEN',tagline:'Math-spil hub — træn logik, hastighed og matematisk viden',hubTitle:'Spil Hub — Matematik',hubDesc:'Alle spil er synlige nedenfor. Klik Play for at åbne hele spillet.',profileTitle:'Profil',profileText:'Tjen point for at stige i rang.',nameLabel:'Navn:',saveName:'Gem',export:'Eksport',reset:'Nulstil',exportPoints:'Eksport',resetPoints:'Nulstil',tierTitle:'Rang',recentTitle:'Seneste',leaderboardTitle:'Highscore',play:'Spil',ready:'Klar',playing:'Spiller',start:'Start',submit:'Indsend',back:'Tilbage',timerNote:'5s pr. spørgsmål',airLocked:'Air Hockey kræver mindst 5000 point for at spille.',magicianTitle:'Matematisk Magiker',reachedMagician:'Tillykke — du nåede Matematisk Magiker!',noPlayers:'Ingen spillere endnu.'},
+    fr:{brand:'BRAIN THE LOGIC',tagline:'Hub de jeux math — entraînez logique, rapidité et mathématiques',hubTitle:'Hub de jeux — Math',hubDesc:'Tous les jeux sont visibles ci-dessous. Cliquez Play pour ouvrir le jeu complet.',profileTitle:'Profil',profileText:'Gagnez des points pour monter en niveau.',nameLabel:'Nom :',saveName:'Enregistrer',export:'Exporter',reset:'Réinitialiser',exportPoints:'Exporter',resetPoints:'Réinitialiser',tierTitle:'Niveau',recentTitle:'Récent',leaderboardTitle:'Classement',play:'Jouer',ready:'Prêt',playing:'En jeu',start:'Démarrer',submit:'Soumettre',back:'Retour',timerNote:'5s par question',airLocked:'Air Hockey nécessite au moins 5000 points pour jouer.',magicianTitle:'Magicien Mathématique',reachedMagician:'Félicitations — vous êtes Magicien Mathématique !',noPlayers:'Pas encore de joueurs.'},
+    ja:{brand:'ロジックをやぶれ',tagline:'数学ゲームハブ — 論理、速度、数学力を鍛える',hubTitle:'ゲームハブ — 数学版',hubDesc:'以下にすべてのゲームが表示されています。Playでフルページを開きます。',profileTitle:'プロフィール',profileText:'ポイントを獲得してランクアップしましょう。',nameLabel:'名前：',saveName:'保存',export:'エクスポート',reset:'リセット',exportPoints:'エクスポート',resetPoints:'リセット',tierTitle:'ランク',recentTitle:'最近',leaderboardTitle:'ランキング',play:'再生',ready:'準備完了',playing:'プレイ中',start:'開始',submit:'送信',back:'戻る',timerNote:'各問5秒',airLocked:'エアホッケーは5000ポイント以上でのみ遊べます。',magicianTitle:'数学の魔術師',reachedMagician:'おめでとう — あなたは数学の魔術師になりました！',noPlayers:'まだプレイヤーはいません。'}
   };
 
-  const LANG_CODES = ['en','zh','da','fr','ja'];
+  const LANG_CODES = Object.keys(LANGS);
   let currentLang = localStorage.getItem('btl_lang') || 'en';
+  function t(k){ return (LANGS[currentLang] && LANGS[currentLang][k]) || (LANGS['en'] && LANGS['en'][k]) || k; }
 
-  function tr(key){
-    return (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][key]) || TRANSLATIONS['en'][key] || key;
-  }
-
-  // language UI toggles
-  function renderLangUI(){
-    const wrap = document.getElementById('langToggle');
-    if(!wrap) return;
-    wrap.innerHTML = '';
-    LANG_CODES.forEach(code=>{
-      const b = document.createElement('button');
-      b.className = 'langBtn';
-      b.textContent = code.toUpperCase();
-      if(code === currentLang) b.style.fontWeight = '800';
-      b.addEventListener('click', ()=>{
-        currentLang = code;
-        localStorage.setItem('btl_lang', code);
-        applyTranslations();
-      });
-      wrap.appendChild(b);
-    });
-  }
-
-  // Apply translations to all UI strings by id/class we control
-  function applyTranslations(){
-    // header / hub
-    const brand = document.getElementById('brandText'); if(brand) brand.textContent = tr('brand');
-    const tagline = document.getElementById('tagline'); if(tagline) tagline.textContent = tr('tagline');
-    const hubTitle = document.getElementById('hubTitle'); if(hubTitle) hubTitle.textContent = tr('hubTitle');
-    const hubDesc = document.getElementById('hubDesc'); if(hubDesc) hubDesc.textContent = tr('hubDesc');
-
-    // profile
-    const profileTitle = document.getElementById('profileTitle'); if(profileTitle) profileTitle.textContent = tr('profileTitle');
-    const profileText = document.getElementById('profileText'); if(profileText) {
-      // if magical status reached, keep magician message
-      if(getPoints() >= 20000) profileText.textContent = tr('reachedMagician');
-      else profileText.textContent = tr('profileText');
-    }
-    const nameLabel = document.getElementById('nameLabel'); if(nameLabel) nameLabel.textContent = tr('nameLabel');
-    const saveNameBtn = document.getElementById('saveName'); if(saveNameBtn) saveNameBtn.textContent = tr('saveName');
-
-    // buttons
-    const exportBtn = document.getElementById('exportBtn'); if(exportBtn) exportBtn.textContent = tr('export');
-    const resetBtn = document.getElementById('resetBtn'); if(resetBtn) resetBtn.textContent = tr('reset');
-    const exportPoints = document.getElementById('exportPoints'); if(exportPoints) exportPoints.textContent = tr('exportPoints');
-    const resetPoints = document.getElementById('resetPoints'); if(resetPoints) resetPoints.textContent = tr('resetPoints');
-
-    // sidebar
-    const tierTitle = document.getElementById('tierTitle'); if(tierTitle) tierTitle.textContent = tr('tierTitle');
-    const recentTitle = document.getElementById('recentTitle'); if(recentTitle) recentTitle.textContent = tr('recentTitle');
-    const leaderboardTitle = document.getElementById('leaderboardTitle'); if(leaderboardTitle) leaderboardTitle.textContent = tr('leaderboardTitle');
-
-    // back buttons
-    Array.from(document.querySelectorAll('.backBtn')).forEach(b=> b.textContent = tr('back'));
-
-    // Play buttons in tiles (re-render tiles to update)
-    renderTiles(); // will set button text
-    // update leaderboard and points display to reflect translations where used
-    renderLeaderboard();
-    renderPoints();
-    renderRecent();
-  }
-
-  // ---------- Points/tier/leaderboard storage ----------
+  /* ---------- utilities for points & storage ---------- */
   const POINTS_KEY = 'btl_points_combined';
-  const NAME_KEY = 'btl_player_name';
+  const NAME_KEY   = 'btl_player_name';
   const LEADER_KEY = 'btl_leaderboard';
   const RECENT_KEY = 'btl_recent_combined';
+  if(!localStorage.getItem(NAME_KEY)) localStorage.setItem(NAME_KEY, 'Player');
 
   function getPoints(){
-    // read #points element first (if game code updates it)
-    const ptsEl = document.getElementById('points');
-    if(ptsEl){
-      const n = Number(ptsEl.textContent || ptsEl.innerText || 0);
-      if(!Number.isNaN(n)) return n;
+    const el = document.getElementById('points');
+    if(el){
+      const v = Number(el.textContent || el.innerText || 0);
+      if(!Number.isNaN(v)) return v;
     }
     const s = localStorage.getItem(POINTS_KEY);
     return s ? Number(s) : 0;
   }
   function setPoints(n){
-    // set DOM and localStorage
-    const ptsEl = document.getElementById('points');
-    if(ptsEl) ptsEl.textContent = String(n);
+    const el = document.getElementById('points');
+    if(el) el.textContent = String(n);
     localStorage.setItem(POINTS_KEY, String(n));
-    onPointsChanged(n);
-  }
-  function addPoints(delta){
-    const p = getPoints();
-    setPoints(Math.max(0, p + delta));
-    pushRecent(delta);
-  }
-  function pushRecent(delta){
-    const arr = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
-    arr.unshift({t: Date.now(), pts: delta});
-    localStorage.setItem(RECENT_KEY, JSON.stringify(arr.slice(0,200)));
-    renderRecent();
+    onPointsUpdate(n);
   }
 
-  // Player name get/set
-  function getPlayerName(){ return localStorage.getItem(NAME_KEY) || 'Player'; }
-  function setPlayerName(n){
-    localStorage.setItem(NAME_KEY, String(n || 'Player'));
-    renderPlayerName();
-    updateLeaderboardEntry();
+  /* ---------- add language selector to header ---------- */
+  function injectLanguageUI(){
+    const headerControls = document.querySelector('header .controls');
+    if(!headerControls) return;
+    // do not inject twice
+    if(document.getElementById('btl-lang-wrap')) return;
+    const wrap = document.createElement('div');
+    wrap.id = 'btl-lang-wrap';
+    wrap.className = 'langToggle';
+    LANG_CODES.forEach(code=>{
+      const b = document.createElement('button');
+      b.className = 'langBtn';
+      b.textContent = code.toUpperCase();
+      b.dataset.lang = code;
+      b.style.marginRight = '6px';
+      if(code === currentLang) b.style.fontWeight = '800';
+      b.addEventListener('click', ()=>{
+        currentLang = code;
+        localStorage.setItem('btl_lang', code);
+        // update UI text
+        applyTranslations();
+        // highlight selected
+        Array.from(wrap.querySelectorAll('.langBtn')).forEach(btn=> btn.style.fontWeight = (btn.dataset.lang===code)?'800':'');
+      });
+      wrap.appendChild(b);
+    });
+    // insert before export button if present
+    const exportBtn = document.getElementById('exportBtn');
+    if(exportBtn) headerControls.insertBefore(wrap, exportBtn);
+    else headerControls.appendChild(wrap);
   }
 
-  // Leaderboard functions
+  /* ---------- add player name input and leaderboard card in aside ---------- */
+  function injectProfileExtras(){
+    const aside = document.querySelector('main .layout aside');
+    if(!aside) return;
+    // player name input/label (if not present)
+    if(!document.getElementById('btl-player-name-wrap')){
+      const profileCard = aside.querySelector('.card');
+      if(profileCard){
+        const wrap = document.createElement('div');
+        wrap.id = 'btl-player-name-wrap';
+        wrap.style.marginTop = '10px';
+        wrap.innerHTML = `
+          <label class="small" id="btl-name-label">${escapeHtml(t('nameLabel'))}</label>
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <input id="btl-player-name" style="flex:1;padding:8px;border-radius:6px;border:1px solid #eee" placeholder="Player"/>
+            <button id="btl-save-name" class="btn">${escapeHtml(t('saveName'))}</button>
+          </div>
+        `;
+        profileCard.appendChild(wrap);
+        const input = document.getElementById('btl-player-name');
+        input.value = localStorage.getItem(NAME_KEY) || 'Player';
+        document.getElementById('btl-save-name').addEventListener('click', ()=>{
+          const v = (input.value||'').trim();
+          if(!v){ alert(t('noPlayers')); return; }
+          localStorage.setItem(NAME_KEY, v);
+          updateLeaderboard();
+        });
+      }
+    }
+
+    // leaderboard card (if not present)
+    if(!document.getElementById('btl-leaderboard-card')){
+      const card = document.createElement('div');
+      card.id = 'btl-leaderboard-card';
+      card.className = 'card';
+      card.style.marginTop = '12px';
+      card.innerHTML = `<h4 id="btl-leader-title">${escapeHtml(t('leaderboardTitle'))}</h4><div class="small btl-leaderboard-list" id="btl-leaderboard-list">${escapeHtml(t('noPlayers'))}</div>`;
+      aside.appendChild(card);
+    }
+  }
+
+  /* ---------- apply translations to known elements and dynamic ones we added ---------- */
+  function applyTranslations(){
+    // static IDs we control in the original HTML
+    const map = {
+      brandText: 'brand', tagline: 'tagline', hubTitle: 'hubTitle', hubDesc: 'hubDesc',
+      profileTitle: 'profileTitle', profileText: 'profileText', exportBtn: 'export', resetBtn: 'reset',
+      exportPoints: 'exportPoints', resetPoints: 'resetPoints',
+      tierTitle: 'tierTitle', recentTitle: 'recentTitle'
+    };
+    Object.keys(map).forEach(id=>{
+      const el = document.getElementById(id);
+      if(el) el.textContent = t(map[id]);
+    });
+
+    // update any back buttons
+    Array.from(document.querySelectorAll('.backBtn')).forEach(b => { b.textContent = t('back'); });
+
+    // update play buttons inside tiles if present
+    Array.from(document.querySelectorAll('.play-btn')).forEach(btn => { btn.textContent = t('play'); });
+
+    // update our injected labels
+    const nameLabel = document.getElementById('btl-name-label'); if(nameLabel) nameLabel.textContent = t('nameLabel');
+    const saveBtn = document.getElementById('btl-save-name'); if(saveBtn) saveBtn.textContent = t('saveName');
+    const leaderTitle = document.getElementById('btl-leader-title'); if(leaderTitle) leaderTitle.textContent = t('leaderboardTitle');
+
+    // profile text special handling
+    const prof = document.getElementById('profileText');
+    if(prof){
+      if(getPoints() >= 20000) prof.textContent = t('reachedMagician');
+      else prof.textContent = t('profileText');
+    }
+  }
+
+  /* ---------- leaderboard logic ---------- */
   function readLeaderboard(){ return JSON.parse(localStorage.getItem(LEADER_KEY) || '[]'); }
   function saveLeaderboard(arr){ localStorage.setItem(LEADER_KEY, JSON.stringify(arr)); }
-  function updateLeaderboardEntry(){
+  function updateLeaderboard(){
     const name = localStorage.getItem(NAME_KEY) || 'Player';
-    const points = getPoints();
+    const pts = getPoints();
     const arr = readLeaderboard();
-    const found = arr.find(e => e.id === name);
-    if(found){
-      found.points = points;
-      found.ts = Date.now();
-    } else {
-      arr.push({id: name, name: name, points: points, ts: Date.now()});
-    }
+    const existing = arr.find(e => e.id === name);
+    if(existing){ existing.points = pts; existing.ts = Date.now(); }
+    else arr.push({id: name, name: name, points: pts, ts: Date.now()});
     arr.sort((a,b) => b.points - a.points || a.ts - b.ts);
     saveLeaderboard(arr.slice(0,100));
     renderLeaderboard();
   }
   function renderLeaderboard(){
-    const listEl = document.getElementById('leaderboardList');
+    const listEl = document.getElementById('btl-leaderboard-list');
     if(!listEl) return;
     const arr = readLeaderboard();
-    if(!arr.length){ listEl.textContent = tr('noPlayers'); return; }
+    if(!arr.length){ listEl.textContent = t('noPlayers'); return; }
     const top = arr.slice(0,10);
     const ol = document.createElement('ol');
-    top.forEach((p)=>{
+    top.forEach(p=>{
       const li = document.createElement('li');
-      const displayName = (p.points >= 20000) ? tr('magicianTitle') : p.name;
-      li.innerHTML = `<strong>${escapeHtml(displayName)}</strong> — ${p.points} pts${p.points >= 20000 ? ` <em>(${escapeHtml(tr('magicianTitle'))})</em>` : ''}`;
+      const display = (p.points >= 20000) ? t('magicianTitle') : p.name;
+      li.innerHTML = `<strong>${escapeHtml(display)}</strong> — ${p.points} pts${p.points >= 20000 ? ` <em>(${escapeHtml(t('magicianTitle'))})</em>` : ''}`;
       ol.appendChild(li);
     });
     listEl.innerHTML = '';
     listEl.appendChild(ol);
   }
 
-  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, (c)=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-  // called whenever points change (either by game or our UI)
-  function onPointsChanged(newPoints){
-    renderPoints();
-    updateLeaderboardEntry();
-    // if reached magical threshold, change background and set display name
-    if(newPoints >= 20000){
-      document.body.classList.add('magical-bg');
-      // show magician message in profileText
-      const prof = document.getElementById('profileText'); if(prof) prof.textContent = tr('reachedMagician');
-      // rename current player's display in leaderboard (but keep stored id)
-      renderLeaderboard();
-    } else {
-      document.body.classList.remove('magical-bg');
-      renderPlayerName();
-    }
-  }
-
-  // render points/tier/recent similar to earlier code
-  const TIERS = [
-    {name:{en:'Chill',zh:'Chill',da:'Chill',fr:'Cool',ja:'チル'}, min:0},
-    {name:{en:'Bronze',zh:'Bronze',da:'Bronze',fr:'Bronze',ja:'ブロンズ'}, min:1000},
-    {name:{en:'Silver',zh:'Silver',da:'Sølv',fr:'Argent',ja:'シルバー'}, min:1500},
-    {name:{en:'Gold',zh:'Gold',da:'Guld',fr:'Or',ja:'ゴールド'}, min:2000},
-    {name:{en:'Diamond',zh:'Diamond',da:'Diamant',fr:'Diamant',ja:'ダイヤモンド'}, min:2500},
-    {name:{en:'Legendary',zh:'Legendary',da:'Legendarisk',fr:'Légendaire',ja:'伝説'}, min:3000},
-    {name:{en:'Wizard',zh:'Wizard',da:'Troldmand',fr:'Sorcier',ja:'ウィザード'}, min:3500},
-    {name:{en:'King',zh:'King',da:'Konge',fr:'Roi',ja:'キング'}, min:5000},
-    {name:{en:'Master',zh:'Master',da:'Mester',fr:'Maître',ja:'マスター'}, min:8000},
-    {name:{en:'Hero',zh:'Hero',da:'Helt',fr:'Héros',ja:'ヒーロー'}, min:12000},
-    {name:{en:'Titan',zh:'Titan',da:'Titan',fr:'Titan',ja:'タイタン'}, min:16000},
-    {name:{en:'Magical Mathematician',zh:'数学魔术师',da:'Magisk matematiker',fr:'Mathématicien magique',ja:'数学の魔術師'}, min:20000}
-  ];
-  function getTier(points){
-    let cur = TIERS[0];
-    for(const t of TIERS) if(points >= t.min) cur = t;
-    const next = TIERS.find(t => t.min > points) || null;
-    return {current: cur, next};
-  }
-
-  function renderPoints(){
-    const pts = getPoints();
-    const ptsEl = document.getElementById('points'); if(ptsEl) ptsEl.textContent = String(pts);
-    const info = getTier(pts);
-    const curName = (info.current.name && info.current.name[currentLang]) ? info.current.name[currentLang] : (info.current.name.en || info.current.name);
-    const tierText = document.getElementById('tierText'); if(tierText) tierText.textContent = `${curName} (${info.current.min}+)`;
-    const fill = info.next ? Math.min(1, (pts - info.current.min) / (info.next.min - info.current.min)) : 1;
-    const tierFill = document.getElementById('tierFill'); if(tierFill) tierFill.style.width = `${Math.round(fill*100)}%`;
-    // profile text handling (if not magical)
-    const prof = document.getElementById('profileText'); if(prof && pts < 20000) prof.textContent = tr('profileText');
-  }
-  function renderRecent(){
-    const arr = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]').slice(0,6);
-    const el = document.getElementById('recentList');
-    if(!arr.length){ el.textContent = tr('noPlayers'); return; }
-    el.innerHTML = arr.map(r=> `${new Date(r.t).toLocaleString()}: ${r.pts>0?'+':''}${r.pts} pts`).join('<br>');
-  }
-
-  // render player name input from storage
-  function renderPlayerName(){
-    const nameInput = document.getElementById('playerName');
-    if(nameInput){
-      if(getPoints() >= 20000){
-        nameInput.value = tr('magicianTitle');
-      } else {
-        nameInput.value = localStorage.getItem(NAME_KEY) || 'Player';
-      }
-    }
-  }
-
-  // Save name button
-  const saveBtn = document.getElementById('saveName');
-  if(saveBtn){
-    saveBtn.addEventListener('click', ()=>{
-      const nameInput = document.getElementById('playerName');
-      const v = (nameInput && nameInput.value) ? nameInput.value.trim() : '';
-      if(!v){
-        alert(tr('setNameRequired'));
-        return;
-      }
-      localStorage.setItem(NAME_KEY, v);
-      updateLeaderboardEntry();
-      renderPlayerName();
-    });
-  }
-
-  // Observe #points changes in DOM (if game code updates it directly)
-  const ptsEl = document.getElementById('points');
-  if(ptsEl){
-    const mo = new MutationObserver(()=> {
-      const val = Number(ptsEl.textContent || 0);
-      if(!Number.isNaN(val)) onPointsChanged(val);
-    });
-    mo.observe(ptsEl, {childList:true, characterData:true, subtree:true});
-  }
-
-  // Also poll localStorage 'btl_points_combined' in case games update it directly
-  let lastKnownPoints = getPoints();
-  setInterval(()=>{
-    const p = Number(localStorage.getItem(POINTS_KEY) || 0);
-    if(p !== lastKnownPoints){
-      lastKnownPoints = p;
-      // update DOM and trigger handlers
-      const el = document.getElementById('points'); if(el) el.textContent = String(p);
-      onPointsChanged(p);
-    }
-  }, 1000);
-
-  // ---------- Override Air Hockey initializer to remove quizzes and require 5000+ ----------
-  // If functions.js defines initFullAir, override it here. If it doesn't exist, define it.
-  window.initFullAir = function(area){
-    // area is the element where full air game should initialize
-    // Build an air hockey UI with no quiz questions; enforce points >= 5000
-    if(!area) return;
-    area.innerHTML = ''; // clear
-    const container = document.createElement('div');
-    container.innerHTML = `
-      <div style="display:flex;gap:8px;align-items:center">
-        <button class="btn air-start">${escapeHtml(tr('start'))}</button>
-        <button class="btn secondary air-stop">${escapeHtml(tr('back'))}</button>
-        <div style="flex:1"></div>
-        <div class="small air-note">${escapeHtml(tr('airLocked'))}</div>
-      </div>
-      <div style="margin-top:10px"><canvas id="airCanvas" width="640" height="320" style="background:#f7fbff;border-radius:8px"></canvas></div>
-    `;
-    area.appendChild(container);
-
-    const startBtn = area.querySelector('.air-start');
-    const stopBtn = area.querySelector('.air-stop');
-    const canvas = area.querySelector('#airCanvas');
-    const ctx = canvas.getContext('2d');
-
-    let state = null;
-
-    startBtn.addEventListener('click', ()=>{
-      const pts = getPoints();
-      if(pts < 5000){
-        alert(tr('airLocked'));
-        return;
-      }
-      if(!state) initMatch();
-      state.running = true;
-    });
-
-    stopBtn.addEventListener('click', ()=> { if(state) state.running = false; });
-
-    function initMatch(){
-      state = {pY: canvas.height/2, aY: canvas.height/2, puck:{x:canvas.width/2,y:canvas.height/2,vx:3,vy:2,r:8}, sP:0, sA:0, running:false};
-      canvas.onmousemove = (e)=>{ const r=canvas.getBoundingClientRect(); state.pY = Math.max(12, Math.min(canvas.height-12, e.clientY - r.top)); };
-      function loop(){
-        requestAnimationFrame(loop);
-        if(!state) return;
-        if(state.running){
-          state.puck.x += state.puck.vx;
-          state.puck.y += state.puck.vy;
-          if(state.puck.y <= state.puck.r || state.puck.y >= canvas.height - state.puck.r) state.puck.vy *= -1;
-          const dx = state.puck.x - 20, dy = state.puck.y - state.pY;
-          if(Math.hypot(dx,dy) < state.puck.r + 12 && state.puck.vx < 0){
-            state.puck.vx = Math.abs(state.puck.vx) + 0.8;
-            state.puck.vy += dy * 0.05;
-          }
-          const dx2 = state.puck.x - (canvas.width - 20), dy2 = state.puck.y - state.aY;
-          if(Math.hypot(dx2,dy2) < state.puck.r + 12 && state.puck.vx > 0){
-            state.puck.vx = -Math.abs(state.puck.vx) - 0.8;
-            state.puck.vy += dy2 * 0.05;
-          }
-          state.aY += (state.puck.y - state.aY) * 0.05;
-          // scoring: award points on goal
-          if(state.puck.x < 0){
-            state.sA++;
-            resetP();
-            addPoints(10); // award points for goal
-          }
-          if(state.puck.x > canvas.width){
-            state.sP++;
-            resetP();
-            addPoints(10);
-          }
-        }
-        draw();
-      }
-      function resetP(){
-        state.puck.x = canvas.width/2; state.puck.y = canvas.height/2;
-        state.puck.vx = (Math.random() > 0.5 ? 3 : -3); state.puck.vy = (Math.random() - 0.5) * 3;
-      }
-      function draw(){
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        ctx.fillStyle = '#e6fbff'; ctx.fillRect(0,0,canvas.width,canvas.height);
-        ctx.fillStyle = '#1a73e8'; ctx.fillRect(12, state.pY-18, 8, 36);
-        ctx.fillStyle = '#ff6b6b'; ctx.fillRect(canvas.width-20, state.aY-18, 8, 36);
-        ctx.fillStyle = '#06263a'; ctx.beginPath(); ctx.arc(state.puck.x, state.puck.y, state.puck.r, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = '#072033'; ctx.font = '18px Inter'; ctx.fillText(state.sP + ' - ' + state.sA, canvas.width/2 - 12, 22);
-      }
-      loop();
-    }
-  };
-
-  // ---------- Render tiles (ensure Play labels use translations) ----------
-  function renderTiles(){
-    const container = document.getElementById('tilesContainer');
-    if(!container) return;
-    container.innerHTML = '';
-    const tiles = [
-      {id:'trivia', titleKey:'Trivia (100 levels)'},
-      {id:'rapid', titleKey:'Rapid Fire'},
-      {id:'maze', titleKey:'Math Maze'},
-      {id:'pattern', titleKey:'Pattern Builder'},
-      {id:'prob', titleKey:'Probability Cups'},
-      {id:'casino', titleKey:'Casino'},
-      {id:'cups', titleKey:'Secret Cups'},
-      {id:'air', titleKey:'Air Hockey'}
-    ];
-    tiles.forEach(t=>{
-      const tile = document.createElement('div'); tile.className = 'tile'; tile.id = 'tile-'+t.id;
-      tile.innerHTML = `<h3>${escapeHtml(t.titleKey)}</h3>
-        <div class="preview" id="preview-${t.id}"></div>
-        <div class="playRow">
-          <button class="btn play-btn" data-game="${t.id}">${escapeHtml(tr('play'))}</button>
-          <div style="flex:1"></div>
-          <div class="small" id="status-${t.id}">${escapeHtml(tr('ready'))}</div>
-        </div>`;
-      container.appendChild(tile);
-    });
-
-    // populate small previews so visible
-    ['trivia','rapid','maze','pattern','prob','casino','cups','air'].forEach(id=>{
-      const pv = document.getElementById('preview-'+id);
-      if(!pv) return;
-      if(id==='trivia'){ const q = { q: '5 + 3 = ?', choices: ['8','9','2','15'] }; pv.innerHTML = `<div class="question">${q.q}</div><div class="small">${q.choices.slice(0,2).join(' | ')} ...</div>`; }
-      else pv.innerHTML = `<div class="small">${escapeHtml({maze: tr('hubDesc')}[id] || '')}</div>`;
-    });
-  }
-
-  // ---------- Initialize basic app state, translations, leaderboard wiring ----------
-  function initialize(){
-    renderLangUI();
-    applyTranslations();
-    // ensure player name saved (keep existing)
-    if(!localStorage.getItem(NAME_KEY)) localStorage.setItem(NAME_KEY, 'Player');
-    renderPlayerName();
-    renderPoints();
-    renderRecent();
+  /* ---------- points change handling: update leaderboard & magical status ---------- */
+  function onPointsUpdate(newPoints){
+    // ensure #points element shows the updated number
+    const el = document.getElementById('points');
+    if(el) el.textContent = String(newPoints);
+    localStorage.setItem(POINTS_KEY, String(newPoints));
+    updateLeaderboard();
     renderLeaderboard();
-    // save initial leaderboard entry
-    updateLeaderboardEntry();
+    // if magical reached, apply effect
+    if(newPoints >= 20000){
+      // add animated background
+      document.body.classList.add('btl-magical-bg');
+      ensureMagicalStyle();
+      // set profile text
+      const prof = document.getElementById('profileText'); if(prof) prof.textContent = t('reachedMagician');
+    } else {
+      document.body.classList.remove('btl-magical-bg');
+      const prof = document.getElementById('profileText'); if(prof) prof.textContent = t('profileText');
+    }
+  }
 
-    // wire play button opening pages (already present in original page, but ensure translations reflect)
-    document.addEventListener('click', function(e){
-      const play = e.target.closest('.play-btn');
-      if(play){
-        const game = play.dataset.game;
-        // open page (reuse existing SPA behavior if present)
-        const hubCard = document.getElementById('hubCard');
-        if(hubCard) hubCard.style.display = 'none';
-        document.querySelectorAll('.game-page').forEach(p=>p.classList.remove('active'));
-        const page = document.getElementById('page-'+game);
-        if(page) page.classList.add('active');
-        location.hash = 'game=' + game;
-        const area = document.getElementById('page-area-'+game);
-        if(area && !area.dataset.inited){
-          area.dataset.inited = '1';
-          // call initFullGame if defined by functions.js or local override
-          if(typeof window.initFullGame === 'function') {
-            try{ window.initFullGame(game, area); } catch(e){ /* ignore */ }
-          }
-        }
-        const status = document.getElementById('status-'+game);
-        if(status) status.textContent = tr('playing');
+  /* ---------- add magical background CSS (only appended once) ---------- */
+  function ensureMagicalStyle(){
+    if(document.getElementById('btl-magical-style')) return;
+    const style = document.createElement('style'); style.id = 'btl-magical-style';
+    style.textContent = `
+      .btl-magical-bg {
+        animation: btlHue 6s linear infinite;
+        background: linear-gradient(45deg, #ff6b6b, #fbc531, #7efff5, #8e44ad);
+        background-size: 400% 400%;
       }
-    });
+      @keyframes btlHue {
+        0%{background-position:0% 50%}
+        50%{background-position:100% 50%}
+        100%{background-position:0% 50%}
+      }
+      .btl-magical-bg .card { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
+    `;
+    document.head.appendChild(style);
+  }
 
-    // back buttons
-    Array.from(document.querySelectorAll('.backBtn')).forEach(b=>{
-      b.addEventListener('click', ()=>{
-        document.querySelectorAll('.game-page').forEach(p=>p.classList.remove('active'));
-        const hubCard = document.getElementById('hubCard'); if(hubCard) hubCard.style.display = 'block';
-        if(location.hash.startsWith('#game=')) history.replaceState(null,'', location.pathname + location.search);
-        document.querySelectorAll('.tile .small[id^="status-"]').forEach(el=> el.textContent = tr('ready'));
+  /* ---------- override Air Hockey initializer(s) to enforce 5000+ and remove questions ---------- */
+  function overrideAirInits(){
+    const makeAir = function(area){
+      if(!area) return;
+      // clear area but do not remove surrounding markup
+      area.innerHTML = '';
+      // Build canvas only air hockey (no quiz prompts). Start allowed only if points >= 5000.
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btl-air-start">${escapeHtml(t('start'))}</button>
+          <button class="btn secondary btl-air-stop">${escapeHtml(t('back'))}</button>
+          <div style="flex:1"></div>
+          <div class="small btl-air-note">${escapeHtml(t('airLocked'))}</div>
+        </div>
+        <div style="margin-top:10px"><canvas width="640" height="320" class="btl-air-canvas" style="background:#f7fbff;border-radius:8px"></canvas></div>
+      `;
+      area.appendChild(wrapper);
+      const startBtn = wrapper.querySelector('.btl-air-start');
+      const stopBtn  = wrapper.querySelector('.btl-air-stop');
+      const canvas   = wrapper.querySelector('.btl-air-canvas');
+      const ctx = canvas.getContext('2d');
+      let state = null;
+      startBtn.addEventListener('click', ()=>{
+        if(getPoints() < 5000){ alert(t('airLocked')); return; }
+        if(!state) initMatch();
+        state.running = true;
       });
-    });
+      stopBtn.addEventListener('click', ()=> { if(state) state.running = false; });
 
-    // Save name button event already added above but ensure present
-    const saveBtn = document.getElementById('saveName');
-    if(saveBtn) saveBtn.addEventListener('click', ()=> {
-      const input = document.getElementById('playerName');
-      const name = input && input.value ? input.value.trim() : '';
-      if(!name){ alert(tr('setNameRequired')); return; }
-      localStorage.setItem(NAME_KEY, name);
-      updateLeaderboardEntry();
-      renderPlayerName();
-    });
-
-    // export/reset points / leaderboard wiring
-    const exportBtn = document.getElementById('exportPoints');
-    if(exportBtn) exportBtn.addEventListener('click', ()=> {
-      const data = {
-        name: localStorage.getItem(NAME_KEY) || 'Player',
-        points: getPoints(),
-        leaderboard: readLeaderboard(),
-        recent: JSON.parse(localStorage.getItem(RECENT_KEY) || '[]')
-      };
-      const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'btl_export.json'; a.click();
-    });
-    const resetBtn = document.getElementById('resetPoints');
-    if(resetBtn) resetBtn.addEventListener('click', ()=>{
-      if(confirm(tr('reset') + '?')){
-        localStorage.removeItem(POINTS_KEY);
-        localStorage.removeItem(LEADER_KEY);
-        localStorage.removeItem(RECENT_KEY);
-        renderPoints();
-        renderLeaderboard();
-        renderRecent();
-        alert(tr('reset') + ' ✓');
+      function initMatch(){
+        state = {pY:canvas.height/2, aY:canvas.height/2, puck:{x:canvas.width/2,y:canvas.height/2,vx:3,vy:2,r:8}, sP:0, sA:0, running:false};
+        canvas.onmousemove = (e)=>{ const r=canvas.getBoundingClientRect(); state.pY = Math.max(12, Math.min(canvas.height-12, e.clientY - r.top)); };
+        function loop(){
+          requestAnimationFrame(loop);
+          if(!state) return;
+          if(state.running){
+            state.puck.x += state.puck.vx; state.puck.y += state.puck.vy;
+            if(state.puck.y <= state.puck.r || state.puck.y >= canvas.height - state.puck.r) state.puck.vy *= -1;
+            const dx = state.puck.x - 20, dy = state.puck.y - state.pY;
+            if(Math.hypot(dx,dy) < state.puck.r+12 && state.puck.vx<0){ state.puck.vx = Math.abs(state.puck.vx)+0.8; state.puck.vy += dy*0.05; }
+            const dx2 = state.puck.x - (canvas.width-20), dy2 = state.puck.y - state.aY;
+            if(Math.hypot(dx2,dy2) < state.puck.r+12 && state.puck.vx>0){ state.puck.vx = -Math.abs(state.puck.vx)-0.8; state.puck.vy += dy2*0.05; }
+            state.aY += (state.puck.y - state.aY) * 0.05;
+            if(state.puck.x < 0){ state.sA++; resetP(); onGoal(); }
+            if(state.puck.x > canvas.width){ state.sP++; resetP(); onGoal(); }
+          }
+          draw();
+        }
+        function resetP(){ state.puck.x = canvas.width/2; state.puck.y = canvas.height/2; state.puck.vx = (Math.random()>0.5?3:-3); state.puck.vy = (Math.random()-0.5)*3; }
+        function onGoal(){ addPoints(10); } // award points for goals
+        function draw(){
+          ctx.clearRect(0,0,canvas.width,canvas.height);
+          ctx.fillStyle='#e6fbff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+          ctx.fillStyle='#1a73e8'; ctx.fillRect(12,state.pY-18,8,36);
+          ctx.fillStyle='#ff6b6b'; ctx.fillRect(canvas.width-20,state.aY-18,8,36);
+          ctx.fillStyle='#06263a'; ctx.beginPath(); ctx.arc(state.puck.x,state.puck.y,state.puck.r,0,Math.PI*2); ctx.fill();
+          ctx.fillStyle='#072033'; ctx.font='18px Inter'; ctx.fillText(state.sP + ' - ' + state.sA, canvas.width/2 - 12, 22);
+        }
+        loop();
       }
-    });
+    };
 
-    // watch DOM points element for external changes
+    // replace common initializer names with our function (safe: keep originals on a property in case)
+    ['initFullAir','initAir','fullAir','fullPageAir'].forEach(name=>{
+      try{
+        if(window[name] && !window[name].btlOriginal){
+          window[name+'_btl_original'] = window[name];
+        }
+      }catch(e){}
+      window[name] = function(area){
+        let el = area;
+        if(typeof area === 'string') el = document.getElementById(area) || document.querySelector(area);
+        if(!el) el = document.getElementById('page-area-air');
+        makeAir = makeAir || makeAir; // no-op to satisfy linter
+        try{ makeAir(el); }catch(e){ /* ignore */ }
+      };
+    });
+  }
+
+  /* ---------- translate dynamic labels (Play/Back/Start etc.) ---------- */
+  function translateDynamic(){
+    Array.from(document.getElementsByClassName('play-btn')).forEach(b => b.textContent = t('play'));
+    Array.from(document.querySelectorAll('.backBtn')).forEach(b => b.textContent = t('back'));
+    Array.from(document.querySelectorAll('button')).forEach(b => {
+      const txt = (b.textContent||'').trim().toLowerCase();
+      if(txt === 'play') b.textContent = t('play');
+      if(txt === 'start') b.textContent = t('start');
+      if(txt === 'submit') b.textContent = t('submit');
+      if(txt === 'back') b.textContent = t('back');
+      if(txt === 'save') b.textContent = t('saveName');
+      if(txt === 'export') b.textContent = t('export');
+      if(txt === 'reset') b.textContent = t('reset');
+    });
+  }
+
+  /* ---------- helpers ---------- */
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  /* ---------- observe #points and sync leaderboard automatically ---------- */
+  function watchPoints(){
     const ptsEl = document.getElementById('points');
     if(ptsEl){
       const mo = new MutationObserver(()=> {
         const v = Number(ptsEl.textContent || ptsEl.innerText || 0);
-        if(!Number.isNaN(v)) onPointsChanged(v);
+        if(!Number.isNaN(v)) {
+          localStorage.setItem(POINTS_KEY, String(v));
+          onPointsUpdate(v);
+        }
       });
       mo.observe(ptsEl, {childList:true, characterData:true, subtree:true});
     }
-
-    // periodic sync with localStorage points key in case functions.js writes it
-    setInterval(()=> {
-      const s = Number(localStorage.getItem(POINTS_KEY) || 0);
-      if(s !== getPoints()){
-        // update DOM and trigger
-        const el = document.getElementById('points'); if(el) el.textContent = String(s);
-        onPointsChanged(s);
+    let last = getPoints();
+    setInterval(()=>{
+      const p1 = Number(localStorage.getItem(POINTS_KEY) || 0);
+      if(p1 !== last){
+        last = p1;
+        const el = document.getElementById('points'); if(el) el.textContent = String(p1);
+        onPointsUpdate(p1);
       }
     }, 1000);
   }
 
-  // helper: when points change via our system or external system
-  function onPointsChanged(newPoints){
-    renderPoints();
-    updateLeaderboardEntry();
-    if(newPoints >= 20000){
-      // apply magical background and rename display
-      document.body.classList.add('magical-bg');
-      const profileText = document.getElementById('profileText'); if(profileText) profileText.textContent = tr('reachedMagician');
-      // also set player name input visually to magician title
-      const nameInput = document.getElementById('playerName'); if(nameInput) nameInput.value = tr('magicianTitle');
-      renderLeaderboard();
-    } else {
-      document.body.classList.remove('magical-bg');
-      const profileText = document.getElementById('profileText'); if(profileText) profileText.textContent = tr('profileText');
-      renderPlayerName();
+  /* ---------- main init ---------- */
+  function main(){
+    injectLanguageUI();
+    injectProfileExtras();
+    applyTranslations();
+    renderPlayerName();
+    updateLeaderboard(); // initial
+    translateDynamic();
+    watchPoints();
+    overrideAirInits();
+    const bodyMo = new MutationObserver(()=> { translateDynamic(); applyTranslations(); renderLeaderboard(); });
+    bodyMo.observe(document.body, {childList:true, subtree:true});
+  }
+
+  function renderPlayerName(){
+    const input = document.getElementById('btl-player-name');
+    if(input){
+      const p = getPoints();
+      if(p >= 20000) input.value = t('magicianTitle');
+      else input.value = localStorage.getItem(NAME_KEY) || 'Player';
     }
   }
 
-  // small wrappers for functions that may exist in functions.js: only call them if defined
-  function tryCall(fnName, ...args){ try{ if(typeof window[fnName] === 'function') window[fnName](...args); }catch(e){ console.warn('call failed', fnName, e); } }
+  // small wrapper to call on points update
+  function onPointsUpdateInternal(n){
+    const el = document.getElementById('points'); if(el) el.textContent = String(n);
+    localStorage.setItem(POINTS_KEY, String(n));
+    const name = localStorage.getItem(NAME_KEY) || 'Player';
+    const arr = readLeaderboard();
+    const found = arr.find(e => e.id === name);
+    if(found){ found.points = n; found.ts = Date.now(); }
+    else arr.push({id:name, name:name, points:n, ts: Date.now()});
+    arr.sort((a,b)=> b.points - a.points || a.ts - b.ts);
+    saveLeaderboard(arr.slice(0,100));
+    renderLeaderboard();
+    if(n >= 20000){
+      if(!document.getElementById('btl-magical-style')){
+        const st = document.createElement('style'); st.id = 'btl-magical-style';
+        st.textContent = `
+          .btl-magical-bg { animation: btlHue 6s linear infinite; background: linear-gradient(45deg,#ff6b6b,#fbc531,#7efff5,#8e44ad); background-size:400% 400%; color:#001; }
+          @keyframes btlHue {0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+        `;
+        document.head.appendChild(st);
+      }
+      document.body.classList.add('btl-magical-bg');
+      const prof = document.getElementById('profileText'); if(prof) prof.textContent = t('reachedMagician');
+    } else {
+      document.body.classList.remove('btl-magical-bg');
+      const prof = document.getElementById('profileText'); if(prof) prof.textContent = t('profileText');
+    }
+  }
 
-  // expose some utilities on window for other scripts (optional)
-  window.btl = {
-    getPoints, setPoints, addPoints, updateLeaderboardEntry, renderLeaderboard
-  };
+  // alias used earlier
+  function onPointsUpdate(n){ onPointsUpdateInternal(n); }
 
-  // Initialize
-  renderLangUI();
-  renderTiles();
-  applyTranslations();
-  initialize();
-
-  // done
+  // run main on load (defer a little so functions.js (deferred) runs first)
+  window.addEventListener('load', ()=> setTimeout(main, 120));
 })();
 </script>
 
